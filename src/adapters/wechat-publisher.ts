@@ -7,6 +7,7 @@
 import type { RuntimeInterface } from '../runtime/index.js'
 import axios from 'axios'
 import { createReadStream } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import FormData from 'form-data'
 import path from 'node:path'
 import os from 'node:os'
@@ -89,9 +90,6 @@ export class WechatPublisher {
   }
 
   /**
-   * 上传本地图片到微信 CDN
-   */
-  /**
    * 上传本地图片到微信 CDN（临时素材，用于正文嵌入）
    */
   async uploadImageFromPath(filePath: string, filename?: string): Promise<string> {
@@ -99,7 +97,7 @@ export class WechatPublisher {
     const name = filename ?? path.basename(filePath)
 
     const form = new FormData()
-    form.append('media', createReadStream(filePath), name)
+    form.append('media', readFileSync(filePath), { filename: name, contentType: 'image/png' })
 
     const res = await axios.post(
       `https://api.weixin.qq.com/cgi-bin/media/upload?access_token=${token}&type=image`,
@@ -123,7 +121,7 @@ export class WechatPublisher {
     const name = filename ?? path.basename(filePath)
 
     const form = new FormData()
-    form.append('media', createReadStream(filePath), name)
+    form.append('media', readFileSync(filePath), { filename: name, contentType: 'image/png' })
     form.append('type', 'image')
 
     const res = await axios.post(
@@ -136,6 +134,33 @@ export class WechatPublisher {
     if (!data.media_id) {
       throw new Error(`永久素材上传失败: ${data.errmsg || JSON.stringify(data)}`)
     }
+    return data.media_id
+  }
+
+  /**
+   * 生成占位封面图（当文章无图片时使用）
+   * 从占位图服务下载图片并上传为永久素材
+   */
+  async uploadPlaceholderCover(): Promise<string> {
+    const token = await this.getAccessToken()
+
+    // 从 httpbin 下载标准测试图（8090 bytes 有效 PNG）
+    const res = await this.runtime.fetch('https://httpbin.org/image/png')
+    if (!res.ok) throw new Error(`占位图下载失败: ${res.status}`)
+    const buf = await res.arrayBuffer()
+    const png = Buffer.from(buf)
+
+    const form = new FormData()
+    form.append('media', png, { filename: 'cover.png', contentType: 'image/png' })
+    form.append('type', 'image')
+
+    const uploadRes = await axios.post(
+      `https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${token}&type=image`,
+      form,
+      { headers: form.getHeaders(), maxBodyLength: Infinity, maxContentLength: Infinity }
+    )
+    const data = uploadRes.data as { media_id?: string; url?: string; errcode?: number; errmsg?: string }
+    if (!data.media_id) throw new Error(`占位图上传失败: ${data.errmsg || JSON.stringify(data)}`)
     return data.media_id
   }
 
@@ -210,26 +235,38 @@ export class WechatPublisher {
 
     const { html: processedHtml, firstMediaId } = await this.processImages(options.content)
 
-    // 上传封面图
+    // 上传封面图：优先用 front-matter 指定的封面图，其次用正文第一张图片的 media_id
     let thumbMediaId: string | undefined
     try {
       thumbMediaId = await this.uploadCover(options.cover)
     } catch (err) {
-      console.warn(`[WechatPublisher] 封面上传失败，遍历正文图片: ${(err as Error).message}`)
-      const imgMatches = [...options.content.matchAll(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi)]
-      for (const m of imgMatches) {
-        const src = m[1]
-        if (src.includes('mmbiz.qpic.cn') || src.includes('mmbiz.qlogo.cn')) continue
-        try {
-          thumbMediaId = await this.uploadImageFromUrl(src)
-          console.log(`[WechatPublisher] 用正文图片作封面: ${src}`)
-          break
-        } catch { /* continue */ }
+      console.warn(`[WechatPublisher] 封面上传失败: ${(err as Error).message}`)
+      // 用 processImages 返回的第一张图片 media_id 作为封面
+      if (firstMediaId) {
+        thumbMediaId = firstMediaId
+        console.log('[WechatPublisher] 使用正文第一张图片作为封面')
+      } else {
+        // fallback：直接从 processedHtml 中查找 img 标签
+        const imgMatches = [...processedHtml.matchAll(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi)]
+        for (const m of imgMatches) {
+          const src = m[1]
+          if (src.includes('mmbiz.qpic.cn') || src.includes('mmbiz.qlogo.cn')) continue
+          try {
+            thumbMediaId = await this.uploadImageFromUrl(src)
+            console.log(`[WechatPublisher] 用正文图片作封面: ${src}`)
+            break
+          } catch { /* continue */ }
+        }
       }
     }
 
     if (!thumbMediaId) {
-      console.warn('[WechatPublisher] 没有可用封面，将使用微信默认封面')
+      try {
+        thumbMediaId = await this.uploadPlaceholderCover()
+        console.log('[WechatPublisher] 使用占位图作为封面')
+      } catch (err) {
+        console.warn('[WechatPublisher] 占位图上传失败，不传 thumb_media_id:', (err as Error).message)
+      }
     }
 
     const article: Record<string, unknown> = {
@@ -239,7 +276,10 @@ export class WechatPublisher {
       digest: options.title,
       content_source_url: options.source_url,
     }
-    if (thumbMediaId) article.thumb_media_id = thumbMediaId
+    // 只在有有效 thumbMediaId 时才传 thumb_media_id
+    if (thumbMediaId && thumbMediaId.trim() !== '') {
+      article.thumb_media_id = thumbMediaId
+    }
 
     const payload = { articles: [article] }
 
