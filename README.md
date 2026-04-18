@@ -136,28 +136,42 @@ mpub platforms
 
 ### 🎨 14 套内置主题
 
-| 主题 ID | 风格 | 预览 | 适用场景 |
-|---------|------|------|----------|
-| `default` | 简洁朴素 | 默认灰蓝 | 通用场景 |
-| `wechat` | 仿微信官方 | 微信绿 | 微信公众号 |
-| `modern` | 深色代码+蓝调 | 深色红蓝字 | 技术文章 |
-| `minimal` | 大量留白 | 浅色红字 | 阅读体验 |
-| `cyberpunk` | 赛博朋克霓虹 | <span style="color:#00fff5">青色</span>+<span style="color:#ff00ff">洋红</span> | 极客风格 |
-| `nord` | 北欧冷淡灰蓝 | <span style="color:#88c0d0">浅蓝</span>+<span style="color:#81a1c1">灰蓝</span> | 程序员文档 |
-| `paper` | 笔记本文艺 | <span style="color:#c7254e">红色</span>+衬线 | 个人日记 |
-| `darkelite` | GitHub深色精英 | <span style="color:#58a6ff">蓝色链接</span> | 专业硬核 |
-| `sunset` | 日落暖调 | <span style="color:#ff6b6b">珊瑚红</span>+<span style="color:#ffd93d">金黄</span> | 生活分享 |
-| `zen` | 日式禅意极简 | <span style="color:#8b7355">棕色</span>+留白 | 日式美学 |
-| `retro` | 80年代复古未来 | <span style="color:#ff6ec7">粉色</span>+<span style="color:#00d4ff">青蓝</span> | 创意设计 |
-| `midnight` | 深夜图书馆 | <span style="color:#ffd700">金色</span>+<span style="color:#c9a962">古铜</span> | 阅读笔记 |
-| `brutalism` | 粗野主义大胆 | <span style="background:#ffff00">黄色</span>醒目 | 设计师作品集 |
-| `neumorphism` | 新拟态软UI | <span style="color:#7c3aed">紫色</span>柔和 | APP设计 |
+点击查看完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)
+
+#### 技术风格（推荐：知乎、掘金、CSDN）
+
+| 主题 | 配色预览 | 风格描述 |
+|------|----------|----------|
+| `cyberpunk` | <span style="background:linear-gradient(135deg,#0d0221,#0a0a1f);color:#00fff5;padding:2px 8px;">青色</span> <span style="background:#ff00ff;color:#fff;padding:2px 8px;">洋红</span> | 赛博朋克霓虹发光 |
+| `nord` | <span style="background:#2e3440;color:#88c0d0;padding:2px 8px;">浅蓝</span> <span style="background:#3b4252;color:#81a1c1;padding:2px 8px;">灰蓝</span> | 北欧冷淡克制度 |
+| `modern` | <span style="background:#1e1e1e;color:#4a90d9;padding:2px 8px;">深蓝</span> <span style="background:rgba(74,144,217,.12);color:#4a90d9;padding:2px 8px;">代码蓝</span> | 现代深色代码块 |
+| `darkelite` | <span style="background:#0f1115;color:#58a6ff;padding:2px 8px;">蓝链</span> <span style="background:#161b22;color:#c9d1d9;padding:2px 8px;">深灰</span> | GitHub 风格专业 |
+| `retro` | <span style="background:#0d0d1a;color:#ff6ec7;padding:2px 8px;">粉</span> <span style="background:#00d4ff;color:#000;padding:2px 8px;">青</span> | 80年代复古霓虹 |
+
+#### 文艺风格（推荐：简书、个人博客）
+
+| 主题 | 配色预览 | 风格描述 |
+|------|----------|----------|
+| `paper` | <span style="background:#faf8f5;color:#c7254e;padding:2px 8px;">红字</span> <span style="background:#f5f5f5;color:#333;padding:2px 8px;">衬线</span> | 笔记本文艺复古 |
+| `zen` | <span style="background:#f7f5f0;color:#8b7355;padding:2px 8px;">棕色</span> <span style="background:#ebe8e0;color:#4a4a4a;padding:2px 8px;">素色</span> | 日式禅意极简留白 |
+| `midnight` | <span style="background:#0f1a14;color:#ffd700;padding:2px 8px;">金色</span> <span style="background:#1a2f23;color:#c9a962;padding:2px 8px;">古铜</span> | 深夜图书馆书香 |
+| `minimal` | <span style="background:#fff;color:#c7254e;padding:2px 8px;">浅红</span> <span style="background:#f9f9f9;color:#0969da;padding:2px 8px;">蓝字</span> | 大量留白简约 |
+
+#### 特色风格
+
+| 主题 | 配色预览 | 风格描述 |
+|------|----------|----------|
+| `sunset` | <span style="background:linear-gradient(180deg,#1a1a2e,#16213e);color:#ff6b6b;padding:2px 8px;">珊瑚红</span> <span style="color:#ffd93d;padding:2px 8px;">金黄</span> | 日落暖调温暖治愈 |
+| `brutalism` | <span style="background:#000;color:#ffff00;padding:2px 8px;">黑黄</span> <span style="background:#fff;color:#000;padding:2px 8px;border:2px solid #000;">粗框</span> | 粗野主义大胆 |
+| `neumorphism` | <span style="background:#e0e5ec;color:#7c3aed;padding:2px 8px;box-shadow:2px 2px 4px #b8bcc2,inset -2px -2px 4px #fff;">紫色</span> | 新拟态软 UI 柔和 |
+| `wechat` | <span style="background:#fff;color:#576b95;padding:2px 8px;border:1px solid #e8e8e8;">微信蓝</span> <span style="background:#faf9f7;color:#c8a96e;padding:2px 8px;">米黄</span> | 仿微信官方样式 |
+| `default` | <span style="background:#f6f8fa;color:#0579b7;padding:2px 8px;">默认蓝</span> <span style="background:#fff;color:#333;padding:2px 8px;">白色</span> | 简洁朴素通用 |
 
 ### 完整主题预览
 
-打开 [themes/all-themes-preview.html](themes/all-themes-preview.html) 查看所有主题的可视化对比，包含完整 HTML 渲染效果。
+打开 [themes/all-themes-preview.html](themes/all-themes-preview.html) 查看所有 14 个主题的完整 HTML 渲染效果（包含代码块、表格、引用块等所有元素）。
 
-**或在命令行预览：**
+**命令行预览：**
 ```bash
 # 预览 cyberpunk 主题
 mpub render -f article.md -t cyberpunk
