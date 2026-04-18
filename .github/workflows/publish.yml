@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Upgrade npm
-        run: npm install -g npm@11
+        run: npx -y npm@latest install -g
 
       - name: Install dependencies
         run: npm ci
