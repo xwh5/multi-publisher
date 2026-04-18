@@ -136,52 +136,25 @@ mpub platforms
 
 ### 🎨 14 套内置主题
 
-点击查看完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)
+完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)
 
-#### 技术风格（推荐：知乎、掘金、CSDN）
+**主题截图示例：**
 
-| 主题 | 预览图 | 风格描述 |
-|------|--------|----------|
-| `cyberpunk` | ![Cyberpunk](themes/previews/cyberpunk.png) | 赛博朋克霓虹发光 |
-| `nord` | ![Nord](themes/previews/nord.png) | 北欧冷淡克制度 |
-| `modern` | ![Modern](themes/previews/modern.png) | 现代深色代码块 |
-| `darkelite` | ![Dark Elite](themes/previews/darkelite.png) | GitHub 风格专业 |
-| `retro` | — | 80年代复古霓虹 |
-
-#### 文艺风格（推荐：简书、个人博客）
-
-| 主题 | 预览图 | 风格描述 |
-|------|--------|----------|
-| `paper` | ![Paper](themes/previews/paper.png) | 笔记本文艺复古 |
-| `minimal` | ![Minimal](themes/previews/minimal.png) | 大量留白简约 |
-| `zen` | — | 日式禅意极简留白 |
-| `midnight` | — | 深夜图书馆书香 |
-
-#### 特色风格
-
-| 主题 | 预览图 | 风格描述 |
-|------|--------|----------|
-| `sunset` | ![Sunset](themes/previews/sunset.png) | 日落暖调温暖治愈 |
-| `wechat` | ![Wechat](themes/previews/wechat.png) | 仿微信官方样式 |
-| `brutalism` | — | 粗野主义大胆 |
-| `neumorphism` | — | 新拟态软 UI 柔和 |
-| `default` | — | 简洁朴素通用 |
-
-### 完整主题预览
-
-打开 [themes/all-themes-preview.html](themes/all-themes-preview.html) 查看所有 14 个主题的完整 HTML 渲染效果（包含代码块、表格、引用块等所有元素）。
+| 风格 | 代表主题 | 预览 |
+|------|----------|------|
+| 技术博客 | Cyberpunk | ![Cyberpunk](themes/previews/cyberpunk.png) |
+| 程序员 | Nord | ![Nord](themes/previews/nord.png) |
+| 微信风格 | Wechat | ![Wechat](themes/previews/wechat.png) |
+| 简约 | Minimal | ![Minimal](themes/previews/minimal.png) |
 
 **命令行预览：**
 ```bash
-# 预览 cyberpunk 主题
 mpub render -f article.md -t cyberpunk
-
-# 预览 nord 主题
 mpub render -f article.md -t nord
-
-# 预览 retro 主题
-mpub render -f article.md -t retro
+mpub render -f article.md -t paper
 ```
+
+**全部 14 主题：** default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism
 
 ### 使用主题
 
