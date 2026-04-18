@@ -4,7 +4,7 @@
   "description": "Markdown → 微信公众号 / 知乎 / 掘金等多平台 CLI 发布工具",
   "type": "module",
   "bin": {
-    "mpub": "./dist/index.js"
+    "mpub": "./dist/cli/index.js"
   },
   "main": "./dist/index.js",
   "scripts": {
