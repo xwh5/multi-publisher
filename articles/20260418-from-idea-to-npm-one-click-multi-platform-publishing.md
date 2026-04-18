@@ -66,6 +66,91 @@ Markdown 文件
 
 ---
 
+## 认证方案：各平台的坑比想象中多
+
+跨平台发布最麻烦的不是排版，是**认证**。
+
+### 微信公众号：唯一有官方开发者 API 的平台
+
+微信公众号有完整的开发者接口，配置好 AppID + AppSecret 就能调用 `access_token`，发布草稿、上传图片都有对应 API。这是所有平台里最规范的，接入成本最低。
+
+### 其他平台：没有官方 API，只能用 Cookie
+
+知乎、掘金、CSDN……这些平台都没有开放"通过开发者账号发布文章"的接口。它们面向的是普通用户，没有开放 OAuth 或 token 认证方式。
+
+但它们都有 Cookie 认证——登录后浏览器里带着的 Cookie，服务器认这个。所以方案是：
+
+1. **Playwright 驱动浏览器自动登录**，让用户扫码/输入账号，Playwright 把登录态的 Cookie 抓出来
+2. **Cookie 存到本地**，后续发布时带上这些 Cookie 调用平台 API
+3. Cookie 过期了就重新跑一次登录流程
+
+这个方案不优雅，但目前是唯一可行的路。
+
+### Playwright 自动登录怎么做的
+
+以知乎为例：
+
+```
+运行 mpub login -p zhihu
+    │
+    ▼
+Playwright 启动一个 Chrome 窗口（headless: false，用户可见）
+    │
+    ▼
+打开知乎登录页 zhihu.com
+    │
+    ▼
+用户扫码/输入账号登录
+    │
+    ▼
+检测到登录成功（URL 变化或指定 Cookie 出现）
+    │
+    ▼
+抓取当前域名的所有 Cookie
+    │
+    ▼
+保存到 ~/.config/multi-publisher/config.json
+```
+
+每个平台的登录检测逻辑不同，有的靠 URL 跳转判断，有的靠特定 Cookie 出现，有的靠 DOM 元素。各个平台各自适配。
+
+### 凭据怎么存
+
+所有平台的凭据存在一个文件里：
+
+```
+~/.config/multi-publisher/config.json
+```
+
+Windows 上相当于 `C:\Users\<user>\.config\multi-publisher\config.json`。
+
+文件结构：
+
+```json
+{
+  "version": 1,
+  "weixin": {
+    "appId": "wx...",
+    "appSecret": "...",
+    "access_token": "...",
+    "token_expires_at": 1745000000000
+  },
+  "zhihu": {
+    "cookies": {
+      "z_c0": "...",
+      "uid_tt": "..."
+    }
+  },
+  "juejin": {
+    "cookies": { "uid_tt": "...", "tt_author_token": "..." }
+  }
+}
+```
+
+微信公众号特殊一点，有 `access_token` 和过期时间，token 过期了会自动刷新。其他平台就是纯 Cookie，Cookie 过期了就重新 `mpub login -p xxx`。
+
+---
+
 ## 发布到 npm 踩的 8 个坑
 
 工具做完了，接下来发到 npm。这个过程折腾了两天，踩了 8 个坑，记录下来供参考。
