@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  release:
-    types: [published]
 
 jobs:
   publish:
@@ -38,27 +36,22 @@ jobs:
           CI: true
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Publishing multi-publisher@$VERSION"
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  release-info:
+  create-release:
     runs-on: ubuntu-latest
     needs: publish
     steps:
-      - name: Create release body
-        run: |
-          echo "## Release Notes" > release_notes.md
-          echo "" >> release_notes.md
-          git tag --contains HEAD | head -1 >> release_notes.md || true
-          echo "" >> release_notes.md
-          echo "Published packages:" >> release_notes.md
-          echo "- multi-publisher@${GITHUB_REF#refs/tags/v}" >> release_notes.md
-
-      - name: Update release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: github.event.action == 'published'
         with:
-          files: release_notes.md
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
