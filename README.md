@@ -12,7 +12,7 @@
 |------|------|
 | **多平台支持** | 微信公众号、知乎、掘金、CSDN、微博、小红书、B站等 20+ 平台 |
 | **浏览器自动登录** | Playwright 驱动扫码/账号登录，Cookie 自动获取保存 |
-| **12 套渲染主题** | default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism |
+| **14 套渲染主题** | default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism |
 | **Markdown 直发** | front-matter 元数据、代码高亮、LaTeX 公式 |
 | **CI/CD 友好** | 纯命令行无需浏览器，配置文件统一管理 |
 | **草稿箱发布** | 微信公众号 → 草稿箱，其他平台 → 各自草稿箱 |
@@ -134,30 +134,40 @@ mpub platforms
 
 ## 主题系统
 
-### 12 套内置主题
+### 🎨 14 套内置主题
 
-| 主题 ID | 风格 | 适用场景 |
-|---------|------|---------|
-| `default` | 简洁朴素 | 通用场景 |
-| `wechat` | 仿微信官方样式 | 微信公众号 |
-| `modern` | 深色代码块 + 蓝色调 | 技术文章 |
-| `minimal` | 大量留白简约 | 阅读体验 |
-| `cyberpunk` | 赛博朋克霓虹 | 极客风格 |
-| `nord` | 北欧冷淡灰蓝 | 程序员文档 |
-| `paper` | 笔记本文艺复古 | 个人日记 |
-| `darkelite` | GitHub 深色精英 | 专业硬核 |
-| `sunset` | 日落暖调温暖 | 生活分享 |
-| `zen` | 日式禅意极简 | 日式美学 |
-| `retro` | 80年代复古未来 | 创意设计 |
-| `midnight` | 深夜图书馆书香 | 阅读笔记 |
-| `brutalism` | 粗野主义大胆 | 设计师作品集 |
-| `neumorphism` | 新拟态软 UI | APP 设计 |
+| 主题 ID | 风格 | 预览 | 适用场景 |
+|---------|------|------|----------|
+| `default` | 简洁朴素 | 默认灰蓝 | 通用场景 |
+| `wechat` | 仿微信官方 | 微信绿 | 微信公众号 |
+| `modern` | 深色代码+蓝调 | 深色红蓝字 | 技术文章 |
+| `minimal` | 大量留白 | 浅色红字 | 阅读体验 |
+| `cyberpunk` | 赛博朋克霓虹 | <span style="color:#00fff5">青色</span>+<span style="color:#ff00ff">洋红</span> | 极客风格 |
+| `nord` | 北欧冷淡灰蓝 | <span style="color:#88c0d0">浅蓝</span>+<span style="color:#81a1c1">灰蓝</span> | 程序员文档 |
+| `paper` | 笔记本文艺 | <span style="color:#c7254e">红色</span>+衬线 | 个人日记 |
+| `darkelite` | GitHub深色精英 | <span style="color:#58a6ff">蓝色链接</span> | 专业硬核 |
+| `sunset` | 日落暖调 | <span style="color:#ff6b6b">珊瑚红</span>+<span style="color:#ffd93d">金黄</span> | 生活分享 |
+| `zen` | 日式禅意极简 | <span style="color:#8b7355">棕色</span>+留白 | 日式美学 |
+| `retro` | 80年代复古未来 | <span style="color:#ff6ec7">粉色</span>+<span style="color:#00d4ff">青蓝</span> | 创意设计 |
+| `midnight` | 深夜图书馆 | <span style="color:#ffd700">金色</span>+<span style="color:#c9a962">古铜</span> | 阅读笔记 |
+| `brutalism` | 粗野主义大胆 | <span style="background:#ffff00">黄色</span>醒目 | 设计师作品集 |
+| `neumorphism` | 新拟态软UI | <span style="color:#7c3aed">紫色</span>柔和 | APP设计 |
 
-### 主题效果预览
+### 完整主题预览
 
-打开 `themes/all-themes-preview.html` 查看所有主题的可视化对比。
+打开 [themes/all-themes-preview.html](themes/all-themes-preview.html) 查看所有主题的可视化对比，包含完整 HTML 渲染效果。
 
-![主题预览](themes/all-themes-preview.html)
+**或在命令行预览：**
+```bash
+# 预览 cyberpunk 主题
+mpub render -f article.md -t cyberpunk
+
+# 预览 nord 主题
+mpub render -f article.md -t nord
+
+# 预览 retro 主题
+mpub render -f article.md -t retro
+```
 
 ### 使用主题
 
