@@ -90,28 +90,40 @@ mpub render -f article.md -t cyberpunk
 
 ## 支持的平台
 
-| 平台 | 认证方式 | 登录命令 | 发布到草稿 |
-|------|----------|----------|------------|
-| 微信公众号 | AppID + AppSecret | `mpub credential --set` | ✅ |
-| 知乎 | Cookie | `mpub login -p zhihu` | ✅ |
-| 掘金 | Cookie | `mpub login -p juejin` | ✅ |
-| CSDN | Cookie | `mpub login -p csdn` | ✅ |
-| 简书 | Cookie | `mpub login -p jianshu` | 规划中 |
-| 微博 | Cookie | `mpub login -p weibo` | 规划中 |
-| 小红书 | Cookie | `mpub login -p xiaohongshu` | 规划中 |
-| 头条号 | Cookie | `mpub login -p toutiao` | 规划中 |
-| 百家号 | Cookie | `mpub login -p baijiahao` | 规划中 |
-| B站 | Cookie | `mpub login -p bilibili` | 规划中 |
-| 思否 | Cookie | `mpub login -p segmentfault` | 规划中 |
-| 博客园 | Cookie | `mpub login -p cnblogs` | 规划中 |
-| 开源中国 | Cookie | `mpub login -p oschina` | 规划中 |
-| 慕课网 | Cookie | `mpub login -p imooc` | 规划中 |
-| 雪球 | Cookie | `mpub login -p xueqiu` | 规划中 |
-| 人人都是产品经理 | Cookie | `mpub login -p woshipm` | 规划中 |
-| 豆瓣 | Cookie | `mpub login -p douban` | 规划中 |
-| 搜狐号 | Cookie | `mpub login -p sohu` | 规划中 |
-| 东方财富 | Cookie | `mpub login -p eastmoney` | 规划中 |
-| 51CTO | Cookie | `mpub login -p cto51` | 规划中 |
+### 浏览器自动登录状态
+
+| 平台 | 登录命令 | Cookie 获取 | 草稿发布 | 备注 |
+|------|----------|-------------|----------|------|
+| 微信公众号 | `mpub credential --set` | ✅ | ✅ | AppID + AppSecret |
+| 知乎 | `mpub login -p zhihu` | ✅ | ✅ | 直接发布草稿 |
+| 掘金 | `mpub login -p juejin` | ✅ | ✅ | 直接发布草稿 |
+| CSDN | `mpub login -p csdn` | ✅ | ✅ | 直接发布草稿 |
+| 小红书 | `mpub login -p xiaohongshu` | ✅ | 🔄 测试中 | 需要更多测试 |
+| 简书 | `mpub login -p jianshu` | ✅ | ❌ 待实现 | |
+| 微博 | `mpub login -p weibo` | ✅ | ❌ 待实现 | |
+| 头条号 | `mpub login -p toutiao` | ✅ | 🔄 测试中 | 有反爬机制 |
+| 百家号 | `mpub login -p baijiahao` | ✅ | ❌ 待实现 | |
+| B站 | `mpub login -p bilibili` | ✅ | 🔄 测试中 | 需要更多测试 |
+| 思否 | `mpub login -p segmentfault` | ✅ | ❌ 待实现 | |
+| 博客园 | `mpub login -p cnblogs` | ✅ | ❌ 待实现 | |
+| 开源中国 | `mpub login -p oschina` | ✅ | ❌ 待实现 | |
+| 慕课网 | `mpub login -p imooc` | ✅ | ❌ 待实现 | |
+| 雪球 | `mpub login -p xueqiu` | ✅ | ❌ 待实现 | |
+| 人人都是产品经理 | `mpub login -p woshipm` | ✅ | ❌ 待实现 | |
+| 豆瓣 | `mpub login -p douban` | ✅ | ❌ 待实现 | |
+| 搜狐号 | `mpub login -p sohu` | ✅ | ❌ 待实现 | |
+| 东方财富 | `mpub login -p eastmoney` | ✅ | ❌ 待实现 | |
+| 51CTO | `mpub login -p cto51` | ✅ | ❌ 待实现 | |
+
+- ✅ 已验证可用
+- 🔄 测试中，可能存在问题
+- ❌ 待实现，适配器框架已搭建但未测试发布功能
+
+### 已验证平台
+
+**登录 + 草稿发布**：知乎、掘金、CSDN、微信公众号
+
+**仅登录验证**：小红书、微博、B站、头条号等（Cookie 获取成功，草稿发布待测试）
 
 ```bash
 # 查看所有支持平台
