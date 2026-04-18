@@ -129,18 +129,15 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         await page.waitForTimeout(1000)
       }
 
-      // 等待编辑器自动保存（最多5分钟）
-      console.log('[toutiao] 等待编辑器自动保存（最多5分钟）...')
-      for (let i = 0; i < 300; i++) {
+      // 等待编辑器自动保存（最多5秒）
+      console.log('[toutiao] 等待编辑器自动保存（5秒）...')
+      for (let i = 0; i < 5; i++) {
         const url = page.url()
         if (url.includes('id=')) {
           console.log('[toutiao] 检测到文章 ID，保存完成')
           break
         }
         await page.waitForTimeout(1000)
-        if (i % 30 === 0 && i > 0) {
-          console.log(`[toutiao] 已等待 ${i} 秒...`)
-        }
       }
 
       // 检查 URL 是否包含文章 ID
