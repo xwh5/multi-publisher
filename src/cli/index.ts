@@ -28,6 +28,7 @@ export function createProgram() {
     .option('-t, --theme <theme-id>', '主题 ID', 'default')
     .option('--app-id <appId>', '微信公众号 AppID（可省略，从配置文件读取）')
     .option('--no-mac-style', '禁用 Mac 风格代码块')
+    .option('--auto-cover', '当文章无封面图时，根据标题自动从网络获取封面')
     .action(runPublish)
 
   // render 命令

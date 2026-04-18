@@ -34,8 +34,9 @@ h2 { font-size: 1.125em; }
 h3 { font-size: 1.05em; }
 h4, h5, h6 { font-size: 1em; }
 li p { margin: 0; }
-ul, ol { margin: 1em 0; padding-left: 2em; }
-li { margin-bottom: 0.4em; }
+ul, ol { margin: 0; padding-left: 2em; }
+li { margin: 0; padding: 0; line-height: normal; }
+li + li { margin-top: 0.3em; }
 pre {
   background-color: #f6f8fa;
   border-radius: 6px;
@@ -74,11 +75,52 @@ const BUILTIN_THEMES: Record<string, { name: string; description: string; css: s
   wechat: {
     name: 'Wechat',
     description: '微信风格，仿微信官方文章样式',
-    css: DEFAULT_CSS + `
-h1 { font-size: 1.35em; border-bottom: 1px solid #e8e8e8; padding-bottom: 0.3em; }
-blockquote { border-left: 3px solid #c8a96e; background: #faf9f7; }
-img { border-radius: 4px; } table th { background-color: #f8f8f8; }
-a { color: #576b95; border-bottom: 1px solid rgba(87, 107, 149, 0.3); }
+    css: `
+p {
+  color: rgb(51, 51, 51);
+  font-size: 15px;
+  line-height: 1.75em;
+  margin: 0 0 1em 0;
+  word-wrap: break-word;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+  margin: 1em 0 0.5em 0;
+}
+h1 { font-size: 1.35em; line-height: 1.4em; border-bottom: 1px solid #e8e8e8; padding-bottom: 0.3em; }
+h2 { font-size: 1.125em; }
+h3 { font-size: 1.05em; }
+h4, h5, h6 { font-size: 1em; }
+li p { margin: 0; }
+ul, ol { margin: 0; padding-left: 2em; }
+li { margin: 0; padding: 0; line-height: normal; }
+li + li { margin-top: 0.3em; }
+pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 1em 0;
+}
+code {
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9em;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+pre code { background: none; padding: 0; font-size: 14px; }
+blockquote { border-left: 3px solid #c8a96e; background: #faf9f7; padding-left: 1em; margin: 1em 0; color: #666; }
+hr { border: none; border-top: 1px solid #ddd; margin: 1.5em 0; }
+i, cite, em, var, address { font-style: italic; }
+b, strong { font-weight: bolder; }
+img { max-width: 100%; height: auto; display: block; margin: 1em auto; border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+table th, table td { border: 1px solid #ddd; padding: 8px 12px; }
+table th { background-color: #f8f8f8; font-weight: bold; }
+a { color: #576b95; border-bottom: 1px solid rgba(87, 107, 149, 0.3); text-decoration: none; }
 `,
   },
   modern: {

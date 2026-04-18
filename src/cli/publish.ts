@@ -7,6 +7,7 @@ import { renderMarkdown } from '../core/renderer.js'
 import { createNodeRuntime } from '../runtime/node-runtime.js'
 import { initAdapterRegistry, getAdapter } from '../adapters/index.js'
 import { ConfigStore } from '../config.js'
+import { cleanupCoverFile } from '../tools/cover-fetcher.js'
 
 export async function runPublish(
   options: {
@@ -15,6 +16,7 @@ export async function runPublish(
     theme?: string
     appId?: string
     macStyle?: boolean
+    autoCover?: boolean
   },
   input?: string
 ): Promise<void> {
@@ -39,6 +41,7 @@ export async function runPublish(
     const result = await renderMarkdown(content, {
       theme: options.theme || 'default',
       macStyle: options.macStyle !== false,
+      autoCover: options.autoCover || false,
     })
 
     // 3. 选择适配器
@@ -62,14 +65,22 @@ export async function runPublish(
       process.env.WECHAT_APP_ID = options.appId
     }
 
+    // 使用自动获取的封面图（如果文章没有指定封面）
+    const coverImage = result.cover || result.autoCoverPath
+
     const syncResult = await adapter.publish({
       title: result.title,
       markdown: content,
       html: result.html,
       author: result.author,
-      cover: result.cover,
+      cover: coverImage,
       source_url: result.source_url,
     })
+
+    // 清理自动获取的临时封面图
+    if (result.autoCoverPath) {
+      await cleanupCoverFile(result.autoCoverPath).catch(() => {})
+    }
 
     // 4. 输出结果
     if (syncResult.success) {
