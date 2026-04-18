@@ -197,6 +197,28 @@ jobs:
 - **原因**：`package.json` 中 `version` 字段未更新
 - **解决**：本地先 `npm version 1.0.1`，让 package.json 与 npm 上已存在的版本错开
 
+### 坑 8：Windows 上 CLI 命令打开文件而非执行（shebang 缺失）
+
+- **现象**：`npm install -g multi-publisher` 后，`mpub --version` 没有输出版本号，而是打开了 `index.js` 源码文件（关联到 VS Code/记事本）
+- **原因**：TypeScript 编译输出的 `dist/cli/index.js` 第一行是 `/**` 注释，不是 shebang。Windows 系统看到 `.js` 文件没有 shebang，不知道要用 `node` 执行它，就把文件当成普通文本打开
+- **错误表现**：PowerShell/CMD 中运行 `mpub` 命令，结果是文件被编辑器打开
+- **排查过程**：
+  1. 确认 `npm install -g` 安装的 bin shim 正确指向 `dist/cli/index.js`
+  2. 直接用 `node dist/cli/index.js --version` 可以正常输出 `1.0.1`
+  3. 用 `cmd /c mpub.cmd --version` 无法正常执行
+  4. 检查编译产物发现文件头是 `/**` 注释，没有 `#!/usr/bin/env node`
+- **解决**：
+  1. 在 `src/cli/index.ts` 顶部添加 shebang 行：
+     ```typescript
+     #!/usr/bin/env node
+     /**
+      * CLI 入口
+      */
+     ```
+  2. TypeScript 编译后会原样保留 shebang 到 `dist/cli/index.js`
+  3. 验证编译后文件第一行：`head -1 dist/cli/index.js` → `#!/usr/bin/env node`
+  4. 重新构建并发布 v1.0.2
+
 ---
 
 ## 调试过程时间线
@@ -212,6 +234,8 @@ jobs:
 | 第7次 | `node-version: '22'` + `npx npm@latest install -g` | ❌ npm 仍为 10.9.7 | 升级命令未生效 |
 | 第8次 | `node-version: '24'` | ❌ E422 | repository 字段缺失 |
 | 第9次 | 添加 `repository` 字段 | ✅ **成功** | 所有问题解决 |
+| v1.0.2 | 用户反馈 `mpub -v` 打开文件 | ❌ Windows 不识别无 shebang 的 JS | TypeScript 输出缺 shebang |
+| v1.0.2 | 添加 `#!/usr/bin/env node` 到 `src/cli/index.ts` | ✅ **成功** | shebang 原样保留到编译产物 |
 
 ---
 
@@ -272,4 +296,4 @@ npm view multi-publisher versions
 
 ---
 
-*Last updated: 2026-04-18*
+*Last updated: 2026-04-18*（v1.0.2 shebang 问题补充）
