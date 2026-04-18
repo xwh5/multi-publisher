@@ -155,12 +155,20 @@ async function main() {
 
   // 读取文章
   const rawContent = fs.readFileSync(filePath, 'utf-8')
-  const { content: html, metadata } = parseFrontMatter(rawContent)
+  const { content: bodyContent, metadata } = parseFrontMatter(rawContent)
+
+  // 渲染 Markdown → HTML（与 mpub publish 流程一致）
+  const { renderMarkdown } = await import('../dist/core/renderer.js')
+  const renderResult = await renderMarkdown(bodyContent, {
+    theme: opts.theme || 'default',
+    macStyle: true,
+  })
 
   const article = {
     title: metadata.title as string || 'Test Article',
     author: metadata.author as string || 'Test Author',
-    html,
+    markdown: bodyContent,         // CSDN 等平台需要原始 markdown
+    html: renderResult.html,      // 渲染后的 HTML
     cover: (metadata.cover as string) || '',
     source_url: (metadata.source_url as string) || '',
   }
