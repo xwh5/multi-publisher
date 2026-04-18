@@ -38,6 +38,11 @@ jobs:
 
       - name: Publish to npm
         run: |
+          echo "=== Testing npm registry connectivity ==="
+          curl -sI https://registry.npmjs.org/multi-publisher | head -5
+          echo "=== Checking npm whoami ==="
+          npm whoami || echo "npm whoami failed"
+          echo "=== Publishing multi-publisher ==="
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Publishing multi-publisher@$VERSION"
           npm publish --access public
