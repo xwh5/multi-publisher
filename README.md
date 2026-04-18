@@ -22,22 +22,33 @@
 ## 安装
 
 ```bash
-# 源码安装
-git clone <repo-url>
-cd multi-publisher
-npm install
-npm run build
+# 推荐：一键安装（Node.js ≥ 18）
+npm install -g multi-publisher
 
-# 链接为全局命令
-npm link
-mpub --help
+# 验证安装
+mpub --version
 ```
 
 **Node.js ≥ 18** required.
 
+### 配合 AI 使用
+
+本工具已制作为 Claude Code Skill，可让 AI 直接帮你发布文章：
+
+```bash
+# 在任意 Claude Code 对话中，直接描述你的需求：
+# "帮我把这篇 article.md 发布到微信公众号"
+# "用 cyberpunk 主题渲染预览一下"
+# AI 会调用 mpub 完成操作
+```
+
+查看支持的所有命令：`mpub --help`
+
 ---
 
 ## 快速开始
+
+> **配合 AI 使用**：安装本工具后，在 Claude Code 中直接说"帮我发布文章到微信公众号"，AI 会调用 `mpub` 自动完成。
 
 ### 1. 配置平台登录
 

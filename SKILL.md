@@ -12,8 +12,8 @@
 
 ## 工具基本信息
 
-**命令**：`mpub`（需先 `npm link` 或 `npm install -g`）
-**项目路径**：`C:\Users\Administrator\.openclaw\workspace\projects\multi-publisher`
+**命令**：`mpub`（需先 `npm install -g multi-publisher`）
+**npm**：`https://www.npmjs.com/package/multi-publisher`
 **文档**：`README.md` / `SPEC.md`
 
 ## 核心命令速查
@@ -133,8 +133,11 @@ tags: [技术, 前端]
 ```bash
 cd C:\Users\Administrator\.openclaw\workspace\projects\multi-publisher
 
+npm install      # 安装依赖
 npm run build    # 编译 TypeScript
-npm link        # 链接到全局（一次性）
+
+# 链接到全局（需先 npm install -g multi-publisher）
+npm link
 mpub platforms  # 测试
 ```
 
