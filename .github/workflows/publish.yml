@@ -41,15 +41,14 @@ jobs:
 
       - name: Publish to npm
         run: |
-          unset NODE_AUTH_TOKEN
-          echo "=== Testing npm registry connectivity ==="
-          curl -sI https://registry.npmjs.org/multi-publisher | head -5
           echo "=== Checking npm whoami ==="
           npm whoami || echo "npm whoami failed"
           echo "=== Publishing multi-publisher ==="
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Publishing multi-publisher@$VERSION"
           npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ''
 
   create-release:
     runs-on: ubuntu-latest
