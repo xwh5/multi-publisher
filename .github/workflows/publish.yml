@@ -23,6 +23,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
+      - name: Upgrade npm
+        run: npm install -g npm@11
+
       - name: Install dependencies
         run: npm ci
 
@@ -38,6 +41,7 @@ jobs:
 
       - name: Publish to npm
         run: |
+          unset NODE_AUTH_TOKEN
           echo "=== Testing npm registry connectivity ==="
           curl -sI https://registry.npmjs.org/multi-publisher | head -5
           echo "=== Checking npm whoami ==="
