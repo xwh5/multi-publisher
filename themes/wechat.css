@@ -1,0 +1,60 @@
+/**
+ * 微信风格主题 - 仿微信官方文章样式
+ */
+p {
+  color: rgb(47, 47, 47);
+  font-size: 16px;
+  line-height: 1.8em;
+  margin: 0 0 1.2em 0;
+  word-wrap: break-word;
+  letter-spacing: 0.02em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+  margin: 1.2em 0 0.6em 0;
+  line-height: 1.4em;
+  color: rgb(30, 30, 30);
+}
+h1 { font-size: 1.35em; border-bottom: 1px solid #e8e8e8; padding-bottom: 0.3em; }
+h2 { font-size: 1.2em; }
+h3 { font-size: 1.1em; }
+li p { margin: 0; }
+ul, ol { margin: 0.8em 0; padding-left: 1.8em; }
+li { margin-bottom: 0.5em; line-height: 1.7em; }
+pre {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 1.2em 0;
+  border: 1px solid #e8e8e8;
+}
+code {
+  background-color: rgba(27, 31, 35, 0.06);
+  border-radius: 3px;
+  padding: 0.15em 0.4em;
+  font-size: 0.9em;
+  font-family: 'SF Mono', 'Fira Code', Consolas, 'Liberation Mono', monospace;
+  color: #e74c3c;
+}
+pre code { background: none; padding: 0; font-size: 14px; color: #333; }
+blockquote {
+  border-left: 3px solid #c8a96e;
+  padding: 0.5em 1em;
+  margin: 1.2em 0;
+  color: #666;
+  background: #faf9f7;
+  border-radius: 0 4px 4px 0;
+}
+hr { border: none; border-top: 1px solid #e5e5e5; margin: 2em 0; }
+i, cite, em, var, address { font-style: italic; }
+b, strong { font-weight: bold; color: #1a1a1a; }
+img { max-width: 100%; height: auto; display: block; margin: 1.2em auto; border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; border-radius: 6px; overflow: hidden; }
+table th, table td { border: 1px solid #e8e8e8; padding: 10px 14px; }
+table th { background-color: #f8f8f8; font-weight: bold; color: #333; }
+table tr:hover { background-color: #fafafa; }
+a { color: #576b95; text-decoration: none; border-bottom: 1px solid rgba(87, 107, 149, 0.3); }
+a:hover { border-bottom-color: #576b95; }

@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'><title>preview-paper.html</title><style>
+body{max-width:900px;margin:2em auto;padding:0 1em;font-family:system-ui,sans-serif}
+img{max-width:100%;height:auto}
+pre{white-space:pre-wrap;word-wrap:break-word}
+</style></head><body>
+<section style="margin-left:6px;margin-right:6px;line-height:1.75em"><h1 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; color: #1a1a1a; font-family: Georgia, serif; font-size: 1.8em; text-align: center; letter-spacing: 0.05em; text-indent: 0;">Claude Code 实战指南：从入门到精通</h1>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong style="font-weight: bold; color: #111;">Claude Code</strong>。</p>
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">为什么选择 Claude Code？</h2>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">Claude Code 是 Anthropic 推出的命令行工具，它能帮助你：</p>
+<ul style="margin: 0.8em 0; padding-left: 2em;">
+<li style="margin-bottom: 0.4em; color: #444;">快速理解代码库结构</li>
+<li style="margin-bottom: 0.4em; color: #444;">自动完成重复性编码任务</li>
+<li style="margin-bottom: 0.4em; color: #444;">修复 Bug 和重构代码</li>
+<li style="margin-bottom: 0.4em; color: #444;">生成测试用例</li>
+<li style="margin-bottom: 0.4em; color: #444;">撰写项目文档</li>
+</ul>
+<blockquote style="border-left: 3px solid #c8a96e; background: #f9f7f3; padding: 0.8rem 1rem; margin: 1em 0; color: #666; font-style: italic; border-radius: 0 4px 4px 0;">
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</p>
+</blockquote>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">快速上手</h2>
+<h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">环境安装</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">首先，确保你已经安装了 Node.js 18+：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code class="hljs language-bash" style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;">node --version
+npm --version
+</code></pre><p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">然后全局安装 Claude Code：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code class="hljs language-bash" style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;">npm install -g @anthropic-ai/claude-code
+</code></pre><h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">首次配置</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">安装完成后，运行以下命令进行配置：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code class="hljs language-bash" style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;">claude-code setup
+</code></pre><p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">这会引导你完成 API Key 的设置。</p>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">核心功能演示</h2>
+<h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">1. 代码理解</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">假设你接手了一个复杂的项目，只需要问：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;">帮我解释一下这个项目的架构
+</code></pre><p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">Claude Code 会自动分析代码并给出详细解释。</p>
+<h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">2. 代码生成</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">生成一个简单的 HTTP 服务器：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code class="hljs language-javascript" style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;"><span class="hljs-keyword">const</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;http&#x27;</span>);
+
+<span class="hljs-keyword">const</span> server = http.<span class="hljs-title function_">createServer</span>(<span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> {
+  res.<span class="hljs-title function_">writeHead</span>(<span class="hljs-number">200</span>, { <span class="hljs-string">&#x27;Content-Type&#x27;</span>: <span class="hljs-string">&#x27;text/plain&#x27;</span> });
+  res.<span class="hljs-title function_">end</span>(<span class="hljs-string">&#x27;Hello, World!&#x27;</span>);
+});
+
+server.<span class="hljs-title function_">listen</span>(<span class="hljs-number">3000</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Server running at http://localhost:3000/&#x27;</span>);
+});
+</code></pre><h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">3. Bug 修复</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">遇到棘手的 Bug？把错误信息贴给 Claude Code，它会帮你分析并修复。</p>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">进阶技巧</h2>
+<h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">使用 MCP 扩展</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">Claude Code 支持 Model Context Protocol，可以连接各种外部工具：</p>
+<table style="border-collapse: collapse; width: 100%; margin: 1em 0;">
+<thead>
+<tr>
+<th style="border: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; color: #333; font-weight: bold;">MCP 服务</th>
+<th style="border: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; color: #333; font-weight: bold;">功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">文件系统</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">读写本地文件</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">Git</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">管理版本控制</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">数据库</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">连接 MySQL/PostgreSQL</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">Web</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">搜索和获取网页内容</td>
+</tr>
+</tbody></table>
+<h3 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.1em; color: #3d3d3d; text-indent: 0;">书签脚本</h3>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">常用操作可以保存为书签脚本：</p>
+<pre style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; font-family: 'Courier New', monospace;"><code class="hljs language-bash" style="border-radius: 3px; font-size: 0.9em; font-family: 'Courier New', monospace; background: none; border: none; padding: 0; color: #333;"><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># 快速启动项目</span>
+npm install
+npm run dev
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;项目已启动！&quot;</span>
+</code></pre><hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">表格测试</h2>
+<table style="border-collapse: collapse; width: 100%; margin: 1em 0;">
+<thead>
+<tr>
+<th style="border: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; color: #333; font-weight: bold;">编程语言</th>
+<th style="border: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; color: #333; font-weight: bold;">擅长领域</th>
+<th style="border: 1px solid #ddd; padding: 8px 12px; background: #f5f5f5; color: #333; font-weight: bold;">学习难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">Python</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">数据科学、AI</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">⭐ 简单</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">JavaScript</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">前端、后端</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">⭐⭐ 中等</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">Rust</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">系统编程</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">⭐⭐⭐ 困难</td>
+</tr>
+<tr>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">Go</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">云原生、并发</td>
+<td style="border: 1px solid #ddd; padding: 8px 12px;">⭐⭐ 中等</td>
+</tr>
+</tbody></table>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">有序列表</h2>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">使用 Claude Code 的标准流程：</p>
+<ol style="margin: 0.8em 0; padding-left: 2em;">
+<li style="margin-bottom: 0.4em; color: #444;"><strong style="font-weight: bold; color: #111;">启动</strong>：运行 <code style="background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; padding: 0.15em 0.4em; color: #c7254e; font-size: 0.9em; font-family: 'Courier New', monospace;">claude-code</code> 命令</li>
+<li style="margin-bottom: 0.4em; color: #444;"><strong style="font-weight: bold; color: #111;">提问</strong>：用自然语言描述你的需求</li>
+<li style="margin-bottom: 0.4em; color: #444;"><strong style="font-weight: bold; color: #111;">审查</strong>：查看 AI 生成的代码</li>
+<li style="margin-bottom: 0.4em; color: #444;"><strong style="font-weight: bold; color: #111;">确认</strong>：批准或让 AI 调整</li>
+<li style="margin-bottom: 0.4em; color: #444;"><strong style="font-weight: bold; color: #111;">集成</strong>：将代码应用到项目中</li>
+</ol>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">图片示例</h2>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;"><img src="https://picsum.photos/600/300" alt="代码编辑器的使用" style="max-width: 100%; height: auto; display: block; margin: 1em auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></p>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">链接</h2>
+<ul style="margin: 0.8em 0; padding-left: 2em;">
+<li style="margin-bottom: 0.4em; color: #444;"><a href="https://docs.anthropic.com/claude-code" style="color: #0969da; text-decoration: none; border-bottom: 1px dashed #0969da;">Claude Code 官方文档</a></li>
+<li style="margin-bottom: 0.4em; color: #444;"><a href="https://www.anthropic.com" style="color: #0969da; text-decoration: none; border-bottom: 1px dashed #0969da;">Anthropic 官网</a></li>
+<li style="margin-bottom: 0.4em; color: #444;"><a href="https://github.com/anthropics/claude-code" style="color: #0969da; text-decoration: none; border-bottom: 1px dashed #0969da;">GitHub 仓库</a></li>
+</ul>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<h2 style="font-weight: bold; margin: 1.5em 0 0.6em 0; line-height: 1.4em; font-family: Georgia, serif; font-size: 1.4em; color: #2d2d2d; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; text-indent: 0;">结语</h2>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;">Claude Code 不仅仅是一个代码生成器，它是一个真正的编程伙伴。合理使用 AI 工具，可以大大提升开发效率。</p>
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;"><strong style="font-weight: bold; color: #111;">记住</strong>：AI 是辅助工具，最终决策权始终在你手中。</p>
+<hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+<p style="color: #444; font-size: 15px; line-height: 2em; margin: 0 0 1em 0; text-indent: 2em;"><em style="font-style: italic;">感谢阅读！如果对你有帮助，欢迎转发分享。</em></p>
+</section></body></html>

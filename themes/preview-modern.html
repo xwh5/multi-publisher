@@ -1,0 +1,150 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'><title>preview-modern.html</title><style>
+body{max-width:900px;margin:2em auto;padding:0 1em;font-family:system-ui,sans-serif}
+img{max-width:100%;height:auto}
+pre{white-space:pre-wrap;word-wrap:break-word}
+</style></head><body>
+<!DOCTYPE html><html><head><meta charset='utf-8'><title>preview-modern</title><style>
+body{max-width:800px;margin:2em auto;padding:0 1em;font-family:system-ui,sans-serif}
+img{max-width:100%;height:auto}
+pre{white-space:pre-wrap;word-wrap:break-word}
+</style></head><body>
+<section style="margin-left:6px;margin-right:6px;line-height:1.75em"><h1 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.4em; border-bottom: 2px solid #4a90d9; padding-bottom: 0.25em;">Claude Code 实战指南：从入门到精通</h1>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">为什么选择 Claude Code？</h2>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">Claude Code 是 Anthropic 推出的命令行工具，它能帮助你：</p>
+<ul>
+<li>快速理解代码库结构</li>
+<li>自动完成重复性编码任务</li>
+<li>修复 Bug 和重构代码</li>
+<li>生成测试用例</li>
+<li>撰写项目文档</li>
+</ul>
+<blockquote style="border-left: 4px solid #4a90d9; background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%); padding: 0.6em 1.2em; border-radius: 0 6px 6px 0;">
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</p>
+</blockquote>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">快速上手</h2>
+<h3 style="font-weight: 700; line-height: 1.35em; color: #111;">环境安装</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">首先，确保你已经安装了 Node.js 18+：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code class="hljs language-bash" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;">node --version
+npm --version
+</code></pre><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">然后全局安装 Claude Code：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code class="hljs language-bash" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;">npm install -g @anthropic-ai/claude-code
+</code></pre><h3 style="font-weight: 700; line-height: 1.35em; color: #111;">首次配置</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">安装完成后，运行以下命令进行配置：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code class="hljs language-bash" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;">claude-code setup
+</code></pre><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">这会引导你完成 API Key 的设置。</p>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">核心功能演示</h2>
+<h3 style="font-weight: 700; line-height: 1.35em; color: #111;">1. 代码理解</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">假设你接手了一个复杂的项目，只需要问：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;">帮我解释一下这个项目的架构
+</code></pre><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">Claude Code 会自动分析代码并给出详细解释。</p>
+<h3 style="font-weight: 700; line-height: 1.35em; color: #111;">2. 代码生成</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">生成一个简单的 HTTP 服务器：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code class="hljs language-javascript" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;"><span class="hljs-keyword">const</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;http&#x27;</span>);
+
+<span class="hljs-keyword">const</span> server = http.<span class="hljs-title function_">createServer</span>(<span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> {
+  res.<span class="hljs-title function_">writeHead</span>(<span class="hljs-number">200</span>, { <span class="hljs-string">&#x27;Content-Type&#x27;</span>: <span class="hljs-string">&#x27;text/plain&#x27;</span> });
+  res.<span class="hljs-title function_">end</span>(<span class="hljs-string">&#x27;Hello, World!&#x27;</span>);
+});
+
+server.<span class="hljs-title function_">listen</span>(<span class="hljs-number">3000</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Server running at http://localhost:3000/&#x27;</span>);
+});
+</code></pre><h3 style="font-weight: 700; line-height: 1.35em; color: #111;">3. Bug 修复</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">遇到棘手的 Bug？把错误信息贴给 Claude Code，它会帮你分析并修复。</p>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">进阶技巧</h2>
+<h3 style="font-weight: 700; line-height: 1.35em; color: #111;">使用 MCP 扩展</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">Claude Code 支持 Model Context Protocol，可以连接各种外部工具：</p>
+<table>
+<thead>
+<tr>
+<th style="background-color: #4a90d9; color: #fff;">MCP 服务</th>
+<th style="background-color: #4a90d9; color: #fff;">功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文件系统</td>
+<td>读写本地文件</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>管理版本控制</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td>连接 MySQL/PostgreSQL</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>搜索和获取网页内容</td>
+</tr>
+</tbody></table>
+<h3 style="font-weight: 700; line-height: 1.35em; color: #111;">书签脚本</h3>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">常用操作可以保存为书签脚本：</p>
+<pre style="background-color: #1e1e1e; border-radius: 10px; padding: 18px 22px; font-size: 13.5px; margin: 1.3em 0; border: 1px solid #333;"><code class="hljs language-bash" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; background: none; padding: 0; color: #d4d4d4;"><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># 快速启动项目</span>
+npm install
+npm run dev
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;项目已启动！&quot;</span>
+</code></pre><hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">表格测试</h2>
+<table>
+<thead>
+<tr>
+<th style="background-color: #4a90d9; color: #fff;">编程语言</th>
+<th style="background-color: #4a90d9; color: #fff;">擅长领域</th>
+<th style="background-color: #4a90d9; color: #fff;">学习难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Python</td>
+<td>数据科学、AI</td>
+<td>⭐ 简单</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>前端、后端</td>
+<td>⭐⭐ 中等</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>系统编程</td>
+<td>⭐⭐⭐ 困难</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>云原生、并发</td>
+<td>⭐⭐ 中等</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">有序列表</h2>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">使用 Claude Code 的标准流程：</p>
+<ol>
+<li><strong>启动</strong>：运行 <code style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; padding: 0.15em 0.45em; font-size: 0.88em; color: #4a90d9;">claude-code</code> 命令</li>
+<li><strong>提问</strong>：用自然语言描述你的需求</li>
+<li><strong>审查</strong>：查看 AI 生成的代码</li>
+<li><strong>确认</strong>：批准或让 AI 调整</li>
+<li><strong>集成</strong>：将代码应用到项目中</li>
+</ol>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">图片示例</h2>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;"><img src="https://picsum.photos/600/300" alt="代码编辑器的使用" style="border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);"></p>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">链接</h2>
+<ul>
+<li><a href="https://docs.anthropic.com/claude-code" style="color: #4a90d9;">Claude Code 官方文档</a></li>
+<li><a href="https://www.anthropic.com" style="color: #4a90d9;">Anthropic 官网</a></li>
+<li><a href="https://github.com/anthropics/claude-code" style="color: #4a90d9;">GitHub 仓库</a></li>
+</ul>
+<hr>
+<h2 style="font-weight: 700; line-height: 1.35em; color: #111; font-size: 1.2em;">结语</h2>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">Claude Code 不仅仅是一个代码生成器，它是一个真正的编程伙伴。合理使用 AI 工具，可以大大提升开发效率。</p>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;"><strong>记住</strong>：AI 是辅助工具，最终决策权始终在你手中。</p>
+<hr>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;"><em>感谢阅读！如果对你有帮助，欢迎转发分享。</em></p>
+</section></body></html>
+</body></html>
