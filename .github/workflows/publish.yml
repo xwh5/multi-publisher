@@ -37,6 +37,7 @@ jobs:
 
       - name: Publish to npm
         run: |
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "Publishing multi-publisher@$VERSION"
           npm publish --provenance --access public
