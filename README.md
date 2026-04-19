@@ -2,7 +2,7 @@
 
 **一行命令，Markdown 发布到全网。**
 
-将排版好的 Markdown 文章一键发布到微信公众号、知乎、掘金、CSDN 等 20+ 平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，12 套渲染主题，是内容创作者的效率神器。
+将排版好的 Markdown 文章一键发布到微信公众号、知乎、掘金、CSDN 等 20+ 平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，14 套渲染主题，是内容创作者的效率神器。
 
 ---
 
@@ -13,6 +13,7 @@
 | **多平台支持** | 微信公众号、知乎、掘金、CSDN、微博、小红书、B站等 20+ 平台 |
 | **浏览器自动登录** | Playwright 驱动扫码/账号登录，Cookie 自动获取保存 |
 | **14 套渲染主题** | default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism |
+| **自动封面图生成** | AI 根据标题生成封面图，自动上传到微信 CDN |
 | **Markdown 直发** | front-matter 元数据、代码高亮、LaTeX 公式 |
 | **CI/CD 友好** | 纯命令行无需浏览器，配置文件统一管理 |
 | **草稿箱发布** | 微信公众号 → 草稿箱，其他平台 → 各自草稿箱 |
@@ -95,6 +96,12 @@ mpub render -f article.md
 
 # 指定主题渲染
 mpub render -f article.md -t cyberpunk
+
+# 自动封面图（文章无封面时 AI 生成）
+mpub publish -f article.md -p weixin --auto-cover
+
+# 指定封面图
+mpub publish -f article.md -p weixin -c cover.jpg
 ```
 
 ---
@@ -199,14 +206,16 @@ pre { background: #f6f8fa; border-radius: 6px; }
 
 ### front-matter 元数据
 
+> **重要**：front-matter 是必需的！缺少 front-matter 会导致标题显示为"无标题"。
+
 ```markdown
 ---
-title: 文章标题
-author: 作者名
-cover: https://example.com/cover.jpg    # 封面图片 URL
-summary: 文章摘要（可选）                 # 微信作者留言摘要
-source_url: https://original.url        # 原文链接（可选）
-tags: [技术, 前端, JavaScript]           # 标签（可选）
+title: 文章标题                      # 必填，用于公众号标题
+author: 作者名                       # 必填
+description: 文章描述（可选）          # 用于公众号摘要
+cover: https://example.com/cover.jpg # 可选，有 --auto-cover 可省略
+source_url: https://original.url     # 原文链接（可选）
+tags: [技术, 前端, JavaScript]        # 标签（可选）
 ---
 
 正文内容...
