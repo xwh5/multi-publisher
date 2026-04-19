@@ -1,6 +1,6 @@
 {
   "name": "multi-publisher",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Markdown → 微信公众号 / 知乎 / 掘金等多平台 CLI 发布工具",
   "type": "module",
   "repository": {
