@@ -11,6 +11,7 @@ import { runCredential } from './credential.js'
 import { runCookie } from './cookie.js'
 import { runLogin } from './login.js'
 import { runPublishAll } from './publish-all.js'
+import { runCapture } from './capture.js'
 
 export function createProgram() {
   const program = new Command()
@@ -77,6 +78,13 @@ export function createProgram() {
     .option('--mac-style', '启用 Mac 风格代码块', true)
     .option('--no-mac-style', '禁用 Mac 风格代码块')
     .action(runPublishAll)
+
+  // capture 命令
+  const captureCmd = program.command('capture')
+    .description('抓包工具 - 打开浏览器并拦截上传请求')
+    .option('-p, --platform <platform>', '平台名称 (csdn|juejin|zhihu|toutiao|jianshu|weibo)', 'csdn')
+    .option('-t, --timeout <seconds>', '超时时间（秒）', '60')
+    .action(runCapture)
 
   return program
 }

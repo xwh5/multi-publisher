@@ -1,0 +1,137 @@
+{
+  "platform": "csdn",
+  "captureTime": "2026-04-20T08:41:01.676Z",
+  "timeout": 60000,
+  "editorUrl": "https://editor.csdn.net/md/",
+  "requests": [
+    {
+      "id": "1776674402104-boq2wuke3",
+      "timestamp": 1776674402104,
+      "method": "POST",
+      "url": "https://passport.csdn.net/v1/api/check/userstatus",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://editor.csdn.net/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "application/json, text/javascript, */*; q=0.01",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"username\":\"qq_32949095\",\"biz\":\"blog\",\"subBiz\":\"article\"}",
+      "responseStatus": 200,
+      "responseBody": "{\"error\":\"\",\"status\":true}"
+    },
+    {
+      "id": "1776674402104-4m11tqzjg",
+      "timestamp": 1776674402105,
+      "method": "GET",
+      "url": "https://bizapi.csdn.net/blog-console-api/v3/editor/getBaseInfo",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "x-ca-signature-headers": "x-ca-key,x-ca-nonce",
+        "referer": "https://editor.csdn.net/",
+        "x-ca-key": "203803574",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "x-ca-nonce": "970980cc-e702-4a97-9738-72552e0094fa",
+        "sec-ch-ua-mobile": "?0",
+        "x-ca-signature": "7PqETnC8B87xBRolboPJimzIstbj59AksB/gkthzJpg=",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":200,\"traceId\":\"6cb1146a-fdf5-417b-8d68-a0003cde9d3f\",\"data\":{\"avatar\":\"https://profile-avatar.csdnimg.cn/default.jpg!1\",\"name\":\"qq_32949095\",\"blog_url\":\"https://blog.csdn.net/qq_32949095\",\"blog_level\":1,\"muser_name\":\"qq_32949095\",\"code_style\":\"prism-atom-one-dark\",\"editor_code_style\":\"atom-one-dark\",\"categorys\":[],\"can_add_category_num\":10,\"open_reward_text\":0,\"cover_image_ab_test\":true,\"template_switch\":true,\"my_template_switch\":true,\"plan\":[],\"vote_switch\":true,\"water_mark\":false,\"nick"
+    },
+    {
+      "id": "1776674402317-dbm5i3q7u",
+      "timestamp": 1776674402317,
+      "method": "GET",
+      "url": "https://bizapi.csdn.net/blog/phoenix/console/v1/write/get-config",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "x-ca-signature-headers": "x-ca-key,x-ca-nonce",
+        "referer": "https://editor.csdn.net/",
+        "x-ca-key": "203803574",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "x-ca-nonce": "fb3b867a-7b17-46b4-a826-c57f0353d673",
+        "sec-ch-ua-mobile": "?0",
+        "x-ca-signature": "aqMYcpaXT7t3a2lenBRS6Sw7HB6hchvPDNPR7See96A=",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":200,\"message\":\"success\",\"traceId\":\"48b672a2-7434-415b-a169-c0effaed5758\",\"data\":{\"vipEditText\":\"<p>现金补贴10万元，高额收益分成，专属VIP内容流量扶持，等你加入，<a style=\\\"color:#7dbce2;\\\" href=\\\"https://marketing.csdn.net/p/fe54150055296e2678b2e4c8f95bb2fc?pId=2950\\\" target=\\\"_blank\\\">活动详情</a></p>\",\"vipEditMark\":\"https://img-home.csdnimg.cn/images/20250207040118.png\"}}"
+    },
+    {
+      "id": "1776674402317-2n7q29bxq",
+      "timestamp": 1776674402317,
+      "method": "GET",
+      "url": "https://bizapi.csdn.net/blog/phoenix/console/v1/user/list-permission",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "x-ca-signature-headers": "x-ca-key,x-ca-nonce",
+        "referer": "https://editor.csdn.net/",
+        "x-ca-key": "203803574",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "x-ca-nonce": "48e75001-6f25-49fe-8db1-dbf006be37fe",
+        "sec-ch-ua-mobile": "?0",
+        "x-ca-signature": "SeroZtISem0Vq+dgDWvA+V5wE6ABCAqIyTTBBxrPGZ8=",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":200,\"message\":\"success\",\"traceId\":\"d90eb679-2b83-42cc-8512-a642fdb13b22\",\"data\":{\"useGpt\":true,\"useHistoryVersion\":{\"guideCopy\":\"•专家或 VIP 可查看 90 天内最多 200 个版本<br>•普通用户可查看 90 天内最多 10 个版本\",\"vipUrl\":\"https://mall.csdn.net/vip\",\"commonUser\":true},\"novice\":true,\"oldUser\":false,\"useSeven\":true,\"displayFlowCouponPage\":true,\"oldFullVersion\":false,\"editPopUpImg\":\"https://img-home.csdnimg.cn/images/20240229014321.png\",\"ab365\":\"exp1\",\"ab369\":\"exp1\",\"ab376\":\"control\",\"latestCouponTimestamp\":177666764"
+    },
+    {
+      "id": "1776674402317-nqaqxiqzg",
+      "timestamp": 1776674402317,
+      "method": "GET",
+      "url": "https://bizapi.csdn.net/blog/phoenix/console/v1/article/is-zero-article-user",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "x-ca-signature-headers": "x-ca-key,x-ca-nonce",
+        "referer": "https://editor.csdn.net/",
+        "x-ca-key": "203803574",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "x-ca-nonce": "9b048c67-e439-4f37-88d3-e6591fee6313",
+        "sec-ch-ua-mobile": "?0",
+        "x-ca-signature": "LQtFFq3MAgxj1wV2acV0h6KAZRTQJk7+3Guk00Z9EtU=",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":200,\"message\":\"success\",\"traceId\":\"0c53531a-374e-484a-aa6a-033aa0c97554\",\"data\":false}"
+    },
+    {
+      "id": "1776674402911-lddj95z2n",
+      "timestamp": 1776674402911,
+      "method": "GET",
+      "url": "https://bizapi.csdn.net/blog/phoenix/console/v1/write-active/list?type=2&order=0&page=1&size=3",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "x-ca-signature-headers": "x-ca-key,x-ca-nonce",
+        "referer": "https://app-blog.csdn.net/",
+        "x-ca-key": "203803574",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "x-ca-nonce": "dc2e1970-4b25-49b7-a130-2e8144263c45",
+        "sec-ch-ua-mobile": "?0",
+        "x-ca-signature": "/LW+Wta1a6EVuou2yEqZVhheK79dQbtzEbItgpOAeWk=",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":200,\"message\":\"success\",\"traceId\":\"806caf16-9a89-441c-b33d-c01ffe72c1b9\",\"data\":{\"actives\":[{\"writeActiveId\":11178,\"name\":\"AI时代工程师superpowers进化论\",\"synopsis\":\"从写代码到调模型，看核心能力如何升维重构\",\"descUrl\":\"https://activity.csdn.net/topic?id=11178\",\"status\":2,\"startTime\":\"2026-04-13T02:13:37.000+0000\",\"endTime\":\"2026-04-27T02:13:37.000+0000\",\"type\":2,\"attendUserNum\":79,\"attendArticleNum\":112,\"owner\":\"blogdevteam\",\"isHot\":false,\"createTime\":\"2026-04-13T02:13:36.000+0000\",\"totalViews\":39432,\"subType\":4,\"f"
+    }
+  ],
+  "summary": {
+    "totalRequests": 6,
+    "matchedRequests": 0,
+    "uploadEndpoints": []
+  }
+}

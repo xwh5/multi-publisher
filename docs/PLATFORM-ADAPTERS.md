@@ -124,3 +124,98 @@ apm-fe.xiaohongshu.com (监控数据，非业务API)
 - [ ] B站 - 待测试
 - [ ] 知乎 - 待测试
 - [ ] 掘金 - 待测试
+
+---
+
+## 6. CSDN 封面图浏览器上传
+
+### 背景
+CSDN 的封面上传没有公开 API，且签名机制复杂。最终采用浏览器自动化方式上传。
+
+### 关键发现
+
+#### 1. 抓包工具的使用
+`src/tools/capture.ts` 可以拦截浏览器请求，记录所有 API 调用。
+- 运行 `node dist/cli/index.js capture -p csdn --timeout 60000`
+- 访问目标页面，操作完成后查看 `temp/capture-csdn-*.json`
+- 过滤 `upload`、`obs`、`image` 等关键词
+
+#### 2. 图片尺寸要求
+CSDN 对封面图有最小尺寸要求：
+- **最小**: 900px 宽
+- **建议**: 1200x500 或更大
+- 小图片会提示"图片尺寸过小"错误
+
+#### 3. 多步骤按钮流程
+CSDN 封面上传需要点击多个按钮：
+
+```
+发布按钮 → 弹出框 → 从本地上传按钮 → 选择文件 → 确认上传按钮 → 保存为草稿按钮
+```
+
+**完整流程：**
+1. 点击"发布"按钮 → 弹出发布设置弹窗
+2. 点击"从本地上传"按钮 → 激活文件选择（隐藏的 file input）
+3. `setInputFiles()` 设置图片文件 → 图片加载到裁剪弹窗
+4. 点击"确认上传"按钮 → 上传到华为云 OBS
+5. 点击"保存为草稿"按钮 → 保存封面设置
+
+**关键代码片段：**
+```typescript
+// 1. 点击"从本地上传"按钮
+const uploadBtn = page.locator('.upload-img-box').first()
+await uploadBtn.click()
+
+// 2. 设置文件（file input 是隐藏的，但 setInputFiles 可以工作）
+await coverInput.setInputFiles(absolutePath)
+
+// 3. 点击"确认上传"
+const confirmBtn = page.locator('.vicp-operate-btn:has-text("确认上传")')
+await confirmBtn.click()
+
+// 4. 点击"保存为草稿"
+const saveDraftBtn = page.locator('button:has-text("保存为草稿")')
+await saveDraftBtn.click()
+```
+
+#### 4. File Input 特殊性
+CSDN 的封面 file input 是隐藏的（`display: none`），但：
+- Playwright 的 `setInputFiles()` 可以绕过可见性检查
+- `page.setInputFiles()` 比 locator 的更可靠
+- 需要先触发 change 事件：`await coverInput.dispatchEvent('change')`
+
+### 调试建议
+
+#### 1. 截图调试
+在关键步骤截图，方便观察 UI 状态：
+```typescript
+await page.screenshot({ path: `temp/csdn-publish-dialog-${Date.now()}.png` })
+```
+
+#### 2. 列出所有按钮
+如果某个按钮找不到，先列出弹窗中所有按钮：
+```typescript
+const modalButtons = page.locator('[class*="modal"] button')
+const count = await modalButtons.count()
+for (let i = 0; i < count; i++) {
+  const text = await modalButtons.nth(i).textContent()
+  console.log(i + ':', text.trim())
+}
+```
+
+#### 3. 重试机制
+如果 setInputFiles 失败，可以尝试：
+- 使用 `page.setInputFiles()` 直接设置
+- 通过 `page.evaluate()` 手动触发 file input 的 change 事件
+- 使用 filechooser 事件监听：`page.on('filechooser', ...)`
+
+#### 4. 什么时候需要人工协助
+- 多次重试后仍然失败
+- UI 结构复杂，无法定位元素
+- 出现未知的错误提示
+- 需要确认某个 UI 元素的具体位置
+
+### 相关文件
+- `src/tools/browser-upload.ts` - 浏览器上传实现
+- `src/tools/capture.ts` - 抓包工具
+- `src/adapters/csdn.ts` - CSDN 适配器，集成浏览器上传
