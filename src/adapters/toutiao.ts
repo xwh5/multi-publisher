@@ -186,39 +186,26 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           }
 
           // 等待封面上传保存（头条号会自动保存）
-          console.log('[toutiao] 等待封面上传保存...')
           await page.waitForTimeout(5000)
-
-          // 截图看看当前状态
-          await page.screenshot({ path: 'temp/toutiao-after-cover-upload.png' })
-          console.log('[toutiao] 截图已保存')
         }
       }
 
       // 关闭预览弹窗（如果还在的话）
-      console.log('[toutiao] 尝试关闭预览弹窗...')
       try {
-        // 查找关闭按钮 - 可能文本是"继续编辑"或"×"
         const continueBtn = page.locator('button:has-text("继续编辑")')
         if (await continueBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
           await continueBtn.click({ force: true })
-          console.log('[toutiao] 点击了继续编辑按钮')
           await page.waitForTimeout(2000)
         } else {
-          // 尝试直接关闭
           const closeIcon = page.locator('[class*="close"], .ai-assistant-drawer-wrapper [class*="close"]')
           if (await closeIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
             await closeIcon.click({ force: true })
-            console.log('[toutiao] 点击了关闭图标')
             await page.waitForTimeout(1000)
           }
         }
       } catch (e) {
-        console.log('[toutiao] 关闭弹窗失败:', (e as Error).message)
+        // 关闭弹窗失败，继续
       }
-
-      // 截图看看关闭弹窗后的状态
-      await page.screenshot({ path: 'temp/toutiao-after-dialog-close.png' })
 
       // 等待编辑器稳定
       await page.waitForTimeout(2000)
