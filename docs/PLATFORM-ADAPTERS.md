@@ -219,3 +219,43 @@ for (let i = 0; i < count; i++) {
 - `src/tools/browser-upload.ts` - 浏览器上传实现
 - `src/tools/capture.ts` - 抓包工具
 - `src/adapters/csdn.ts` - CSDN 适配器，集成浏览器上传
+
+---
+
+## 7. 头条号封面图浏览器上传
+
+### 关键发现
+
+#### 1. 发布流程
+头条号的封面上传在"预览并发布"弹窗中进行：
+1. 填写标题和内容
+2. 点击"预览并发布"按钮 → 弹出预览框
+3. 在预览框中选择"单图"
+4. 点击封面添加区域 → 触发文件选择
+5. 点击"本地上传" → 弹出系统文件选择
+6. 选择图片后点击"确定"
+7. 等待 5 秒让封面上传保存
+8. 点击"继续编辑"关闭弹窗
+9. 再次点击发布按钮保存草稿
+
+#### 2. File Chooser 事件
+头条号使用系统文件选择器，需要监听 `filechooser` 事件：
+```typescript
+page.on('filechooser', async (fileChooser) => {
+  await fileChooser.setFiles(absolutePath)
+})
+```
+
+#### 3. 关键选择器
+- `.article-cover-add` - 封面添加区域
+- `text=单图` - 单图选项
+- `text=本地上传` - 本地上传按钮
+- `button:has-text("确定")` - 确认按钮
+- `button:has-text("继续编辑")` - 关闭弹窗按钮
+
+#### 4. 等待时间
+封面上传后需要等待 5 秒让服务器保存，之后可以继续操作。
+
+### 相关文件
+- `src/adapters/toutiao.ts` - 头条号适配器，集成封面上传
+- `src/tools/toutiao-upload.ts` - 头条号封面上传工具（备用独立工具）
