@@ -192,8 +192,8 @@ export async function capture(platform: string, timeoutMs: number = 60000): Prom
     const method = request.method()
     const contentType = headers['content-type'] || ''
 
-    // 只记录 API 请求（放宽过滤条件）
-    if (!url.includes('api') && !url.includes('bizapi') && !url.includes('.om.qq.com')) {
+    // 只记录 API 请求（放宽过滤条件以捕获 QQ 的特殊接口）
+    if (!url.includes('api') && !url.includes('bizapi') && !url.includes('.om.qq.com') && !url.includes('editorCache')) {
       return
     }
 

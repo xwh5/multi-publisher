@@ -48,9 +48,30 @@ export class BrowserRuntime {
     this.browser = await chromium.launch({
       headless: false, // 需要可见浏览器让用户登录
       channel: 'chromium', // 使用用户的默认 Chrome 配置
+      args: [
+        '--disable-blink-features=AutomationControlled',
+        '--disable-devtools-shm-usage',
+        '--no-sandbox',
+      ],
     })
-    // 不创建新context，让Playwright使用默认context，保持已登录状态
-    this.page = await this.browser.newPage()
+    // 创建新 context，带真实浏览器配置
+    const context = await this.browser.newContext({
+      viewport: { width: 1280, height: 900 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    })
+    this.page = await context.newPage()
+
+    // 使用 CDP 隐藏自动化特征
+    const cdp = await this.page.context().newCDPSession(this.page)
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+        Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh', 'en'] });
+        window.chrome = { runtime: {}, loadTimes: () => {}, csi: () => {} };
+      `
+    })
+
     // 注意：不清理 cookies，使用用户已有的登录状态
 
     console.log(`打开登录页面: ${loginConfig.loginUrl}`)

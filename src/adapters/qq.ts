@@ -1,12 +1,11 @@
 /**
  * 企鹅号适配器
  * 认证方式: Cookie
- * 发布方式: 浏览器自动化
+ * 发布方式: API (editorCache/update)
  */
 import type { IPlatformAdapter, Article, SyncResult, AuthResult, PlatformMeta } from './interface.js'
 import type { RuntimeInterface } from '../runtime/index.js'
 import { ConfigStore } from '../config.js'
-import { chromium, type Browser, type Page } from 'playwright'
 import { existsSync } from 'node:fs'
 
 export class QQAdapter implements IPlatformAdapter {
@@ -50,36 +49,43 @@ export class QQAdapter implements IPlatformAdapter {
   }
 
   /**
-   * 通过浏览器自动化上传封面图片，返回图片 URL
+   * 上传封面图片到企鹅号，返回图片 URL
    */
-  private async uploadCoverViaBrowser(page: Page, imagePath: string): Promise<string | null> {
-    // 监听上传响应
-    const [response] = await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('ArchacaleUploadViaFile'), { timeout: 30000 }),
-      (async () => {
-        // 上传文件
-        const fileInput = page.locator('input[type="file"]').first()
-        if (await fileInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-          await fileInput.setInputFiles(imagePath)
-        } else {
-          // 尝试点击封面上传区域
-          const coverArea = page.locator('[class*="cover"], [class*="upload"]').first()
-          if (await coverArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await coverArea.click()
-            await page.waitForTimeout(500)
-            const input = page.locator('input[type="file"]').first()
-            if (await input.isVisible({ timeout: 3000 }).catch(() => false)) {
-              await input.setInputFiles(imagePath)
-            }
-          }
-        }
-      })()
-    ])
+  private async uploadCover(imagePath: string, cookieStr: string): Promise<string | null> {
+    const FormData = require('form-data')
+    const fs = require('fs')
+
+    const form = new FormData()
+    const fileBuffer = fs.readFileSync(imagePath)
+    const fileName = imagePath.split(/[\\/]/).pop() || 'image.jpg'
+
+    form.append('file', fileBuffer, {
+      filename: fileName,
+      contentType: 'image/jpeg',
+    })
+
+    const response = await this.runtime.fetch(
+      'https://image.om.qq.com/cpom_pimage/ArchacaleUploadViaFile',
+      {
+        method: 'POST',
+        headers: {
+          'Cookie': cookieStr,
+          'Referer': 'https://om.qq.com/',
+          'X-Requested-With': 'XMLHttpRequest',
+          ...form.getHeaders(),
+        },
+        body: form,
+      }
+    )
+
+    if (!response.ok) {
+      return null
+    }
 
     try {
-      const json = await response.json()
-      if (json.code === 0 && json.data?.url) {
-        const urlData = json.data.url as Record<string, { imageUrl?: string }>
+      const data = await response.json() as { code?: number; data?: { url?: Record<string, { imageUrl?: string }> } }
+      if (data.code === 0 && data.data?.url) {
+        const urlData = data.data.url
         return urlData['640']?.imageUrl || urlData['0']?.imageUrl || Object.values(urlData)[0]?.imageUrl || null
       }
     } catch {}
@@ -88,102 +94,120 @@ export class QQAdapter implements IPlatformAdapter {
 
   async publish(article: Article): Promise<SyncResult> {
     const start = Date.now()
-    const browser: Browser = await chromium.launch({
-      headless: false,
-      channel: 'chromium',
-    })
-
     try {
-      const context = await browser.newContext({
-        viewport: { width: 1280, height: 720 },
-      })
-      const page: Page = await context.newPage()
-
-      // 加载 cookies
-      const cookies = await this.getCookies()
-      if (!cookies || Object.keys(cookies).length === 0) {
-        throw new Error('未配置企鹅号 Cookie')
+      const cookieData = await this.getCookies()
+      if (!cookieData || Object.keys(cookieData).length === 0) {
+        throw new Error('未配置企鹅号 Cookie，请运行: mpub login --platform qq')
       }
 
-      const qqCookies = Object.entries(cookies).map(([name, value]) => ({
-        name,
-        value,
-        domain: '.om.qq.com',
-        path: '/',
-      }))
-      await context.addCookies(qqCookies)
+      const cookieStr = Object.entries(cookieData)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('; ')
 
-      // 打开创作页面
-      console.log('[QQ] 打开创作页面...')
-      await page.goto('https://om.qq.com/main/creation/article', {
-        waitUntil: 'domcontentloaded',
-        timeout: 60000
-      })
-      await page.waitForTimeout(3000)
-
-      // 截图查看状态
-      await page.screenshot({ path: `temp/qq-publish-1-${Date.now()}.png` })
-
-      // 点击"写文章"按钮
-      const writeBtn = page.locator('text=写文章').first()
-      if (await writeBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await writeBtn.click()
-        await page.waitForTimeout(2000)
-      }
-
-      // 截图
-      await page.screenshot({ path: `temp/qq-publish-2-${Date.now()}.png` })
-
-      // 填写标题
-      console.log('[QQ] 填写标题...')
-      const titleInput = page.locator('input[placeholder*="标题"], input[name*="title"]').first()
-      if (await titleInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await titleInput.fill(article.title)
-      }
-
-      // 填写内容 - 找到富文本编辑器
-      console.log('[QQ] 填写内容...')
-      const contentArea = page.locator('[contenteditable="true"], .editor, [role="textbox"]').first()
-      if (await contentArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await contentArea.click()
-        await contentArea.fill(article.markdown || article.html || '')
-      }
+      const mediaId = cookieData['userid']
 
       // 上传封面（如果有）
+      let coverUrl = ''
       if (article.cover && existsSync(article.cover)) {
-        console.log('[QQ] 上传封面...')
-        const coverUrl = await this.uploadCoverViaBrowser(page, article.cover)
-        if (coverUrl) {
-          console.log(`[QQ] 封面 URL: ${coverUrl}`)
+        try {
+          coverUrl = await this.uploadCover(article.cover, cookieStr) || ''
+          console.log(`[QQ] 封面上传结果: ${coverUrl || '失败'}`)
+        } catch (err) {
+          console.warn(`封面图上传失败: ${(err as Error).message}`)
         }
       }
 
-      await page.waitForTimeout(2000)
-      await page.screenshot({ path: `temp/qq-publish-3-${Date.now()}.png` })
-
-      // 点击发布/保存按钮
-      console.log('[QQ] 点击发布...')
-      const publishBtn = page.locator('button:has-text("发布"), button:has-text("保存"), button:has-text("提交")').first()
-      if (await publishBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await publishBtn.click()
-        await page.waitForTimeout(3000)
+      // 构建文章数据
+      const articleData = {
+        title: article.title,
+        title2: '',
+        tag: '',
+        video: '',
+        cover_type: coverUrl ? '1' : '1',
+        imgurl_ext: '[]',
+        category_id: '',
+        content: `<p>${(article.markdown || article.html || '').replace(/<[^>]+>/g, '')}</p>`,
+        orignal: 0,
+        user_original: 0,
+        music: '',
+        activity: '',
+        apply_olympic_flag: 0,
+        apply_push_flag: 0,
+        apply_reward_flag: 0,
+        reward_flag: 0,
+        survey_id: '',
+        survey_name: '',
+        imgurlsrc: coverUrl || null,
+        om_activity_id: '',
+        om_activity_name: '',
+        activityInfo: '',
+        commercialization_source: '',
+        caiMaiInfo: '',
+        isHowto: '0',
+        howtoInfo: '',
+        daihuoInfo: '',
+        novel: '',
+        needpub: 1,
+        event_id: '',
+        event_name: '',
+        activity_scene_id: 0,
+        hotBreak: '',
+        self_declare: '',
+        resource_aigc_mark_info: '{}',
+        parent_article_id: '',
+        conclusion: '',
+        summary: article.summary || '',
+        failedImage: [],
+        adContentImgs: [],
+        mediaId: mediaId,
+        type: 0,
+        unmount: false,
       }
 
-      await page.screenshot({ path: `temp/qq-publish-4-${Date.now()}.png` })
+      // 发送保存请求
+      const postData = new URLSearchParams()
+      postData.append('cache', JSON.stringify(articleData))
+      postData.append('mediaid', mediaId)
 
-      // 关闭浏览器
-      await browser.close()
+      const response = await this.runtime.fetch(
+        'https://om.qq.com/editorCache/update',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cookie': cookieStr,
+            'Referer': 'https://om.qq.com/main/creation/article',
+          },
+          body: postData.toString(),
+        }
+      )
+
+      const responseText = await response.text()
+
+      if (!response.ok) {
+        throw new Error(`保存文章失败: ${response.status} - ${responseText.substring(0, 100)}`)
+      }
+
+      let resultData: { response?: { code?: string; msg?: string } }
+      try {
+        resultData = JSON.parse(responseText)
+      } catch {
+        throw new Error(`保存响应无效: ${responseText.substring(0, 100)}`)
+      }
+
+      if (resultData.response?.code !== '0') {
+        throw new Error(resultData.response?.msg || '保存文章失败')
+      }
 
       return {
         platform: this.meta.id,
         success: true,
-        draftOnly: true,
+        draftOnly: true, // 企鹅号需要审核
         timestamp: Date.now() - start,
         postUrl: 'https://om.qq.com/main/creation/article',
       }
 
     } catch (err) {
-      await browser.close()
       return {
         platform: this.meta.id,
         success: false,
