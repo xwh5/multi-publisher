@@ -101,6 +101,10 @@ export interface EastmoneyConfig {
   cookies?: Record<string, string>
 }
 
+export interface QQConfig {
+  cookies?: Record<string, string>
+}
+
 export interface GlobalConfig {
   version: number
   weixin?: WeixinConfig
@@ -123,6 +127,7 @@ export interface GlobalConfig {
   douban?: DoubanConfig
   sohu?: SohuConfig
   eastmoney?: EastmoneyConfig
+  qq?: QQConfig
   // 其他平台继续扩展
 }
 
@@ -474,6 +479,19 @@ export class ConfigStore {
   static async setEastmoneyCookies(cookies: Record<string, string>): Promise<void> {
     await updateConfig((c) => {
       c.eastmoney = { ...c.eastmoney, cookies }
+    })
+  }
+
+  /** 获取企鹅号 Cookie */
+  static async getQQCookies(): Promise<Record<string, string> | null> {
+    const config = await loadConfig()
+    return config.qq?.cookies || null
+  }
+
+  /** 设置企鹅号 Cookie */
+  static async setQQCookies(cookies: Record<string, string>): Promise<void> {
+    await updateConfig((c) => {
+      c.qq = { ...c.qq, cookies }
     })
   }
 

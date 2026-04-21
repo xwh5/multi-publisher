@@ -105,6 +105,9 @@ async function saveCookies(platformId: string, cookies: Record<string, string>):
     case 'cto51':
       await ConfigStore.setCto51Cookies(cookies)
       break
+    case 'qq':
+      await ConfigStore.setQQCookies(cookies)
+      break
     default:
       console.warn(`⚠️  尚未为 ${platformId} 实现 Cookie 保存，请手动保存`)
   }

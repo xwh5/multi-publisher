@@ -26,10 +26,11 @@ const PLATFORM_LIST = [
   { id: 'sohu', name: '搜狐号', auth: 'Cookie', capabilities: ['article', 'draft'], note: 'Cookie 登录支持', status: '🔄 待测试' },
   { id: 'eastmoney', name: '东方财富', auth: 'Cookie', capabilities: ['article', 'draft'], note: 'Cookie 登录支持', status: '🔄 待测试' },
   { id: 'cto51', name: '51CTO', auth: 'Cookie', capabilities: ['article', 'draft'], note: 'Cookie 登录支持', status: '🔄 待测试' },
+  { id: 'qq', name: '企鹅号', auth: 'Cookie', capabilities: ['article', 'draft', 'image_upload'], note: '企鹅号平台', status: '🔄 待测试' },
 ]
 
 export async function runPlatforms(): Promise<void> {
-  console.log('\n🖥️  支持的平台（共 20 个）：\n')
+  console.log('\n🖥️  支持的平台（共 21 个）：\n')
   console.log('状态说明：')
   console.log('  ✅ 已验证 - 登录和发布功能已测试通过')
   console.log('  🔄 待测试 - Cookie 登录支持，但发布功能尚未测试\n')

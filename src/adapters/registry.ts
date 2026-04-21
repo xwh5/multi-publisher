@@ -23,6 +23,7 @@ import { YuqueAdapter } from './yuque.js'
 import { Cto51Adapter } from './cto51.js'
 import { ToutiaoAdapter } from './toutiao.js'
 import { XiaohongshuAdapter } from './xiaohongshu.js'
+import { QQAdapter } from './qq.js'
 import type { RuntimeInterface } from '../runtime/index.js'
 
 // 适配器构造函数类型
@@ -50,6 +51,7 @@ const ADAPTER_CLASSES: Record<string, AdapterConstructor> = {
   cto51: Cto51Adapter,
   toutiao: ToutiaoAdapter,
   xiaohongshu: XiaohongshuAdapter,
+  qq: QQAdapter,
 }
 
 /**

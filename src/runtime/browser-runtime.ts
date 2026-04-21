@@ -443,6 +443,16 @@ export const PLATFORM_LOGIN_CONFIGS: Record<string, PlatformLoginConfig> = {
     },
     extraCookieDomains: ['.51cto.com', '.cto51.com'],
   },
+  qq: {
+    id: 'qq',
+    name: '企鹅号',
+    loginUrl: 'https://om.qq.com/',
+    successCondition: {
+      cookieName: 'userid',
+      waitMs: 60000,
+    },
+    extraCookieDomains: ['.qq.com', '.om.qq.com'],
+  },
 }
 
 /**

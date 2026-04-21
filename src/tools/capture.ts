@@ -71,6 +71,10 @@ const PLATFORM_CONFIGS: Record<string, { editorUrl: string; uploadPatterns: RegE
     editorUrl: 'https://weibo.com/compose',
     uploadPatterns: [/upload/i, /file/i, /image/i, /img/i],
   },
+  qq: {
+    editorUrl: 'https://om.qq.com/main/creation/article',
+    uploadPatterns: [/upload/i, /file/i, /image/i, /img/i, /cover/i],
+  },
 }
 
 function isUploadRequest(url: string, headers: Record<string, string>, postData?: string): boolean {
@@ -102,6 +106,7 @@ async function loadCookies(platform: string): Promise<Record<string, string>> {
       case 'toutiao': return await ConfigStore.getToutiaoCookies() || {}
       case 'jianshu': return await ConfigStore.getJianshuCookies() || {}
       case 'weibo': return await ConfigStore.getWeiboCookies() || {}
+      case 'qq': return await ConfigStore.getQQCookies() || {}
       default: return {}
     }
   } catch {
@@ -117,6 +122,7 @@ function getCookieDomains(platform: string): string[] {
     toutiao: ['.toutiao.com'],
     jianshu: ['.jianshu.com'],
     weibo: ['.weibo.com', '.sina.com.cn'],
+    qq: ['.qq.com', '.om.qq.com'],
   }
   return domains[platform] || []
 }
@@ -186,8 +192,8 @@ export async function capture(platform: string, timeoutMs: number = 60000): Prom
     const method = request.method()
     const contentType = headers['content-type'] || ''
 
-    // 只记录 API 请求
-    if (!url.includes('api') && !url.includes('bizapi')) {
+    // 只记录 API 请求（放宽过滤条件）
+    if (!url.includes('api') && !url.includes('bizapi') && !url.includes('.om.qq.com')) {
       return
     }
 
@@ -278,7 +284,7 @@ export async function capture(platform: string, timeoutMs: number = 60000): Prom
 
   // 打开编辑器
   console.log(`\n🌐 打开编辑器: ${config.editorUrl}`)
-  await page.goto(config.editorUrl, { waitUntil: 'networkidle', timeout: 30000 })
+  await page.goto(config.editorUrl, { waitUntil: 'domcontentloaded', timeout: 60000 })
   console.log('✅ 编辑器已加载')
   console.log('\n📋 操作提示:')
   console.log('   1. 在编辑器中找到上传图片功能')
