@@ -6,6 +6,7 @@ import type { IPlatformAdapter, Article, SyncResult, AuthResult, PlatformMeta } 
 import type { RuntimeInterface } from '../runtime/index.js'
 import { ConfigStore } from '../config.js'
 import { uploadCoverViaBrowser } from '../tools/browser-upload.js'
+import { downloadCoverUrl } from '../tools/cover-fetcher.js'
 import crypto from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -350,14 +351,30 @@ export class CSDNAdapter implements IPlatformAdapter {
       const postId = res.data.id
       const draftUrl = `https://editor.csdn.net/md?articleId=${postId}`
 
-      // 如果有封面图片，通过浏览器自动化上传
-      if (article.cover && existsSync(article.cover)) {
-        console.log(`[CSDN] 封面上传中...`)
-        const coverResult = await uploadCoverViaBrowser(postId, article.cover)
-        if (coverResult.success && coverResult.coverUrl) {
-          console.log(`[CSDN] 封面 URL: ${coverResult.coverUrl}`)
-        } else {
-          console.warn(`[CSDN] 封面上传失败: ${coverResult.error}`)
+      // 如果有封面图片，先下载 URL 封面到本地，再通过浏览器上传
+      if (article.cover) {
+        let localCover = article.cover
+
+        // 如果是 URL 封面，先下载到本地
+        if (!existsSync(article.cover)) {
+          console.log(`[CSDN] 封面是 URL，正在下载到本地...`)
+          const downloadResult = await downloadCoverUrl(article.cover)
+          if (!downloadResult.success || !downloadResult.localPath) {
+            console.warn(`[CSDN] 封面下载失败: ${downloadResult.error}，跳过封面上传`)
+          } else {
+            localCover = downloadResult.localPath
+            console.log(`[CSDN] 封面下载成功: ${localCover}`)
+          }
+        }
+
+        if (existsSync(localCover)) {
+          console.log(`[CSDN] 封面上传中...`)
+          const coverResult = await uploadCoverViaBrowser(postId, localCover)
+          if (coverResult.success && coverResult.coverUrl) {
+            console.log(`[CSDN] 封面 URL: ${coverResult.coverUrl}`)
+          } else {
+            console.warn(`[CSDN] 封面上传失败: ${coverResult.error}`)
+          }
         }
       }
 

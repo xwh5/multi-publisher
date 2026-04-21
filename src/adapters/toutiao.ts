@@ -7,6 +7,7 @@ import type { Article, AuthResult, PlatformMeta, SyncResult } from './interface.
 import { ConfigStore } from '../config.js'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import { downloadCoverUrl } from '../tools/cover-fetcher.js'
 
 export class ToutiaoAdapter implements IPlatformAdapter {
   readonly meta: PlatformMeta = {
@@ -129,64 +130,80 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         await page.waitForTimeout(1000)
       }
 
-      // 如果有封面图片，先上传封面再发布
-      if (article.cover && existsSync(article.cover)) {
-        console.log('[toutiao] 检测到封面图片，准备上传...')
+      // 如果有封面图片，先下载 URL 封面到本地，再上传
+      if (article.cover) {
+        let localCover = article.cover
 
-        // 点击"预览并发布"按钮打开预览弹窗
-        const previewBtn = page.locator('button:has-text("预览并发布")')
-        if (await previewBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await previewBtn.click({ force: true })
-          console.log('[toutiao] 点击预览并发布按钮')
-          await page.waitForTimeout(2000)
-
-          // 选择"单图"选项
-          const singleImg = page.locator('text=单图').first()
-          if (await singleImg.isVisible({ timeout: 2000 }).catch(() => false)) {
-            await singleImg.click()
-            console.log('[toutiao] 选择单图')
-            await page.waitForTimeout(500)
+        // 如果是 URL 封面，先下载到本地
+        if (!existsSync(article.cover)) {
+          console.log('[toutiao] 封面是 URL，正在下载到本地...')
+          const downloadResult = await downloadCoverUrl(article.cover)
+          if (!downloadResult.success || !downloadResult.localPath) {
+            console.warn(`[toutiao] 封面下载失败: ${downloadResult.error}，跳过封面上传`)
+          } else {
+            localCover = downloadResult.localPath
+            console.log(`[toutiao] 封面下载成功: ${localCover}`)
           }
+        }
 
-          // 设置 filechooser 监听
-          const absolutePath = path.resolve(article.cover)
-          page.on('filechooser', async (fileChooser) => {
-            console.log('[toutiao] 收到 filechooser，设置封面文件')
-            await fileChooser.setFiles(absolutePath)
-          })
+        if (existsSync(localCover)) {
+          console.log('[toutiao] 检测到封面图片，准备上传...')
 
-          // 点击封面添加区域
-          const coverAdd = page.locator('.article-cover-add')
-          if (await coverAdd.isVisible({ timeout: 2000 }).catch(() => false)) {
-            await coverAdd.click({ force: true })
-            console.log('[toutiao] 点击了封面添加区域')
-            await page.waitForTimeout(1500)
-          }
+          // 点击"预览并发布"按钮打开预览弹窗
+          const previewBtn = page.locator('button:has-text("预览并发布")')
+          if (await previewBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await previewBtn.click({ force: true })
+            console.log('[toutiao] 点击预览并发布按钮')
+            await page.waitForTimeout(2000)
 
-          // 点击"本地上传"
-          const localUpload = page.locator('text=本地上传')
-          if (await localUpload.isVisible({ timeout: 3000 }).catch(() => false)) {
-            await localUpload.click()
-            console.log('[toutiao] 点击本地上传')
-            await page.waitForTimeout(1500)
-          }
-
-          // 点击"确定"按钮
-          const confirmBtn = page.locator('button:has-text("确定")').filter({ visible: true })
-          try {
-            if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-              const disabled = await confirmBtn.first().isDisabled().catch(() => true)
-              if (!disabled) {
-                await confirmBtn.first().click()
-                console.log('[toutiao] 点击确定按钮，封面上传完成')
-              }
+            // 选择"单图"选项
+            const singleImg = page.locator('text=单图').first()
+            if (await singleImg.isVisible({ timeout: 2000 }).catch(() => false)) {
+              await singleImg.click()
+              console.log('[toutiao] 选择单图')
+              await page.waitForTimeout(500)
             }
-          } catch (e) {
-            console.log('[toutiao] 确定按钮点击失败:', (e as Error).message)
-          }
 
-          // 等待封面上传保存（头条号会自动保存）
-          await page.waitForTimeout(5000)
+            // 设置 filechooser 监听
+            const absolutePath = path.resolve(localCover)
+            page.on('filechooser', async (fileChooser) => {
+              console.log('[toutiao] 收到 filechooser，设置封面文件')
+              await fileChooser.setFiles(absolutePath)
+            })
+
+            // 点击封面添加区域
+            const coverAdd = page.locator('.article-cover-add')
+            if (await coverAdd.isVisible({ timeout: 2000 }).catch(() => false)) {
+              await coverAdd.click({ force: true })
+              console.log('[toutiao] 点击了封面添加区域')
+              await page.waitForTimeout(1500)
+            }
+
+            // 点击"本地上传"
+            const localUpload = page.locator('text=本地上传')
+            if (await localUpload.isVisible({ timeout: 3000 }).catch(() => false)) {
+              await localUpload.click()
+              console.log('[toutiao] 点击本地上传')
+              await page.waitForTimeout(1500)
+            }
+
+            // 点击"确定"按钮
+            const confirmBtn = page.locator('button:has-text("确定")').filter({ visible: true })
+            try {
+              if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+                const disabled = await confirmBtn.first().isDisabled().catch(() => true)
+                if (!disabled) {
+                  await confirmBtn.first().click()
+                  console.log('[toutiao] 点击确定按钮，封面上传完成')
+                }
+              }
+            } catch (e) {
+              console.log('[toutiao] 确定按钮点击失败:', (e as Error).message)
+            }
+
+            // 等待封面上传保存（头条号会自动保存）
+            await page.waitForTimeout(5000)
+          }
         }
       }
 

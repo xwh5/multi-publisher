@@ -408,3 +408,124 @@ export async function cleanupCoverFile(localPath: string | undefined): Promise<v
     console.log(`[cover-fetcher] 已清理临时文件: ${localPath}`)
   } catch {}
 }
+
+/**
+ * 下载远程封面图片到本地临时目录
+ * @param coverUrl 远程图片 URL
+ * @param options 配置选项
+ * @returns 本地临时文件路径
+ */
+export async function downloadCoverUrl(
+  coverUrl: string,
+  options: {
+    timeout?: number
+    outputDir?: string
+  } = {}
+): Promise<CoverFetchResult> {
+  const {
+    timeout = 15000,
+    outputDir = tmpdir(),
+  } = options
+
+  if (!coverUrl || !coverUrl.startsWith('http')) {
+    return { success: false, error: '无效的 URL' }
+  }
+
+  let browser: Browser | null = null
+
+  try {
+    console.log(`[cover-fetcher] 下载封面: ${coverUrl.substring(0, 80)}...`)
+
+    browser = await chromium.launch({ headless: true })
+
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 900 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    })
+
+    const page = await context.newPage()
+
+    // 绕过反爬检测
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false })
+    })
+
+    let buffer: Buffer | null = null
+    let actualContentType = ''
+
+    // 方法1：直接下载
+    try {
+      const response = await page.request.get(coverUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*',
+          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        },
+        timeout: timeout,
+      })
+
+      if (response.ok()) {
+        buffer = await response.body()
+        actualContentType = response.headers()['content-type'] || ''
+        console.log(`[cover-fetcher] 下载成功，大小: ${(buffer.length / 1024).toFixed(1)} KB`)
+      }
+    } catch (e) {
+      console.log(`[cover-fetcher] 直接下载失败: ${(e as Error).message}`)
+    }
+
+    // 方法2：如果失败，尝试通过浏览器加载
+    if (!buffer || buffer.length < 1000) {
+      try {
+        await page.goto(coverUrl, { waitUntil: 'networkidle', timeout: 15000 })
+        const finalUrl = page.url()
+        if (finalUrl !== coverUrl) {
+          const response2 = await page.request.get(finalUrl, { timeout: timeout })
+          if (response2.ok()) {
+            buffer = await response2.body()
+            actualContentType = response2.headers()['content-type'] || ''
+          }
+        }
+      } catch (e) {
+        console.log(`[cover-fetcher] 浏览器加载失败: ${(e as Error).message}`)
+      }
+    }
+
+    if (!buffer || buffer.length < 1000) {
+      return { success: false, error: '无法下载图片' }
+    }
+
+    // 检测图片类型
+    const detectedExt = detectImageType(buffer)
+    const fromHeader = getExtensionFromContentType(actualContentType)
+    const ext = detectedExt || fromHeader || getExtension(coverUrl)
+    const filename = generateFilename(ext)
+    const localPath = path.join(outputDir, filename)
+
+    await fs.writeFile(localPath, buffer)
+
+    // WebP 转换为 PNG
+    if (ext === '.webp') {
+      try {
+        const convertedPath = await convertWebpToPng(localPath, outputDir)
+        return { success: true, localPath: convertedPath, imageUrl: coverUrl }
+      } catch {
+        console.warn(`[cover-fetcher] WebP 转换失败，保留原文件`)
+      }
+    }
+
+    return {
+      success: true,
+      localPath,
+      imageUrl: coverUrl
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: (error as Error).message
+    }
+  } finally {
+    if (browser) {
+      await browser.close().catch(() => {})
+    }
+  }
+}
