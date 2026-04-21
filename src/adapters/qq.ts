@@ -7,8 +7,6 @@ import type { IPlatformAdapter, Article, SyncResult, AuthResult, PlatformMeta } 
 import type { RuntimeInterface } from '../runtime/index.js'
 import { ConfigStore } from '../config.js'
 import { chromium, type Browser, type Page } from 'playwright'
-import fs from 'node:fs/promises'
-import path from 'node:path'
 import { existsSync } from 'node:fs'
 
 export class QQAdapter implements IPlatformAdapter {
@@ -52,7 +50,7 @@ export class QQAdapter implements IPlatformAdapter {
   }
 
   /**
-   * 通过浏览器自动化上传封面图片
+   * 通过浏览器自动化上传封面图片，返回图片 URL
    */
   private async uploadCoverViaBrowser(imagePath: string): Promise<string | null> {
     const browser: Browser = await chromium.launch({
@@ -88,10 +86,6 @@ export class QQAdapter implements IPlatformAdapter {
       })
       await page.waitForTimeout(3000)
 
-      // 等待页面加载完成，点击创建文章按钮
-      console.log('[QQ] 等待页面加载...')
-      await page.waitForTimeout(2000)
-
       // 截图查看页面状态
       await page.screenshot({ path: `temp/qq-creation-${Date.now()}.png` })
 
@@ -102,59 +96,65 @@ export class QQAdapter implements IPlatformAdapter {
         await page.waitForTimeout(2000)
       }
 
-      // 上传封面图片
       console.log('[QQ] 上传封面图片...')
 
-      // QQ 可能需要先上传封面，找到封面上传入口
-      // 通常在文章设置区域有封面上传
-      const coverInput = page.locator('input[type="file"]').first()
+      // 使用 JavaScript 上传文件并获取返回的 URL
+      const uploadResult = await page.evaluate(async (filePath) => {
+        // 读取文件为 base64
+        const response = await fetch(filePath)
+        const blob = await response.blob()
+        const arrayBuffer = await blob.arrayBuffer()
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+        const mimeType = blob.type || 'image/jpeg'
+        const filename = filePath.split(/[\\/]/).pop() || 'image.jpg'
 
-      if (await coverInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await coverInput.setInputFiles(imagePath)
-        await page.waitForTimeout(3000)
-      } else {
-        // 如果没有可见的 file input，尝试点击封面上传按钮
-        const coverArea = page.locator('[class*="cover"]').first()
-        if (await coverArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await coverArea.click()
-          await page.waitForTimeout(1000)
-
-          // 找到 file input
-          const fileInput = page.locator('input[type="file"]')
-          if (await fileInput.count() > 0) {
-            await fileInput.first().setInputFiles(imagePath)
-            await page.waitForTimeout(3000)
-          }
+        // 构建 multipart form data
+        const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2)
+        const header = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: ${mimeType}\r\n\r\n`
+        const footer = `\r\n--${boundary}--`
+        const binary = atob(base64)
+        const bytes = new Uint8Array(binary.length)
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i)
         }
-      }
 
-      // 截图查看上传结果
+        // 构造 multipart body
+        const bodyArray = new Uint8Array(header.length + bytes.length + footer.length)
+        let offset = 0
+        for (let i = 0; i < header.length; i++) bodyArray[offset++] = header.charCodeAt(i)
+        bodyArray.set(bytes, offset)
+        offset += bytes.length
+        for (let i = 0; i < footer.length; i++) bodyArray[offset++] = footer.charCodeAt(i)
+
+        // 发送请求
+        const uploadResponse = await fetch('https://image.om.qq.com/cpom_pimage/ArchacaleUploadViaFile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': `multipart/form-data; boundary=${boundary}`,
+            'Referer': 'https://om.qq.com/',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: bodyArray,
+        })
+
+        const result = await uploadResponse.json()
+        if (result.code === 0 && result.data?.url) {
+          // 返回 640 尺寸的 URL
+          const urlData = result.data.url as Record<string, { imageUrl?: string }>
+          return urlData['640']?.imageUrl || urlData['0']?.imageUrl || Object.values(urlData)[0]?.imageUrl
+        }
+        return null
+      }, `file://${imagePath.replace(/\\/g, '/')}`)
+
       await page.screenshot({ path: `temp/qq-cover-uploaded-${Date.now()}.png` })
-
-      // 关闭浏览器
       await browser.close()
 
-      // 从截图中无法获取实际 URL，返回空让调用方知道上传可能成功
-      // 实际 URL 需要从页面元素或后续请求中获取
-      return null
+      console.log(`[QQ] 上传结果: ${uploadResult}`)
+      return uploadResult || null
 
     } catch (err) {
       await browser.close()
       throw err
-    }
-  }
-
-  /**
-   * 尝试上传图片到企鹅号
-   * 由于 API 上传在 Node.js 环境下有问题，暂时返回空
-   */
-  private async uploadImage(filePath: string): Promise<string | null> {
-    try {
-      // 尝试通过浏览器上传
-      return await this.uploadCoverViaBrowser(filePath)
-    } catch (err) {
-      console.warn(`[QQ] 封面图上传失败: ${(err as Error).message}`)
-      return null
     }
   }
 
@@ -178,10 +178,10 @@ export class QQAdapter implements IPlatformAdapter {
       let coverUrl = ''
       if (article.cover && existsSync(article.cover)) {
         try {
-          // 封面图上传通过浏览器完成
-          await this.uploadCoverViaBrowser(article.cover)
-          // 封面 URL 需要从页面获取，这里暂时无法获取
-          console.log('[QQ] 封面图已通过浏览器上传')
+          coverUrl = await this.uploadCoverViaBrowser(article.cover) || ''
+          if (coverUrl) {
+            console.log(`[QQ] 封面图上传成功: ${coverUrl}`)
+          }
         } catch (err) {
           console.warn(`封面图上传失败: ${(err as Error).message}`)
         }
