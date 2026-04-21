@@ -1,0 +1,153 @@
+{
+  "platform": "qq",
+  "captureTime": "2026-04-21T09:35:23.124Z",
+  "timeout": 90000,
+  "editorUrl": "https://om.qq.com/main/creation/article",
+  "uploadApiUrl": "/cpom_pimage/ArchacaleUploadViaFile",
+  "requests": [
+    {
+      "id": "1776764035034-9ytjbarow",
+      "timestamp": 1776764035034,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/user/load.action?sysNum=860167d257754f7ca935c3761c8c2fac&source=0&channelFlag=&platformUnionCode=&partnerId=&agid=452ace2ce72dfda1ef00288f2f225670&xst=&ucTrackUrl=&toTiao_clickId=&sogou_logidUrl=&callback=callback1776764035032",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776764035032({\"whiteListFlag\":0,\"color\":\"#548dd4\",\"firstTimeOut\":10,\"wslink.bak\":[\"wss://imwsten.sobot.com:9001/ws\",\"wss://imwsten.sobot.com:9002/ws\",\"wss://imwsten.sobot.com:9003/ws\",\"wss://imwsten.sobot.com:9004/ws\",\"wss://imwsten.sobot.com:9005/ws\",\"wss://imwsten.sobot.com:9006/ws\"],\"pid\":\"860167d257754f7ca935c3761c8c2fac\",\"title\":\"咨询在线客服\",\"isInvite\":1,\"wslink.default\":\"wss://imwsten.sobot.com:9001/ws\",\"uid\":\"452ace2ce72dfda1ef00288f2f225670\",\"inviteCount\":1,\"lan\":0,\"tipTitle\":\"请问有什么"
+    },
+    {
+      "id": "1776764035301-6rix9zuqo",
+      "timestamp": 1776764035301,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/msgOffline/offlineMsgSize.action?uid=452ace2ce72dfda1ef00288f2f225670&callback=callback1776764035299",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776764035299({\"offlineMsg\":[],\"size\":0,\"unAckSize\":0,\"unAckMsg\":[],\"groupId\":\"\",\"params\":\"\"})"
+    },
+    {
+      "id": "1776764037311-juxb81fzo",
+      "timestamp": 1776764037311,
+      "method": "GET",
+      "url": "https://h.trace.qq.com/kv?attaid=02000014960&token=2225483334&cgipath=%2Ftext%2Fchat-visit%2Fuser%2Fload.action&cgihost=api-c.soboten.com&bizcode_server=&cgiurl=https%3A%2F%2Fapi-c.soboten.com%2Ftext%2Fchat-visit%2Fuser%2Fload.action%3FsysNum%3D860167d257754f7ca935c3761c8c2fac%26source%3D0%26channelFlag%3D%26platformUnionCode%3D%26partnerId%3D%26agid%3D452ace2ce72dfda1ef00288f2f225670%26xst%3D%26ucTrackUrl%3D%26toTiao_clickId%3D%26sogou_logidUrl%3D%26callback%3Dcallback1776764035032&delay=268&httpcode=200&bizcode=&bizmsg=&starttime=1776764035032&timestamps=1776764035300&_dc=0.8496703702849027&dtime=1776764035300&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=&hc_pgv_pvid=ek177676403529483723&s_url=https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle&s_host=om.qq.com&s_path=%2Fmain%2Fcreation%2Farticle&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om_qq_com&s_ptag=&content=%7B%22log%22%3A%5B%7B%22logname%22%3A%22cmjn_emonitor_om_qq_com_cgi%22%2C%22content%22%3A%5B%7B%22dimensions%22%3A%5B%22%2Ftext%2Fchat-visit%2Fuser%2Fload.action%22%2C%22api-c.soboten.com%22%2C%22%22%2C%22https%3A%2F%2Fapi-c.soboten.com%2Ftext%2Fchat-visit%2Fuser%2Fload.action%22%2C200%2C%22%22%2C%22%22%2C%22https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle%22%2C%22om.qq.com%22%2C%22%2Fmain%2Fcreation%2Farticle%22%2C%22https%22%2C%22Chrome%22%2C%22windows%22%2C%22om_qq_com%22%2C%22%22%5D%2C%22values%22%3A%5B%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A268%2C%22count%22%3A1%2C%22policy%22%3A%22AVG%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%5D%2C%22time%22%3A1776764037311%7D%5D%7D%5D%7D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "\r\n"
+    },
+    {
+      "id": "1776764037387-a7td1dowy",
+      "timestamp": 1776764037387,
+      "method": "GET",
+      "url": "https://h.trace.qq.com/kv?attaid=02000014960&token=2225483334&cgipath=%2Ftext%2Fchat-visit%2FmsgOffline%2FofflineMsgSize.action&cgihost=api-c.soboten.com&bizcode_server=&cgiurl=https%3A%2F%2Fapi-c.soboten.com%2Ftext%2Fchat-visit%2FmsgOffline%2FofflineMsgSize.action%3Fuid%3D452ace2ce72dfda1ef00288f2f225670%26callback%3Dcallback1776764035299&delay=76&httpcode=200&bizcode=&bizmsg=&starttime=1776764035299&timestamps=1776764035375&_dc=0.4366224397279662&dtime=1776764035375&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=&hc_pgv_pvid=ek177676403529483723&s_url=https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle&s_host=om.qq.com&s_path=%2Fmain%2Fcreation%2Farticle&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om_qq_com&s_ptag=&content=%7B%22log%22%3A%5B%7B%22logname%22%3A%22cmjn_emonitor_om_qq_com_cgi%22%2C%22content%22%3A%5B%7B%22dimensions%22%3A%5B%22%2Ftext%2Fchat-visit%2FmsgOffline%2FofflineMsgSize.action%22%2C%22api-c.soboten.com%22%2C%22%22%2C%22https%3A%2F%2Fapi-c.soboten.com%2Ftext%2Fchat-visit%2FmsgOffline%2FofflineMsgSize.action%22%2C200%2C%22%22%2C%22%22%2C%22https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle%22%2C%22om.qq.com%22%2C%22%2Fmain%2Fcreation%2Farticle%22%2C%22https%22%2C%22Chrome%22%2C%22windows%22%2C%22om_qq_com%22%2C%22%22%5D%2C%22values%22%3A%5B%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A76%2C%22count%22%3A1%2C%22policy%22%3A%22AVG%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%5D%2C%22time%22%3A1776764037387%7D%5D%7D%5D%7D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "\r\n"
+    },
+    {
+      "id": "1776764053889-3bs3g83ug",
+      "timestamp": 1776764053889,
+      "method": "POST",
+      "url": "https://image.om.qq.com/cpom_pimage/ArchacaleUploadViaFile",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0",
+        "x-requested-with": "XMLHttpRequest",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "content-type": "multipart/form-data; boundary=----WebKitFormBoundarydLys7WIreBJFOFmH"
+      },
+      "matched": true,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":0,\"message\":\"success\",\"data\":{\"url\":{\"isqrcode\":0,\"face\":\"\",\"count\":1,\"islong\":0,\"url\":\"https://inews.gtimg.com/om_bt/OoNfk3WYWYwulmmCE8CJXB_sfzsOalTpDsrNZ8t-qTqmgAA\",\"resource_id\":\"1552864483\",\"type\":3,\"size\":{\"641\":{\"height\":\"392\",\"faceSize\":{},\"cropWidth\":\"0\",\"cropHeight\":\"0\",\"imageUrl\":\"https://inews.gtimg.com/om_bt/OoNfk3WYWYwulmmCE8CJXB_sfzsOalTpDsrNZ8t-qTqmgAA/641\",\"width\":\"641\"},\"0\":{\"imageUrl\":\"https://inews.gtimg.com/om_bt/OoNfk3WYWYwulmmCE8CJXB_sfzsOalTpDsrNZ8t-qTqmgAA/0\",\"wid"
+    },
+    {
+      "id": "1776764055474-tx7jwayok",
+      "timestamp": 1776764055474,
+      "method": "POST",
+      "url": "https://image.om.qq.com/cpom_pimage/ListImageUploadViaUrl",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0",
+        "x-requested-with": "XMLHttpRequest",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json"
+      },
+      "matched": true,
+      "postData": "{\"auth\":{\"appid\":\"LA6zXi1lWzAioIzdiAD6iM10aHarlHF6\",\"endpoint\":1},\"reqData\":{\"appid\":\"LA6zXi1lWzAioIzdiAD6iM10aHarlHF6\",\"isUpOrg\":1,\"endpoint\":1,\"isRetImgAttr\":1,\"opCode\":151,\"imageUrl\":\"https://inews.gtimg.com/om_bt/OoNfk3WYWYwulmmCE8CJXB_sfzsOalTpDsrNZ8t-qTqmgAA/641\"},\"relogin\":1}",
+      "responseStatus": 200,
+      "responseBody": "{\"code\":0,\"message\":\"success\",\"data\":{\"face\":\"\",\"ocr\":\"\",\"length\":\"184452\",\"width\":\"960\",\"height\":\"588\",\"type\":3,\"url\":{\"580300\":\"https://inews.gtimg.com/om_ls/OsjiV4w2u6gxhvkV8YwIn8aPTHEyeey4eicK2NAjaC-IEAA_580300/0\",\"1\":\"https://inews.gtimg.com/om_ls/OsjiV4w2u6gxhvkV8YwIn8aPTHEyeey4eicK2NAjaC-IEAA/0\",\"150120\":\"https://inews.gtimg.com/om_ls/OsjiV4w2u6gxhvkV8YwIn8aPTHEyeey4eicK2NAjaC-IEAA_150120/0\",\"196130\":\"https://inews.gtimg.com/om_ls/OsjiV4w2u6gxhvkV8YwIn8aPTHEyeey4eicK2NAjaC-IEAA_196130/0\","
+    },
+    {
+      "id": "1776764056931-lmcc72we9",
+      "timestamp": 1776764056931,
+      "method": "GET",
+      "url": "https://h.trace.qq.com/kv?attaid=02000014960&token=2225483334&cgipath=%2Fcpom_pimage%2FArchacaleUploadViaFile&cgihost=image.om.qq.com&bizcode_server=&cgiurl=https%3A%2F%2Fimage.om.qq.com%2Fcpom_pimage%2FArchacaleUploadViaFile&delay=1032&httpcode=200&bizcode=0&bizmsg=&starttime=1776764053885&headers=%7B%7D&timestamps=1776764054917&_dc=0.21866139140478724&dtime=1776764054917&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=&hc_pgv_pvid=ek177676403529483723&s_url=https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle&s_host=om.qq.com&s_path=%2Fmain%2Fcreation%2Farticle&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om_qq_com&s_ptag=&content=%7B%22log%22%3A%5B%7B%22logname%22%3A%22cmjn_emonitor_om_qq_com_cgi%22%2C%22content%22%3A%5B%7B%22dimensions%22%3A%5B%22%2Fcpom_pimage%2FArchacaleUploadViaFile%22%2C%22image.om.qq.com%22%2C%22%22%2C%22https%3A%2F%2Fimage.om.qq.com%2Fcpom_pimage%2FArchacaleUploadViaFile%22%2C200%2C0%2C%22%22%2C%22https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle%22%2C%22om.qq.com%22%2C%22%2Fmain%2Fcreation%2Farticle%22%2C%22https%22%2C%22Chrome%22%2C%22windows%22%2C%22om_qq_com%22%2C%22%22%5D%2C%22values%22%3A%5B%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1032%2C%22count%22%3A1%2C%22policy%22%3A%22AVG%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%5D%2C%22time%22%3A1776764056929%7D%5D%7D%5D%7D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": true,
+      "responseStatus": 200,
+      "responseBody": "\r\n"
+    },
+    {
+      "id": "1776764058794-1ypienrqv",
+      "timestamp": 1776764058794,
+      "method": "GET",
+      "url": "https://h.trace.qq.com/kv?attaid=02000014960&token=2225483334&cgipath=%2Fcpom_pimage%2FListImageUploadViaUrl&cgihost=image.om.qq.com&bizcode_server=&cgiurl=https%3A%2F%2Fimage.om.qq.com%2Fcpom_pimage%2FListImageUploadViaUrl&delay=1315&httpcode=200&bizcode=0&bizmsg=&starttime=1776764056470&headers=%7B%7D&timestamps=1776764056786&_dc=0.5557387699307499&dtime=1776764056786&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=&hc_pgv_pvid=ek177676403529483723&s_url=https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle&s_host=om.qq.com&s_path=%2Fmain%2Fcreation%2Farticle&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om_qq_com&s_ptag=&content=%7B%22log%22%3A%5B%7B%22logname%22%3A%22cmjn_emonitor_om_qq_com_cgi%22%2C%22content%22%3A%5B%7B%22dimensions%22%3A%5B%22%2Fcpom_pimage%2FListImageUploadViaUrl%22%2C%22image.om.qq.com%22%2C%22%22%2C%22https%3A%2F%2Fimage.om.qq.com%2Fcpom_pimage%2FListImageUploadViaUrl%22%2C200%2C0%2C%22%22%2C%22https%3A%2F%2Fom.qq.com%2Fmain%2Fcreation%2Farticle%22%2C%22om.qq.com%22%2C%22%2Fmain%2Fcreation%2Farticle%22%2C%22https%22%2C%22Chrome%22%2C%22windows%22%2C%22om_qq_com%22%2C%22%22%5D%2C%22values%22%3A%5B%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1315%2C%22count%22%3A1%2C%22policy%22%3A%22AVG%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A1%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%2C%7B%22value%22%3A0%2C%22count%22%3A1%2C%22policy%22%3A%22SUM%22%7D%5D%2C%22time%22%3A1776764058793%7D%5D%7D%5D%7D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": true,
+      "responseStatus": 200,
+      "responseBody": "\r\n"
+    }
+  ],
+  "summary": {
+    "totalRequests": 8,
+    "matchedRequests": 4,
+    "uploadEndpoints": [
+      "/cpom_pimage/ArchacaleUploadViaFile",
+      "/cpom_pimage/ListImageUploadViaUrl",
+      "/kv"
+    ]
+  }
+}

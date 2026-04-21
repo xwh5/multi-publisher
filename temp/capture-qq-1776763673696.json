@@ -1,0 +1,314 @@
+{
+  "platform": "qq",
+  "captureTime": "2026-04-21T09:27:53.695Z",
+  "timeout": 60000,
+  "editorUrl": "https://om.qq.com/main/creation/article",
+  "uploadApiUrl": "/connect/qrconnect",
+  "requests": [
+    {
+      "id": "1776763614277-t9busqr91",
+      "timestamp": 1776763614277,
+      "method": "GET",
+      "url": "https://m.om.qq.com/config/getRegisterForbidTime",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "{\"code\":0,\"message\":\"ok\",\"data\":{\"starttime\":\"2021-06-03 20:00:00\",\"endtime\":\"2021-06-05 20:00:00\",\"current\":1776763633091}}"
+    },
+    {
+      "id": "1776763614536-eu5q0lt08",
+      "timestamp": 1776763614536,
+      "method": "GET",
+      "url": "https://btrace.qq.com/kvcollect?BossId=6528&Pwd=96045012&cgipath=%2Fconfig%2FgetRegisterForbidTime&cgihost=m.om.qq.com&bizcode_server=&cgiurl=https%3A%2F%2Fm.om.qq.com%2Fconfig%2FgetRegisterForbidTime&delay=265&httpcode=200&bizcode=&bizmsg=&starttime=1776763614270&timestamps=1776763614535&_dc=0.6148362209887288&dtime=1776763614535&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=&hc_pgv_pvid=ek177676361430160303&s_url=https%3A%2F%2Fom.qq.com%2FuserAuth%2Findex&s_host=om.qq.com&s_path=%2FuserAuth%2Findex&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om&s_ptag=",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763614714-ppgg6fk9t",
+      "timestamp": 1776763614714,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/user/load.action?sysNum=860167d257754f7ca935c3761c8c2fac&source=0&channelFlag=&platformUnionCode=&partnerId=&agid=a2d15ad7d79e8a34888422b47b8a01bd&xst=&ucTrackUrl=&toTiao_clickId=&sogou_logidUrl=&callback=callback1776763614713",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776763614713({\"whiteListFlag\":0,\"color\":\"#548dd4\",\"firstTimeOut\":10,\"wslink.bak\":[\"wss://imwsten.sobot.com:9001/ws\",\"wss://imwsten.sobot.com:9002/ws\",\"wss://imwsten.sobot.com:9003/ws\",\"wss://imwsten.sobot.com:9004/ws\",\"wss://imwsten.sobot.com:9005/ws\",\"wss://imwsten.sobot.com:9006/ws\"],\"pid\":\"860167d257754f7ca935c3761c8c2fac\",\"title\":\"咨询在线客服\",\"isInvite\":1,\"wslink.default\":\"wss://imwsten.sobot.com:9004/ws\",\"uid\":\"a2d15ad7d79e8a34888422b47b8a01bd\",\"inviteCount\":1,\"lan\":0,\"tipTitle\":\"请问有什么"
+    },
+    {
+      "id": "1776763614920-rizul7egn",
+      "timestamp": 1776763614920,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/msgOffline/offlineMsgSize.action?uid=a2d15ad7d79e8a34888422b47b8a01bd&callback=callback1776763614920",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776763614920({\"offlineMsg\":[],\"size\":0,\"unAckSize\":0,\"unAckMsg\":[],\"groupId\":\"\",\"params\":\"\"})"
+    },
+    {
+      "id": "1776763621258-d6ni1msrq",
+      "timestamp": 1776763621258,
+      "method": "GET",
+      "url": "https://open.weixin.qq.com/connect/qrconnect?appid=wx2940959351a738f7&redirect_uri=https%3A%2F%2Fom.qq.com%2Fmindex%2FuserAuth%2FomWxLoginCallback%3Fsource%3Dlogin2%26target%3D%26cb_url%3D&response_type=code&scope=snsapi_login&state=91e25d04ddeac9836cbf3c88a16d1406&stylelite=0&href=https%3A%2F%2Fom.gtimg.cn%2Fom%2Fom_3.0%2Fcss%2Fwechat_login_iframe_inner_style_1756956178.css",
+      "headers": {
+        "referer": "https://om.qq.com/",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      },
+      "matched": true,
+      "responseStatus": 200
+    },
+    {
+      "id": "1776763621827-h3q202evh",
+      "timestamp": 1776763621827,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:14013/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763621830-otrz6bp2a",
+      "timestamp": 1776763621830,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:14014/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763621834-f461cokmk",
+      "timestamp": 1776763621834,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:14015/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763621834-jh913o36m",
+      "timestamp": 1776763621834,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:13013/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763621834-xbvtpq9hq",
+      "timestamp": 1776763621834,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:13014/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763621834-czsmfp8ow",
+      "timestamp": 1776763621834,
+      "method": "POST",
+      "url": "https://localhost.weixin.qq.com:13015/api/check-login",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "content-type": "application/json",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "postData": "{\"apiname\":\"qrconnectchecklogin\",\"jsdata\":{\"appid\":\"wx2940959351a738f7\",\"scope\":\"snsapi_login\",\"redirect_uri\":\"https://om.qq.com/mindex/userAuth/omWxLoginCallback?source=login2&target=&cb_url=\",\"state\":\"91e25d04ddeac9836cbf3c88a16d1406\"}}"
+    },
+    {
+      "id": "1776763623922-33q3fx5ri",
+      "timestamp": 1776763623922,
+      "method": "GET",
+      "url": "https://support.weixin.qq.com/cgi-bin/mmsupportmeshnodelogicsvr-bin/cube?biz=3512&label=connect.qrconnect&action=connect_qrconnect_checkLogin_fail&msg=wx2940959351a738f7&idx1=snsapi_login&idx2=https%253A%252F%252Fom.qq.com%252Fmindex%252FuserAuth%252FomWxLoginCallback%253Fsource%253Dlogin2%2526target%253D%2526cb_url%253D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763624092-zxmgvaka6",
+      "timestamp": 1776763624092,
+      "method": "GET",
+      "url": "https://support.weixin.qq.com/cgi-bin/mmsupportmeshnodelogicsvr-bin/cube?biz=3512&label=connect.qrconnect&action=connect_qrconnect_checkLogin_fail&msg=wx2940959351a738f7&idx1=snsapi_login&idx2=https%253A%252F%252Fom.qq.com%252Fmindex%252FuserAuth%252FomWxLoginCallback%253Fsource%253Dlogin2%2526target%253D%2526cb_url%253D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763624171-hz7a5g4n5",
+      "timestamp": 1776763624171,
+      "method": "GET",
+      "url": "https://support.weixin.qq.com/cgi-bin/mmsupportmeshnodelogicsvr-bin/cube?biz=3512&label=connect.qrconnect&action=connect_qrconnect_checkLogin_fail&msg=wx2940959351a738f7&idx1=snsapi_login&idx2=https%253A%252F%252Fom.qq.com%252Fmindex%252FuserAuth%252FomWxLoginCallback%253Fsource%253Dlogin2%2526target%253D%2526cb_url%253D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763624916-ga7h2ecrs",
+      "timestamp": 1776763624916,
+      "method": "GET",
+      "url": "https://support.weixin.qq.com/cgi-bin/mmsupportmeshnodelogicsvr-bin/cube?biz=3512&label=connect.qrconnect&action=connect_qrconnect_checkLogin_fail&msg=wx2940959351a738f7&idx1=snsapi_login&idx2=https%253A%252F%252Fom.qq.com%252Fmindex%252FuserAuth%252FomWxLoginCallback%253Fsource%253Dlogin2%2526target%253D%2526cb_url%253D",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://open.weixin.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763632065-xcer8yrk2",
+      "timestamp": 1776763632065,
+      "method": "GET",
+      "url": "https://m.om.qq.com/config/getRegisterForbidTime",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "accept": "*/*",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    },
+    {
+      "id": "1776763632081-mzae4azb9",
+      "timestamp": 1776763632081,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/user/load.action?sysNum=860167d257754f7ca935c3761c8c2fac&source=0&channelFlag=&platformUnionCode=&partnerId=&agid=a2d15ad7d79e8a34888422b47b8a01bd&xst=&ucTrackUrl=&toTiao_clickId=&sogou_logidUrl=&callback=callback1776763632080",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776763632080({\"whiteListFlag\":0,\"color\":\"#548dd4\",\"firstTimeOut\":10,\"wslink.bak\":[\"wss://imwsten.sobot.com:9001/ws\",\"wss://imwsten.sobot.com:9002/ws\",\"wss://imwsten.sobot.com:9003/ws\",\"wss://imwsten.sobot.com:9004/ws\",\"wss://imwsten.sobot.com:9005/ws\",\"wss://imwsten.sobot.com:9006/ws\"],\"pid\":\"860167d257754f7ca935c3761c8c2fac\",\"title\":\"咨询在线客服\",\"isInvite\":1,\"wslink.default\":\"wss://imwsten.sobot.com:9004/ws\",\"uid\":\"a2d15ad7d79e8a34888422b47b8a01bd\",\"inviteCount\":1,\"lan\":0,\"tipTitle\":\"请问有什么"
+    },
+    {
+      "id": "1776763632149-eitt2bu7w",
+      "timestamp": 1776763632149,
+      "method": "GET",
+      "url": "https://api-c.soboten.com/text/chat-visit/msgOffline/offlineMsgSize.action?uid=a2d15ad7d79e8a34888422b47b8a01bd&callback=callback1776763632149",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false,
+      "responseStatus": 200,
+      "responseBody": "callback1776763632149({\"offlineMsg\":[],\"size\":0,\"unAckSize\":0,\"unAckMsg\":[],\"groupId\":\"\",\"params\":\"\"})"
+    },
+    {
+      "id": "1776763632323-yqfr1fvdu",
+      "timestamp": 1776763632323,
+      "method": "GET",
+      "url": "https://btrace.qq.com/kvcollect?BossId=6528&Pwd=96045012&cgipath=%2Fconfig%2FgetRegisterForbidTime&cgihost=m.om.qq.com&bizcode_server=&cgiurl=https%3A%2F%2Fm.om.qq.com%2Fconfig%2FgetRegisterForbidTime&delay=257&httpcode=200&bizcode=&bizmsg=&starttime=1776763632063&timestamps=1776763632320&_dc=0.4730788590050976&dtime=1776763632320&hh_ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F147.0.0.0%20Safari%2F537.36&hh_uav=147.0&hh_ref=https%3A%2F%2Fom.qq.com%2Fmindex%2FuserAuth%2FomWxLoginCallback%3Fsource%3Dlogin2%26target%3D%26cb_url%3D%26code%3D041QkcHa1BXfyL0VsWIa1X4Pjn1QkcH7%26state%3D91e25d04ddeac9836cbf3c88a16d1406&hc_pgv_pvid=ek177676361430160303&s_url=https%3A%2F%2Fom.qq.com%2FuserReg%2Fregister&s_host=om.qq.com&s_path=%2FuserReg%2Fregister&s_protocol=https&s_browser=Chrome&s_os=windows&s_qq=&s_openid=&s_app=om&s_ptag=",
+      "headers": {
+        "sec-ch-ua-platform": "\"Windows\"",
+        "referer": "https://om.qq.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"147\", \"Not.A/Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "matched": false
+    }
+  ],
+  "summary": {
+    "totalRequests": 19,
+    "matchedRequests": 1,
+    "uploadEndpoints": [
+      "/connect/qrconnect"
+    ]
+  }
+}
