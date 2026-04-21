@@ -24,7 +24,14 @@ function extFromUrl(url: string): string {
 }
 
 function nameFromUrl(url: string): string {
-  return path.basename(new URL(url).pathname) || `image${extFromUrl(url)}`
+  const ext = extFromUrl(url)
+  const pathname = new URL(url).pathname
+  const basename = path.basename(pathname)
+  // If basename has no extension (or is just numbers like "720"), generate a proper name
+  if (!path.extname(basename) || /^\d+$/.test(basename)) {
+    return `cover${ext}`
+  }
+  return basename
 }
 
 export class WechatPublisher {
