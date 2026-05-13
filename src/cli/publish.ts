@@ -17,6 +17,7 @@ export async function runPublish(
     appId?: string
     macStyle?: boolean
     autoCover?: boolean
+    coverMode?: 'sharp' | 'network' | 'auto'
   },
   input?: string
 ): Promise<void> {
@@ -42,10 +43,18 @@ export async function runPublish(
       theme: options.theme || 'default',
       macStyle: options.macStyle !== false,
       autoCover: options.autoCover || false,
+      coverMode: (options.coverMode as 'sharp' | 'network' | 'auto') || 'auto',
     })
 
     // 3. 选择适配器
     const platformId = options.platform || 'weixin'
+
+    // 校验 title
+    if (!result.title || result.title === '无标题') {
+      console.warn(`[publish] ⚠️ 警告：文章标题为空！`)
+    } else {
+      console.log(`[publish] ✅ 文章标题: "${result.title}"`)
+    }
 
     // 初始化适配器注册表
     const runtime = createNodeRuntime()
@@ -65,8 +74,15 @@ export async function runPublish(
       process.env.WECHAT_APP_ID = options.appId
     }
 
-    // 使用自动获取的封面图（如果文章没有指定封面）
-    const coverImage = result.cover || result.autoCoverPath
+    // 使用封面图：
+    // - coverMode=sharp/network: 强制用 autoCoverPath，忽略 front-matter 封面
+    // - coverMode=auto: 优先用 front-matter 封面，其次 autoCoverPath
+    let coverImage: string | undefined
+    if (options.coverMode === 'sharp' || options.coverMode === 'network') {
+      coverImage = result.autoCoverPath
+    } else {
+      coverImage = result.cover || result.autoCoverPath
+    }
 
     const syncResult = await adapter.publish({
       title: result.title,

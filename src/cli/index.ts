@@ -27,6 +27,7 @@ export function createProgram() {
     .requiredOption('-f, --file <path>', 'Markdown 文件路径（支持本地文件和 URL）')
     .option('-p, --platform <platform>', '目标平台 (weixin|zhihu|juejin|csdn)', 'weixin')
     .option('-t, --theme <theme-id>', '主题 ID', 'default')
+    .option('-m, --cover-mode <mode>', '封面模式 (sharp|network|auto)', 'auto')
     .option('--app-id <appId>', '微信公众号 AppID（可省略，从配置文件读取）')
     .option('--no-mac-style', '禁用 Mac 风格代码块')
     .option('--auto-cover', '当文章无封面图时，根据标题自动从网络获取封面')

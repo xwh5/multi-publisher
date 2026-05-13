@@ -50,9 +50,18 @@ export function parseMarkdown(content: string): ParsedArticle {
 
   const html = markedInstance.parse(parsed.body)
 
+  // Fallback title extraction: try to get first # heading if front-matter title is missing
+  let title = parsed.attributes.title
+  if (!title) {
+    const headingMatch = parsed.body.match(/^#\s+(.+)/m)
+    if (headingMatch) {
+      title = headingMatch[1].trim()
+    }
+  }
+
   return {
     meta: {
-      title: parsed.attributes.title || '无标题',
+      title: title || '无标题',
       author: parsed.attributes.author,
       cover: parsed.attributes.cover,
       source_url: parsed.attributes.source_url,

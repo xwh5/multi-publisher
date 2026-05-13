@@ -149,6 +149,13 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         if (existsSync(localCover)) {
           console.log('[toutiao] 检测到封面图片，准备上传...')
 
+          // 设置 filechooser 监听（必须在点击之前设置）
+          const absolutePath = path.resolve(localCover)
+          console.log('[toutiao] 封面文件路径:', absolutePath)
+
+          // 使用 promise 等待 filechooser 事件
+          const fileChooserPromise = page.waitForEvent('filechooser', { timeout: 10000 })
+
           // 点击"预览并发布"按钮打开预览弹窗
           const previewBtn = page.locator('button:has-text("预览并发布")')
           if (await previewBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -164,13 +171,6 @@ export class ToutiaoAdapter implements IPlatformAdapter {
               await page.waitForTimeout(500)
             }
 
-            // 设置 filechooser 监听
-            const absolutePath = path.resolve(localCover)
-            page.on('filechooser', async (fileChooser) => {
-              console.log('[toutiao] 收到 filechooser，设置封面文件')
-              await fileChooser.setFiles(absolutePath)
-            })
-
             // 点击封面添加区域
             const coverAdd = page.locator('.article-cover-add')
             if (await coverAdd.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -185,6 +185,75 @@ export class ToutiaoAdapter implements IPlatformAdapter {
               await localUpload.click()
               console.log('[toutiao] 点击本地上传')
               await page.waitForTimeout(1500)
+            }
+
+            let fileSet = false
+          // 直接查找文件输入框，不依赖 filechooser 事件
+          console.log('[toutiao] 尝试直接设置文件输入框...')
+          const fileInput = page.locator('input[type="file"]').first()
+          if (await fileInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+            console.log('[toutiao] 找到文件输入框，直接设置文件')
+            await fileInput.setInputFiles(absolutePath)
+            fileSet = true
+          } else {
+            // 文件输入框可能是 hidden，用 setInputFiles 即使不可见也可以设置
+            console.log('[toutiao] 文件输入框不可见，尝试直接 setInputFiles')
+            const allInputs = page.locator('input[type="file"]')
+            const count = await allInputs.count()
+            console.log(`[toutiao] 页面中有 ${count} 个 file 输入框`)
+            if (count > 0) {
+              await allInputs.first().setInputFiles(absolutePath)
+              fileSet = true
+              console.log('[toutiao] 已对第一个 file 输入框设置文件')
+            }
+          }
+
+          if (!fileSet) {
+            // 尝试点击本地上传但使用另一种方式
+            const localUpload = page.locator('text=本地上传')
+            if (await localUpload.isVisible({ timeout: 3000 }).catch(() => false)) {
+              await localUpload.click()
+              console.log('[toutiao] 点击本地上传')
+              await page.waitForTimeout(1500)
+
+              // 点击后重新查找文件输入框
+              const newInputs = page.locator('input[type="file"]')
+              const newCount = await newInputs.count()
+              console.log(`[toutiao] 点击后有 ${newCount} 个 file 输入框`)
+              if (newCount > 0) {
+                await newInputs.first().setInputFiles(absolutePath)
+                fileSet = true
+                console.log('[toutiao] 点击后设置文件成功')
+              }
+            }
+          }
+
+            if (fileSet) {
+              // 等待封面上传
+              console.log('[toutiao] 等待封面上传...')
+              await page.waitForTimeout(5000)
+
+              // 检测封面是否上传成功
+              const coverFound = await page.evaluate(() => {
+                const imgs = document.querySelectorAll('img')
+                for (const img of imgs) {
+                  const htmlImg = img as HTMLImageElement
+                  if (htmlImg.src && htmlImg.naturalWidth > 0) {
+                    // 检查是否是封面相关的图片
+                    const parent = htmlImg.closest('[class*="cover"], [class*="preview"]')
+                    if (parent) return true
+                  }
+                }
+                return false
+              })
+
+              if (coverFound) {
+                console.log('[toutiao] 封面上传成功')
+              } else {
+                console.log('[toutiao] 未检测到明确的上传成功标志')
+              }
+            } else {
+              console.log('[toutiao] 未能设置封面文件')
             }
 
             // 点击"确定"按钮

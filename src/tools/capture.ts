@@ -158,10 +158,29 @@ export async function capture(platform: string, timeoutMs: number = 60000): Prom
   const browser: Browser = await chromium.launch({
     headless: false,
     channel: 'chromium',
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      '--disable-devtools-shm-usage',
+      '--no-sandbox',
+    ],
   })
 
-  const context = await browser.newContext()
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  })
   const page: Page = await context.newPage()
+
+  // 使用 CDP 隐藏自动化特征
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh', 'en'] });
+      window.chrome = { runtime: {}, loadTimes: () => {}, csi: () => {} };
+    `
+  })
 
   // 设置 cookies
   const cookieDomains = getCookieDomains(platform)
