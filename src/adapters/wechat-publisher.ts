@@ -97,6 +97,29 @@ export class WechatPublisher {
   }
 
   /**
+   * 上传图片到微信 CDN（图文消息专用接口，返回可直接访问的 URL）
+   */
+  async uploadImageForArticle(filePath: string): Promise<string> {
+    const token = await this.getAccessToken()
+    const name = path.basename(filePath)
+
+    const form = new FormData()
+    form.append('media', readFileSync(filePath), { filename: name, contentType: 'image/png' })
+
+    const res = await axios.post(
+      `https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=${token}`,
+      form,
+      { headers: form.getHeaders(), maxBodyLength: Infinity, maxContentLength: Infinity }
+    )
+
+    const data = res.data as { url?: string; errcode?: number; errmsg?: string }
+    if (!data.url) {
+      throw new Error(`图片上传失败: ${data.errmsg || JSON.stringify(data)}`)
+    }
+    return data.url
+  }
+
+  /**
    * 上传本地图片到微信 CDN（临时素材，用于正文嵌入）
    */
   async uploadImageFromPath(filePath: string, filename?: string): Promise<string> {
@@ -195,11 +218,12 @@ export class WechatPublisher {
 
   /**
    * 处理 HTML 中的图片：本地图片上传到微信 CDN，外部图片保留原 URL
-   * 返回处理后的 HTML 和第一张可用的 media_id（用作封面）
+   * 返回处理后的 HTML、第一张 media_id（临时）和第一张本地路径（用于封面永久上传）
    */
-  async processImages(html: string): Promise<{ html: string; firstMediaId?: string }> {
+  async processImages(html: string): Promise<{ html: string; firstMediaId?: string; firstLocalPath?: string }> {
     const imgPattern = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi
     let firstMediaId: string | undefined
+    let firstLocalPath: string | undefined
     let replaced = html
 
     for (const match of [...html.matchAll(imgPattern)]) {
@@ -216,16 +240,25 @@ export class WechatPublisher {
       }
 
       try {
-        const mediaId = await this.uploadImageFromUrl(src)
-        if (!firstMediaId) firstMediaId = mediaId
-        const cdnUrl = `https://mmbiz.qpic.cn/mmbiz_png/${mediaId}/0`
-        replaced = replaced.replace(original, original.replace(src, cdnUrl))
+        const isLocalPath = !src.startsWith('http://') && !src.startsWith('https://')
+        if (isLocalPath) {
+          // 本地文件用 uploadimg 接口，返回直接可访问的 URL
+          const url = await this.uploadImageForArticle(src)
+          if (!firstLocalPath) firstLocalPath = src
+          replaced = replaced.replace(original, original.replace(src, url))
+        } else {
+          // 外部 URL 下载后上传
+          const mediaId = await this.uploadImageFromUrl(src)
+          if (!firstMediaId) firstMediaId = mediaId
+          const cdnUrl = `https://mmbiz.qpic.cn/mmbiz_png/${mediaId}/0`
+          replaced = replaced.replace(original, original.replace(src, cdnUrl))
+        }
       } catch (err) {
         console.warn(`[WechatPublisher] 上传图片失败 ${src}: ${(err as Error).message}，保留原 URL`)
       }
     }
 
-    return { html: replaced, firstMediaId }
+    return { html: replaced, firstMediaId, firstLocalPath }
   }
 
   /**
@@ -240,7 +273,7 @@ export class WechatPublisher {
   }): Promise<{ media_id: string }> {
     const token = await this.getAccessToken()
 
-    const { html: processedHtml, firstMediaId } = await this.processImages(options.content)
+    const { html: processedHtml, firstMediaId, firstLocalPath } = await this.processImages(options.content)
 
     // 上传封面图：优先用 front-matter 指定的封面图，其次用正文第一张图片的 media_id
     let thumbMediaId: string | undefined
@@ -248,21 +281,27 @@ export class WechatPublisher {
       thumbMediaId = await this.uploadCover(options.cover)
     } catch (err) {
       console.warn(`[WechatPublisher] 封面上传失败: ${(err as Error).message}`)
-      // 用 processImages 返回的第一张图片 media_id 作为封面
-      if (firstMediaId) {
+      // 用 processImages 返回的第一张图片（本地路径需要用永久素材接口）
+      if (firstLocalPath) {
+        thumbMediaId = await this.uploadPermanentImageFromPath(firstLocalPath)
+        console.log('[WechatPublisher] 使用正文第一张图片作为封面（永久素材）')
+      } else if (firstMediaId) {
+        // 外部 URL 图片用临时素材
         thumbMediaId = firstMediaId
-        console.log('[WechatPublisher] 使用正文第一张图片作为封面')
+        console.log('[WechatPublisher] 使用正文第一张图片作为封面（临时素材）')
       } else {
         // fallback：直接从 processedHtml 中查找 img 标签
         const imgMatches = [...processedHtml.matchAll(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi)]
         for (const m of imgMatches) {
           const src = m[1]
           if (src.includes('mmbiz.qpic.cn') || src.includes('mmbiz.qlogo.cn')) continue
-          try {
-            thumbMediaId = await this.uploadImageFromUrl(src)
-            console.log(`[WechatPublisher] 用正文图片作封面: ${src}`)
-            break
-          } catch { /* continue */ }
+          if (src.startsWith('http')) {
+            try {
+              thumbMediaId = await this.uploadPermanentImageFromUrl(src)
+              console.log(`[WechatPublisher] 用正文图片作封面: ${src}`)
+              break
+            } catch { /* continue */ }
+          }
         }
       }
     }

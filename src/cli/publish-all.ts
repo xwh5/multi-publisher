@@ -72,7 +72,7 @@ export async function runPublishAll(options: {
     markdownContent = markdownContent.slice(frontmatterMatch[0].length)
   }
 
-  // 渲染 HTML
+  // 渲染 HTML（不处理 mermaid，由各平台适配器自行处理）
   const renderResult = await renderMarkdown(markdownContent, {
     theme,
     highlight,

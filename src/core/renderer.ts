@@ -38,24 +38,32 @@ export interface RenderResult {
 
 /**
  * 处理 Mermaid 代码块，将它们转换为图片
- * 支持微信公众号（不支持 Mermaid 渲染）
+ * 各平台适配器可调用此函数
  */
-async function processMermaid(html: string, outputDir: string): Promise<string> {
-  const mermaidBlockRegex = /<pre><code class="mermaid">([\s\S]*?)<\/code><\/pre>/gi
+export async function processMermaid(html: string, outputDir: string): Promise<{ html: string; tempFiles: string[] }> {
+  const mermaidBlockRegex = /<pre[^>]*><code[^>]*class="hljs language-mermaid"[^>]*>([\s\S]*?)<\/code><\/pre>/gi
   const matches = [...html.matchAll(mermaidBlockRegex)]
+  const tempFiles: string[] = []
 
-  if (matches.length === 0) return html
+  if (matches.length === 0) return { html, tempFiles }
 
   console.log(`[renderer] 发现 ${matches.length} 个 mermaid 代码块，开始转换为图片...`)
 
   for (const match of matches) {
-    const mermaidCode = match[1].trim()
+    let mermaidCode = match[1].trim()
+    // 解码 HTML 实体
+    mermaidCode = mermaidCode
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
     const tmpMmd = path.join(os.tmpdir(), `mermaid-${Date.now()}-${Math.random()}.mmd`)
     const outputPng = path.join(outputDir, `mermaid-${Date.now()}-${Math.random()}.png`)
 
     try {
       // 写入临时 mmd 文件
       await fs.writeFile(tmpMmd, mermaidCode, 'utf8')
+      tempFiles.push(tmpMmd)
 
       // 调用 mmdc 渲染
       execSync(`mmdc -i "${tmpMmd}" -o "${outputPng}" -b white`, {
@@ -65,6 +73,7 @@ async function processMermaid(html: string, outputDir: string): Promise<string> 
 
       // 验证图片生成
       await fs.access(outputPng)
+      tempFiles.push(outputPng)
 
       // 替换 mermaid 代码块为图片
       const imageTag = `<img src="${outputPng.replace(/\\/g, '/')}" />`
@@ -72,13 +81,11 @@ async function processMermaid(html: string, outputDir: string): Promise<string> 
       console.log(`[renderer] Mermaid 图片生成成功: ${outputPng}`)
     } catch (err) {
       console.warn(`[renderer] Mermaid 渲染失败: ${(err as Error).message}，保留原代码块`)
-    } finally {
-      // 清理临时文件
       await fs.unlink(tmpMmd).catch(() => {})
     }
   }
 
-  return html
+  return { html, tempFiles }
 }
 
 export async function renderMarkdown(
@@ -99,8 +106,8 @@ export async function renderMarkdown(
   // 2. 处理 LaTeX 公式（$...$ 和 $$...$$）
   let html = processMath(parsed.html)
 
-  // 2.5 处理 Mermaid 代码块（转换为图片，微信公众号不支持 Mermaid 渲染）
-  html = await processMermaid(html, os.tmpdir())
+  // 注意：Mermaid 处理移到各平台适配器的 processMermaid 钩子
+  // 各 adapter 自己决定是否转换 mermaid 代码块
 
   // 3. 加载主题 CSS
   const themeCss = customCss ?? (await loadThemeCss(theme)) ?? DEFAULT_CSS

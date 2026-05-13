@@ -6,8 +6,12 @@ import { chromium } from 'playwright'
 import type { Article, AuthResult, PlatformMeta, SyncResult } from './interface.js'
 import { ConfigStore } from '../config.js'
 import { existsSync } from 'node:fs'
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
+import os from 'os'
 import { downloadCoverUrl } from '../tools/cover-fetcher.js'
+import { processMermaid } from '../core/renderer.js'
+import { uploadImageToPublicUrl } from '../tools/imgbb-uploader.js'
 
 export class ToutiaoAdapter implements IPlatformAdapter {
   readonly meta: PlatformMeta = {
@@ -35,6 +39,28 @@ export class ToutiaoAdapter implements IPlatformAdapter {
     return { isAuthenticated: true }
   }
 
+  async processMermaid(html: string): Promise<{ html: string; tempFiles: string[] }> {
+    const { html: processed, tempFiles } = await processMermaid(html, os.tmpdir())
+
+    // 上传图片到 ImgBB 获取公开 URL
+    let result = processed
+    const imgPattern = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi
+    for (const match of [...processed.matchAll(imgPattern)]) {
+      const original = match[0]
+      const src = match[1]
+      if (!src.startsWith('http://') && !src.startsWith('https://')) {
+        try {
+          const url = await uploadImageToPublicUrl(src)
+          result = result.replace(original, original.replace(src, url))
+          console.log(`[toutiao] mermaid 图片已上传: ${url}`)
+        } catch (err) {
+          console.warn(`[toutiao] mermaid 图片上传失败 ${src}: ${(err as Error).message}`)
+        }
+      }
+    }
+    return { html: result, tempFiles }
+  }
+
   async publish(article: Article): Promise<SyncResult> {
     const start = Date.now()
     if (!this.cookieData) {
@@ -44,6 +70,14 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         error: '未配置头条号 Cookie',
         timestamp: Date.now() - start,
       }
+    }
+
+    // 处理 Mermaid 代码块（转换为图片并上传到公开 URL）
+    let processedArticle = article
+    if (this.processMermaid && article.html) {
+      const { html: mermaidHtml, tempFiles } = await this.processMermaid(article.html)
+      processedArticle = { ...article, html: mermaidHtml }
+      await Promise.all(tempFiles.map(f => fs.unlink(f).catch(() => {})))
     }
 
     const browser = await chromium.launch({
@@ -109,7 +143,7 @@ export class ToutiaoAdapter implements IPlatformAdapter {
 
       // 填写标题
       const titleTextarea = page.locator('textarea').first()
-      await titleTextarea.fill(article.title)
+      await titleTextarea.fill(processedArticle.title)
       console.log('[toutiao] 已填写标题')
 
       // 填写内容
@@ -118,7 +152,7 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         await contentEl.click()
         await page.keyboard.press('Control+a')
         await page.waitForTimeout(200)
-        const htmlContent = article.html || article.markdown || ''
+        const htmlContent = processedArticle.html || processedArticle.markdown || ''
         await page.evaluate((el) => {
           const div = document.querySelector('[contenteditable="true"]') as HTMLDivElement
           if (div) {
@@ -131,13 +165,13 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       }
 
       // 如果有封面图片，先下载 URL 封面到本地，再上传
-      if (article.cover) {
-        let localCover = article.cover
+      if (processedArticle.cover) {
+        let localCover = processedArticle.cover
 
         // 如果是 URL 封面，先下载到本地
-        if (!existsSync(article.cover)) {
+        if (!existsSync(processedArticle.cover)) {
           console.log('[toutiao] 封面是 URL，正在下载到本地...')
-          const downloadResult = await downloadCoverUrl(article.cover)
+          const downloadResult = await downloadCoverUrl(processedArticle.cover)
           if (!downloadResult.success || !downloadResult.localPath) {
             console.warn(`[toutiao] 封面下载失败: ${downloadResult.error}，跳过封面上传`)
           } else {

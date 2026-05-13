@@ -38,7 +38,7 @@ export async function runPublish(
       throw new Error('请提供 -f 选项指定 Markdown 文件')
     }
 
-    // 2. 渲染
+    // 2. 渲染（不处理 mermaid，由各平台适配器自行处理）
     const result = await renderMarkdown(content, {
       theme: options.theme || 'default',
       macStyle: options.macStyle !== false,

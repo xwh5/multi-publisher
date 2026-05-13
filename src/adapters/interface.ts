@@ -42,10 +42,23 @@ export interface AuthResult {
   error?: string
 }
 
+export interface MermaidProcessResult {
+  html: string
+  tempFiles: string[]
+}
+
 export interface IPlatformAdapter {
   readonly meta: PlatformMeta
 
   init(runtime: RuntimeInterface): Promise<void>
   checkAuth(): Promise<AuthResult>
+
+  /**
+   * 可选钩子：自定义处理 Mermaid 代码块
+   * 如果平台不支持原生 Mermaid 渲染，实现此方法进行转换
+   * 返回处理后的 HTML 和需要清理的临时文件路径
+   */
+  processMermaid?(html: string): Promise<MermaidProcessResult>
+
   publish(article: Article): Promise<SyncResult>
 }
