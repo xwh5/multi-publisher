@@ -38,16 +38,25 @@ export async function runPublish(
       throw new Error('请提供 -f 选项指定 Markdown 文件')
     }
 
+    // 平台未显式指定主题时，按平台绑定合适的默认主题
+    const platformId = options.platform || 'weixin'
+    const PLATFORM_DEFAULT_THEME: Record<string, string> = {
+      weixin: 'wechat',
+      zhihu: 'modern',
+      toutiao: 'minimal',
+      // 其余平台回退到 default
+    }
+    const theme = options.theme || PLATFORM_DEFAULT_THEME[platformId] || 'default'
+
     // 2. 渲染（不处理 mermaid，由各平台适配器自行处理）
     const result = await renderMarkdown(content, {
-      theme: options.theme || 'default',
+      theme,
       macStyle: options.macStyle !== false,
       autoCover: options.autoCover || false,
       coverMode: (options.coverMode as 'sharp' | 'network' | 'auto') || 'auto',
     })
 
     // 3. 选择适配器
-    const platformId = options.platform || 'weixin'
 
     // 校验 title
     if (!result.title || result.title === '无标题') {

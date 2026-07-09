@@ -2,7 +2,7 @@
 
 **一行命令，Markdown 发布到全网。**
 
-将排版好的 Markdown 文章一键发布到微信公众号、知乎、掘金、CSDN 等 20+ 平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，14 套渲染主题，是内容创作者的效率神器。
+将排版好的 Markdown 文章一键发布到微信公众号、知乎、掘金、CSDN 等 20+ 平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，4 套精排渲染主题（按平台自动匹配），是内容创作者的效率神器。
 
 ---
 
@@ -12,7 +12,7 @@
 |------|------|
 | **多平台支持** | 微信公众号、知乎、掘金、CSDN、微博、小红书、B站等 20+ 平台 |
 | **浏览器自动登录** | Playwright 驱动扫码/账号登录，Cookie 自动获取保存 |
-| **14 套渲染主题** | default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism |
+| **4 套精排主题** | default（通用）、wechat（公众号）、modern（技术/知乎）、minimal（轻阅读/头条），均按平台自动匹配 |
 | **自动封面图生成** | AI 根据标题生成封面图，自动上传到微信 CDN |
 | **Markdown 直发** | front-matter 元数据、代码高亮、LaTeX 公式 |
 | **CI/CD 友好** | 纯命令行无需浏览器，配置文件统一管理 |
@@ -39,7 +39,7 @@ mpub --version
 ```bash
 # 在任意 Claude Code 对话中，直接描述你的需求：
 # "帮我把这篇 article.md 发布到微信公众号"
-# "用 cyberpunk 主题渲染预览一下"
+# "用 wechat 主题渲染预览一下"
 # AI 会调用 mpub 完成操作
 ```
 
@@ -95,7 +95,7 @@ mpub publish-all -f article.md
 mpub render -f article.md
 
 # 指定主题渲染
-mpub render -f article.md -t cyberpunk
+mpub render -f article.md -t wechat
 
 # 自动封面图（文章无封面时 AI 生成）
 mpub publish -f article.md -p weixin --auto-cover
@@ -152,37 +152,43 @@ mpub platforms
 
 ## 主题系统
 
-### 🎨 14 套内置主题
+### 🎨 4 套内置主题（按平台自动匹配）
+
+mpub 内置 4 套浅色阅读主题，均针对公众号 / 知乎 / 头条等白底平台的真实排版规范做了优化：
+
+| 主题 | 风格 | 适配平台 |
+|------|------|----------|
+| `default` | 通用简洁，绿调标题/引用 | 兜底，所有平台可用 |
+| `wechat` | 微信官方排版（微信蓝链接、浅灰代码块、圆角图） | 微信公众号 |
+| `modern` | 深色代码块、清晰层次（知乎/网页友好） | 知乎、技术博客 |
+| `minimal` | 极简留白、轻装饰 | 头条号等轻阅读平台 |
+
+**平台自动匹配**：未用 `-t` 指定主题时，发布按平台自动选默认主题——
+微信 → `wechat`，知乎 → `modern`，头条 → `minimal`，其余回退 `default`。
+（手动 `-t` 仍可覆盖。）
 
 完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)
 
-**主题截图示例：**
-
-| 风格 | 代表主题 | 预览 |
-|------|----------|------|
-| 技术博客 | Cyberpunk | ![Cyberpunk](themes/previews/cyberpunk.png) |
-| 程序员 | Nord | ![Nord](themes/previews/nord.png) |
-| 微信风格 | Wechat | ![Wechat](themes/previews/wechat.png) |
-| 简约 | Minimal | ![Minimal](themes/previews/minimal.png) |
-
 **命令行预览：**
 ```bash
-mpub render -f article.md -t cyberpunk
-mpub render -f article.md -t nord
-mpub render -f article.md -t paper
+mpub render -f article.md -t wechat
+mpub render -f article.md -t modern
+mpub render -f article.md -t minimal
 ```
 
-**全部 14 主题：** default、wechat、modern、minimal、cyberpunk、nord、paper、darkelite、sunset、zen、retro、midnight、brutalism、neumorphism
+**全部 4 主题：** default、wechat、modern、minimal
 
 ### 使用主题
 
 ```bash
-# 渲染时指定主题
-mpub render -f article.md -t cyberpunk
-mpub render -f article.md -t nord
-mpub render -f article.md -t paper
+# 不指定主题：发布到微信自动用 wechat，知乎自动用 modern
+mpub publish -f article.md -p weixin
+mpub publish -f article.md -p zhihu
 
-# 发布时指定主题
+# 渲染时手动指定主题
+mpub render -f article.md -t wechat
+
+# 发布时手动覆盖主题
 mpub publish -f article.md -t modern -p zhihu
 ```
 
