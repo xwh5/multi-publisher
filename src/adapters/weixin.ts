@@ -48,13 +48,15 @@ export class WeixinAdapter implements IPlatformAdapter {
     const { processMermaid: convert } = await import('../core/renderer.js')
     const { html: processed, tempFiles } = await convert(html, os.tmpdir())
 
-    // 上传图片到微信 CDN 并替换 URL
+    // 只上传 mermaid 转换产生的图片（绝对路径且位于临时目录）；
+    // 正文配图（相对路径）交给 WechatPublisher.processImages 统一处理，避免重复上传
     const imgPattern = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi
     let result = processed
     for (const match of [...processed.matchAll(imgPattern)]) {
       const original = match[0]
       const src = match[1]
-      if (!src.startsWith('http://') && !src.startsWith('https://')) {
+      const isMermaidImage = src.startsWith(os.tmpdir()) && src.includes('mermaid-')
+      if (isMermaidImage) {
         try {
           const url = await this.getPublisher().uploadImageForArticle(src)
           result = result.replace(original, original.replace(src, url))
