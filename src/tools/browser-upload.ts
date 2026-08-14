@@ -19,9 +19,9 @@ export interface BrowserUploadResult {
  * @param imagePath 本地图片路径
  * @returns 上传后的封面 URL
  */
-export async function uploadCoverViaBrowser(articleId: string, imagePath: string): Promise<BrowserUploadResult> {
+export async function uploadCoverViaBrowser(articleId: string, imagePath: string, headless = true): Promise<BrowserUploadResult> {
   const browser: Browser = await chromium.launch({
-    headless: false,
+    headless,
     channel: 'chromium',
   })
 
@@ -192,7 +192,7 @@ export async function uploadCoverViaBrowser(articleId: string, imagePath: string
           if (await element.isVisible({ timeout: 500 })) {
             // 检查父元素是否和封面相关
             const parentCover = await element.evaluate((el: Element) => {
-              let parent = el.closest('[class*="cover"]') || el.parentElement?.closest('[class*="cover"]')
+              const parent = el.closest('[class*="cover"]') || el.parentElement?.closest('[class*="cover"]')
               return parent ? 'found' : 'not-found'
             })
 

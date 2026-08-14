@@ -22,6 +22,8 @@ export interface Article {
   source_url?: string
   summary?: string
   tags?: string[]
+  /** Markdown 文件所在目录，用于解析相对路径图片 */
+  baseDir?: string
 }
 
 export interface SyncResult {

@@ -6,7 +6,6 @@
  */
 import type { RuntimeInterface } from '../runtime/index.js'
 import axios from 'axios'
-import { createReadStream } from 'node:fs'
 import { readFileSync } from 'node:fs'
 import FormData from 'form-data'
 import path from 'node:path'
@@ -19,19 +18,38 @@ interface UploadCache {
 }
 
 function extFromUrl(url: string): string {
-  const ext = path.extname(new URL(url).pathname).toLowerCase()
-  return ext || '.jpg'
+  try {
+    const ext = path.extname(new URL(url).pathname).toLowerCase()
+    return ext || '.jpg'
+  } catch {
+    return '.jpg'
+  }
+}
+
+/** 根据文件扩展名返回表单 contentType */
+function contentTypeFromExt(ext: string): string {
+  switch (ext) {
+    case '.jpg': case '.jpeg': return 'image/jpeg'
+    case '.gif': return 'image/gif'
+    case '.webp': return 'image/webp'
+    case '.svg': return 'image/svg+xml'
+    case '.png': default: return 'image/png'
+  }
 }
 
 function nameFromUrl(url: string): string {
   const ext = extFromUrl(url)
-  const pathname = new URL(url).pathname
-  const basename = path.basename(pathname)
-  // If basename has no extension (or is just numbers like "720"), generate a proper name
-  if (!path.extname(basename) || /^\d+$/.test(basename)) {
+  try {
+    const pathname = new URL(url).pathname
+    const basename = path.basename(pathname)
+    // If basename has no extension (or is just numbers like "720"), generate a proper name
+    if (!path.extname(basename) || /^\d+$/.test(basename)) {
+      return `cover${ext}`
+    }
+    return basename
+  } catch {
     return `cover${ext}`
   }
-  return basename
 }
 
 export class WechatPublisher {
@@ -102,9 +120,10 @@ export class WechatPublisher {
   async uploadImageForArticle(filePath: string): Promise<string> {
     const token = await this.getAccessToken()
     const name = path.basename(filePath)
+    const ext = path.extname(name).toLowerCase()
 
     const form = new FormData()
-    form.append('media', readFileSync(filePath), { filename: name, contentType: 'image/png' })
+    form.append('media', readFileSync(filePath), { filename: name, contentType: contentTypeFromExt(ext) })
 
     const res = await axios.post(
       `https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=${token}`,
@@ -219,8 +238,9 @@ export class WechatPublisher {
   /**
    * 处理 HTML 中的图片：本地图片上传到微信 CDN，外部图片保留原 URL
    * 返回处理后的 HTML、第一张 media_id（临时）和第一张本地路径（用于封面永久上传）
+   * 本地相对路径优先按 baseDir 解析（文章所在目录），其次按进程 cwd
    */
-  async processImages(html: string): Promise<{ html: string; firstMediaId?: string; firstLocalPath?: string }> {
+  async processImages(html: string, baseDir?: string): Promise<{ html: string; firstMediaId?: string; firstLocalPath?: string }> {
     const imgPattern = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi
     let firstMediaId: string | undefined
     let firstLocalPath: string | undefined
@@ -239,22 +259,16 @@ export class WechatPublisher {
         continue
       }
 
+      // 本地路径：优先 baseDir 解析，其次 cwd
+      const localPath = baseDir ? path.resolve(baseDir, src) : src
+
       try {
-        const isLocalPath = !src.startsWith('http://') && !src.startsWith('https://')
-        if (isLocalPath) {
-          // 本地文件用 uploadimg 接口，返回直接可访问的 URL
-          const url = await this.uploadImageForArticle(src)
-          if (!firstLocalPath) firstLocalPath = src
-          replaced = replaced.replace(original, original.replace(src, url))
-        } else {
-          // 外部 URL 下载后上传
-          const mediaId = await this.uploadImageFromUrl(src)
-          if (!firstMediaId) firstMediaId = mediaId
-          const cdnUrl = `https://mmbiz.qpic.cn/mmbiz_png/${mediaId}/0`
-          replaced = replaced.replace(original, original.replace(src, cdnUrl))
-        }
+        // 本地文件用 uploadimg 接口，返回直接可访问的 URL
+        const url = await this.uploadImageForArticle(localPath)
+        if (!firstLocalPath) firstLocalPath = localPath
+        replaced = replaced.replace(original, original.replace(src, url))
       } catch (err) {
-        console.warn(`[WechatPublisher] 上传图片失败 ${src}: ${(err as Error).message}，保留原 URL`)
+        console.warn(`[WechatPublisher] 上传图片失败 ${localPath}: ${(err as Error).message}，保留原 URL`)
       }
     }
 
@@ -270,10 +284,12 @@ export class WechatPublisher {
     cover: string
     author: string
     source_url: string
+    summary?: string
+    baseDir?: string
   }): Promise<{ media_id: string }> {
     const token = await this.getAccessToken()
 
-    const { html: processedHtml, firstMediaId, firstLocalPath } = await this.processImages(options.content)
+    const { html: processedHtml, firstMediaId, firstLocalPath } = await this.processImages(options.content, options.baseDir)
 
     // 上传封面图：优先用 front-matter 指定的封面图，其次用正文第一张图片的 media_id
     let thumbMediaId: string | undefined
@@ -319,7 +335,8 @@ export class WechatPublisher {
       title: options.title,
       author: options.author,
       content: processedHtml,
-      digest: options.title,
+      // 微信摘要：优先 front-matter summary，其次用标题
+      digest: options.summary || options.title,
       content_source_url: options.source_url,
     }
     // 只在有有效 thumbMediaId 时才传 thumb_media_id

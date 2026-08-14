@@ -1,12 +1,12 @@
 /**
  * 渲染管道 - 将 Markdown 渲染为平台可用的 HTML
  */
-import { parseMarkdown, type ParsedArticle } from './parser.js'
+import { parseMarkdown } from './parser.js'
 import { processMath } from './mathjax.js'
 import { inlineStyles } from './styler.js'
 import { loadThemeCss, DEFAULT_CSS } from './theme.js'
 import { generateCover } from '../tools/cover-generator.js'
-import { fetchCoverByTitle, cleanupCoverFile } from '../tools/cover-fetcher.js'
+import { fetchCoverByTitle } from '../tools/cover-fetcher.js'
 import { execSync } from 'child_process'
 import path from 'path'
 import fs from 'fs/promises'
@@ -32,6 +32,8 @@ export interface RenderResult {
   author?: string
   cover?: string
   source_url?: string
+  /** front-matter 摘要（微信 digest 用） */
+  summary?: string
   /** 自动获取的封面图本地路径（需在使用后清理） */
   autoCoverPath?: string
 }
@@ -95,7 +97,6 @@ export async function renderMarkdown(
   const {
     theme = 'default',
     customCss,
-    macStyle = true,
     autoCover = false,
     coverMode = 'auto',
   } = options
@@ -165,6 +166,7 @@ export async function renderMarkdown(
     author: parsed.meta.author,
     cover: parsed.meta.cover,
     source_url: parsed.meta.source_url,
+    summary: parsed.meta.summary,
     autoCoverPath,
   }
 }

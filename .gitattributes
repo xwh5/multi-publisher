@@ -1,0 +1,13 @@
+# 统一行尾符为 LF（Windows/WSL 跨平台协作）
+* text=auto eol=lf
+
+# 二进制文件
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

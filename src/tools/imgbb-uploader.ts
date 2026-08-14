@@ -1,6 +1,7 @@
 /**
  * 图片上传工具 - 提供公共 URL 供各平台使用
  * 尝试多个图床服务，按优先级 fallback
+ * 注意：Catbox 为永久存储（优先），Litterbox 仅 1 小时有效期（兜底）
  */
 import axios from 'axios'
 import FormData from 'form-data'
@@ -13,8 +14,8 @@ import path from 'node:path'
  */
 export async function uploadImageToPublicUrl(filePath: string): Promise<string> {
   const services = [
-    () => uploadToLitterbox(filePath),
     () => uploadToCatbox(filePath),
+    () => uploadToLitterbox(filePath),
   ]
 
   for (const attempt of services) {

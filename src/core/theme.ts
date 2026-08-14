@@ -87,64 +87,102 @@ const BUILTIN_THEMES: Record<string, { name: string; description: string; css: s
   },
   wechat: {
     name: 'Wechat',
-    description: '微信风格，仿微信官方文章排版（白底、微信蓝链接、浅灰代码块）',
+    description: '微信风格：琥珀编辑风（Tufte 灵感）——重点琥珀高亮、金句引用块、卡片容器，阅读友好',
     css: `
+/* 正文：沉稳墨色，1.75 行高 */
 p {
-  color: rgb(62, 62, 62);
+  color: rgb(51, 51, 51);
   font-size: 15px;
   line-height: 1.75em;
   margin: 0 0 1em 0;
   word-wrap: break-word;
   letter-spacing: 0.5px;
 }
+/* 标题：暖墨色 + 编辑感下边框；h3 用琥珀区分层级 */
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
-  color: #3f3f3f;
-  margin: 1.4em 0 0.6em 0;
+  color: #2b2116;
+  margin: 1.5em 0 0.7em 0;
+  line-height: 1.4em;
 }
-h1 { font-size: 1.4em; line-height: 1.4em; border-bottom: 1px solid #e8e8e8; padding-bottom: 0.3em; text-align: center; }
-h2 { font-size: 1.2em; border-left: 4px solid #07a35a; padding-left: 0.5em; }
-h3 { font-size: 1.05em; }
-h4, h5, h6 { font-size: 1em; }
-ul, ol { margin: 0 0 1em 0; padding-left: 1.8em; }
+h1 {
+  font-size: 1.5em;
+  text-align: center;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #e6e2d8;
+  padding-bottom: 0.4em;
+  margin-bottom: 1.2em;
+}
+h2 {
+  font-size: 1.22em;
+  border-left: 4px solid #b45309;
+  border-bottom: 1px solid #e6e2d8;
+  padding: 0.1em 0 0.3em 0.5em;
+  letter-spacing: 0.5px;
+}
+h3 { font-size: 1.08em; color: #b45309; }
+h4, h5, h6 { font-size: 1em; color: #6b6b6b; }
+/* 重点强调：琥珀色，一眼看到重点 */
+b, strong { font-weight: bold; color: #b45309; }
+/* 列表 */
+ul, ol { margin: 0 0 1em 0; padding-left: 1.7em; }
 li { margin: 0.35em 0; line-height: 1.7em; }
 li p { margin: 0; }
+/* 引用块：金句样式——琥珀左边框 + 暖底斜体 */
+blockquote {
+  border-left: 4px solid #b45309;
+  background-color: #fef3e2;
+  padding: 0.8em 1.1em;
+  margin: 1.2em 0;
+  color: #3a2c12;
+  font-style: italic;
+  border-radius: 0 6px 6px 0;
+}
+blockquote p { margin: 0.3em 0; color: #3a2c12; }
+/* 代码块与行内代码 */
 pre {
   background-color: #f6f8fa;
   border: 1px solid #eaecef;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 14px 16px;
   overflow-x: auto;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.6;
   margin: 1em 0;
   color: #24292e;
 }
 code {
-  background-color: rgba(175, 184, 193, 0.2);
-  border-radius: 3px;
+  background-color: rgba(180, 83, 9, 0.08);
+  border-radius: 4px;
   padding: 0.2em 0.4em;
-  font-size: 0.9em;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.88em;
+  color: #9a5b1d;
+  font-family: Consolas, 'Liberation Mono', Menlo, monospace;
 }
-pre code { background: none; padding: 0; border: none; font-size: 13.5px; }
-blockquote {
-  border-left: 3px solid #c8a96e;
-  background-color: #faf9f7;
-  padding: 0.8em 1em;
-  margin: 1em 0;
-  color: #666;
-  border-radius: 0 4px 4px 0;
+pre code { background: none; padding: 0; border: none; color: #24292e; }
+/* 卡片容器（:::tip / :::warning / :::note） */
+.callout {
+  border: 1px solid #e6e2d8;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 1.2em 0;
+  background: #fbfaf6;
+  font-size: 14.5px;
 }
-hr { border: none; border-top: 1px solid #e8e8e8; margin: 1.5em 0; }
-i, cite, em, var, address { font-style: italic; }
-b, strong { font-weight: bold; color: #1a1a1a; }
-img { max-width: 100%; height: auto; display: block; margin: 1em auto; border-radius: 4px; }
-table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14px; }
-table th, table td { border: 1px solid #e8e8e8; padding: 8px 12px; }
-table th { background-color: #f8f8f8; font-weight: bold; color: #3f3f3f; }
-table tr:nth-child(even) { background-color: #fafafa; }
-a { color: #576b95; border-bottom: 1px solid rgba(87, 107, 149, 0.3); text-decoration: none; }
+.callout p { margin: 0.4em 0; }
+.callout-tip { border-left: 4px solid #b45309; background: #fef3e2; }
+.callout-warning { border-left: 4px solid #b3261e; background: #fdecea; }
+.callout-note { border-left: 4px solid #8a8a8a; background: #f7f7f5; }
+/* 表格：暖纸色表头 + 细边框 */
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: 14px; }
+table th, table td { border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6; }
+table th { background-color: #faf6ef; font-weight: bold; color: #6b4a1d; }
+/* 图片：圆角居中 */
+img { max-width: 100%; height: auto; display: block; margin: 1.2em auto; border-radius: 8px; }
+/* 链接：琥珀下边框 */
+a { color: #b45309; text-decoration: none; border-bottom: 1px solid rgba(180, 83, 9, 0.3); }
+/* 分割线 */
+hr { border: none; border-top: 1px solid #e6e2d8; margin: 1.8em 0; }
 `,
   },
   modern: {

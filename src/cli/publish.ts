@@ -2,6 +2,7 @@
  * publish 命令 - 渲染并发布文章到平台
  */
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import type { Command } from 'commander'
 import { renderMarkdown } from '../core/renderer.js'
 import { createNodeRuntime } from '../runtime/node-runtime.js'
@@ -47,6 +48,9 @@ export async function runPublish(
       // 其余平台回退到 default
     }
     const theme = options.theme || PLATFORM_DEFAULT_THEME[platformId] || 'default'
+
+    // 文章目录（解析正文相对路径图片用）；URL 输入时无 baseDir
+    const baseDir = options.file && !options.file.startsWith('http') ? path.dirname(path.resolve(options.file)) : undefined
 
     // 2. 渲染（不处理 mermaid，由各平台适配器自行处理）
     const result = await renderMarkdown(content, {
@@ -100,6 +104,8 @@ export async function runPublish(
       author: result.author,
       cover: coverImage,
       source_url: result.source_url,
+      summary: result.summary,
+      baseDir,
     })
 
     // 清理自动获取的临时封面图

@@ -88,6 +88,8 @@ export class WeixinAdapter implements IPlatformAdapter {
         cover: article.cover ?? '',
         author: article.author ?? '',
         source_url: article.source_url ?? '',
+        summary: article.summary,
+        baseDir: article.baseDir,
       })
 
       const token = await this.getPublisher().getAccessToken()

@@ -30,3 +30,7 @@ test-*.md
 # Temp files
 .temp/
 tmp/
+temp/
+# Playwright artifacts
+playwright-report/
+test-results/
