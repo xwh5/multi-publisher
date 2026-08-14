@@ -1,522 +1,209 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>所有主题预览 - multi-publisher</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>multi-publisher 主题预览（4 套）</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #fff; padding: 2rem; }
-  h1 { text-align: center; margin-bottom: 0.5rem; color: #fff; font-size: 2rem; }
-  .subtitle { text-align: center; color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 2rem; max-width: 1600px; margin: 0 auto; }
-  .preview-card { background: #16213e; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-  .preview-header { padding: 1rem 1.5rem; background: #0f3460; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-  .preview-body { padding: 1.5rem; max-height: 480px; overflow-y: auto; font-size: 13px; }
-  .preview-footer { padding: 0.75rem 1.5rem; background: #0f3460; font-size: 0.8rem; color: #88c0d0; }
-  .badge { font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 20px; background: rgba(255,255,255,0.15); }
-
-  /* ===================== */
-  /* 1. Wechat */
-  .wechat { background: #fff; color: rgb(47, 47, 47); font-size: 14px; line-height: 1.8em; }
-  .wechat h1 { color: rgb(30, 30, 30); font-size: 1.35em; border-bottom: 1px solid #e8e8e8; padding-bottom: 0.3em; margin-bottom: 1rem; }
-  .wechat h2 { color: rgb(30, 30, 30); font-size: 1.2em; margin: 1em 0 0.5em; font-weight: bold; }
-  .wechat h3 { color: rgb(30, 30, 30); font-size: 1.1em; }
-  .wechat p { color: rgb(47, 47, 47); margin-bottom: 1em; }
-  .wechat code { background: rgba(27, 31, 35, 0.06); border-radius: 3px; padding: 0.15em 0.4em; color: #e74c3c; font-family: monospace; }
-  .wechat pre { background: #f8f8f8; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1em 0; border: 1px solid #e8e8e8; }
-  .wechat pre code { background: none; padding: 0; color: #333; }
-  .wechat blockquote { border-left: 3px solid #c8a96e; background: #faf9f7; padding: 0.5em 1em; margin: 1em 0; color: #666; }
-  .wechat a { color: #576b95; text-decoration: none; border-bottom: 1px solid rgba(87, 107, 149, 0.3); }
-  .wechat table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-  .wechat th, .wechat td { border: 1px solid #e8e8e8; padding: 8px 12px; }
-  .wechat th { background: #f8f8f8; font-weight: bold; }
-  .wechat ul, .wechat ol { padding-left: 1.8em; margin: 0.8em 0; }
-  .wechat li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 2. Cyberpunk */
-  .cyberpunk { background: linear-gradient(135deg, #0d0221 0%, #0a0a1f 100%); color: #c8c8ff; font-size: 14px; line-height: 1.8em; }
-  .cyberpunk h1 { color: #00fff5; text-shadow: 0 0 20px #00fff5; font-size: 1.5em; margin-bottom: 1rem; border-bottom: 2px solid #ff00ff; padding-bottom: 0.4em; }
-  .cyberpunk h2 { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 1.2em; margin: 1.2em 0 0.6em; }
-  .cyberpunk h3 { color: #00fff5; font-size: 1.05em; }
-  .cyberpunk p { color: #c8c8ff; margin-bottom: 1em; }
-  .cyberpunk code { background: linear-gradient(90deg, #ff00ff22, #00fff522); border: 1px solid #ff00ff55; border-radius: 4px; padding: 0.2em 0.5em; color: #00fff5; }
-  .cyberpunk pre { background: linear-gradient(135deg, #0d022155, #0a0a1f); border: 1px solid #ff00ff33; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1em 0; box-shadow: 0 0 20px #ff00ff22; }
-  .cyberpunk pre code { background: none; border: none; padding: 0; color: #00fff5; }
-  .cyberpunk blockquote { border-left: 3px solid #ff00ff; background: linear-gradient(90deg, #ff00ff11, transparent); padding: 0.8rem 1rem; margin: 1em 0; color: #ff88ff; }
-  .cyberpunk a { color: #00fff5; text-decoration: none; border-bottom: 1px solid #00fff5; }
-  .cyberpunk table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-  .cyberpunk th { background: linear-gradient(90deg, #ff00ff33, #00fff533); padding: 8px; border: 1px solid #ff00ff44; color: #00fff5; }
-  .cyberpunk td { padding: 6px; border: 1px solid #ff00ff22; color: #c8c8ff; }
-  .cyberpunk ul, .cyberpunk ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .cyberpunk li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 3. Nord */
-  .nord { background: #2e3440; color: #eceff4; font-size: 14px; line-height: 1.8em; }
-  .nord h1 { color: #88c0d0; font-size: 1.5em; margin-bottom: 1rem; padding-bottom: 0.4em; border-bottom: 2px solid #4c566a; }
-  .nord h2 { color: #81a1c1; font-size: 1.2em; margin: 1.2em 0 0.6em; }
-  .nord h3 { color: #88c0d0; font-size: 1.05em; }
-  .nord p { color: #d8dee9; margin-bottom: 1em; }
-  .nord code { background: #3b4252; border-radius: 4px; padding: 0.2em 0.5em; color: #a3be8c; }
-  .nord pre { background: #3b4252; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1em 0; border-left: 3px solid #88c0d0; }
-  .nord pre code { background: none; padding: 0; color: #eceff4; }
-  .nord blockquote { border-left: 3px solid #5e81ac; background: #3b425255; padding: 0.8rem 1rem; margin: 1em 0; color: #d8dee9; font-style: italic; }
-  .nord a { color: #88c0d0; text-decoration: none; }
-  .nord table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-  .nord th { background: #3b4252; padding: 8px; border: 1px solid #4c566a; color: #88c0d0; }
-  .nord td { padding: 6px; border: 1px solid #4c566a55; }
-  .nord ul, .nord ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .nord li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 4. Paper */
-  .paper { background: #faf8f5; color: #333; font-size: 14px; line-height: 2; font-family: Georgia, serif; background-image: linear-gradient(transparent 95%, #e8e4dc 95%); background-size: 100% 2em; }
-  .paper h1 { color: #1a1a1a; font-size: 1.6em; margin-bottom: 1rem; text-align: center; letter-spacing: 0.05em; text-indent: 0; }
-  .paper h2 { color: #2d2d2d; font-size: 1.3em; border-bottom: 1px solid #ccc; padding-bottom: 0.3em; margin: 1.2em 0 0.6em; text-indent: 0; }
-  .paper h3 { color: #3d3d3d; font-size: 1.1em; text-indent: 0; }
-  .paper p { color: #444; margin-bottom: 1em; text-indent: 2em; }
-  .paper code { background: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; padding: 0.15em 0.4em; color: #c7254e; font-family: Courier New, monospace; font-size: 0.9em; }
-  .paper pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 16px; overflow-x: auto; margin: 1em 0; font-family: Courier New, monospace; }
-  .paper pre code { background: none; border: none; padding: 0; color: #333; }
-  .paper blockquote { border-left: 3px solid #c8a96e; background: #f9f7f3; padding: 0.8rem 1rem; margin: 1em 0; color: #666; font-style: italic; }
-  .paper a { color: #0969da; text-decoration: none; border-bottom: 1px dashed #0969da; }
-  .paper table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-  .paper th { background: #f5f5f5; padding: 8px; border: 1px solid #ddd; color: #333; }
-  .paper td { padding: 6px; border: 1px solid #ddd; }
-  .paper ul, .paper ol { padding-left: 2em; margin: 0.8em 0; }
-  .paper li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 5. Gradient */
-  .gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-size: 14px; line-height: 1.8em; }
-  .gradient h1 { font-size: 1.6em; margin-bottom: 1rem; text-align: center; background: linear-gradient(90deg, #fff, #e0e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .gradient h2 { color: #e0e0ff; font-size: 1.2em; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 0.3em; margin: 1.2em 0 0.6em; }
-  .gradient h3 { color: #fff; font-size: 1.05em; }
-  .gradient p { color: rgba(255,255,255,0.9); margin-bottom: 1em; }
-  .gradient code { background: rgba(255,255,255,0.15); border-radius: 4px; padding: 0.2em 0.5em; color: #fff; }
-  .gradient pre { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px; overflow-x: auto; margin: 1em 0; backdrop-filter: blur(10px); }
-  .gradient pre code { background: none; padding: 0; color: #e0e0ff; }
-  .gradient blockquote { background: rgba(255,255,255,0.1); border-left: 3px solid #fff; border-radius: 0 8px 8px 0; padding: 0.8rem 1rem; margin: 1em 0; color: rgba(255,255,255,0.9); }
-  .gradient a { color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.5); }
-  .gradient table { width: 100%; border-collapse: collapse; margin: 1em 0; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; }
-  .gradient th { background: rgba(255,255,255,0.2); padding: 8px; color: #fff; }
-  .gradient td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .gradient ul, .gradient ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .gradient li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 6. Dark Elite */
-  .darkelite { background: #0f1115; color: #c9d1d9; font-size: 14px; line-height: 1.8em; }
-  .darkelite h1 { color: #fff; font-size: 1.5em; margin-bottom: 1rem; padding-bottom: 0.4em; border-bottom: 1px solid #30363d; }
-  .darkelite h2 { color: #58a6ff; font-size: 1.2em; margin: 1.2em 0 0.6em; }
-  .darkelite h3 { color: #8b949e; font-size: 1.05em; }
-  .darkelite p { color: #c9d1d9; margin-bottom: 1em; }
-  .darkelite code { background: #21262d; border: 1px solid #30363d; border-radius: 4px; padding: 0.2em 0.5em; color: #f0883e; }
-  .darkelite pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 16px; overflow-x: auto; margin: 1em 0; }
-  .darkelite pre code { background: none; border: none; padding: 0; color: #c9d1d9; }
-  .darkelite blockquote { border-left: 3px solid #238636; background: #161b22; padding: 0.8rem 1rem; margin: 1em 0; color: #8b949e; }
-  .darkelite a { color: #58a6ff; text-decoration: none; }
-  .darkelite table { width: 100%; border-collapse: collapse; margin: 1em 0; border: 1px solid #30363d; }
-  .darkelite th { background: #161b22; padding: 8px; border: 1px solid #30363d; color: #58a6ff; }
-  .darkelite td { padding: 6px; border: 1px solid #30363d; }
-  .darkelite ul, .darkelite ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .darkelite li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 7. Sunset */
-  .sunset { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%); color: #ddd; font-size: 14px; line-height: 1.8em; }
-  .sunset h1 { color: #ff6b6b; font-size: 1.5em; margin-bottom: 1rem; text-align: center; text-shadow: 0 0 30px #ff6b6b55; }
-  .sunset h2 { color: #ffa07a; font-size: 1.2em; border-bottom: 1px solid #ffa07a44; padding-bottom: 0.3em; margin: 1.2em 0 0.6em; }
-  .sunset h3 { color: #ffd93d; font-size: 1.05em; }
-  .sunset p { color: #ddd; margin-bottom: 1em; }
-  .sunset code { background: #2d2d44; border-radius: 4px; padding: 0.2em 0.5em; color: #ffd93d; }
-  .sunset pre { background: #2d2d44; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 1em 0; border-left: 3px solid #ff6b6b; }
-  .sunset pre code { background: none; padding: 0; color: #ffa07a; }
-  .sunset blockquote { background: linear-gradient(90deg, #ff6b6b11, transparent); border-left: 3px solid #ff6b6b; padding: 0.8rem 1rem; margin: 1em 0; color: #bbb; }
-  .sunset a { color: #ffa07a; text-decoration: none; }
-  .sunset table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-  .sunset th { background: #2d2d44; padding: 8px; border: 1px solid #444; color: #ffd93d; }
-  .sunset td { padding: 6px; border: 1px solid #444; }
-  .sunset ul, .sunset ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .sunset li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 8. Zen */
-  .zen { background: #f7f5f0; color: #4a4a4a; font-size: 14px; line-height: 2em; font-family: 'Noto Serif SC', serif; }
-  .zen h1 { color: #2d2d2d; font-size: 1.5em; margin-bottom: 1rem; text-align: center; letter-spacing: 0.15em; border-bottom: 1px solid #d4d4d4; padding-bottom: 0.5em; font-weight: normal; }
-  .zen h2 { color: #2d2d2d; font-size: 1.2em; border-left: 3px solid #8b7355; padding-left: 0.8em; margin: 1.2em 0 0.6em; font-weight: normal; }
-  .zen h3 { color: #5a5a5a; font-size: 1.05em; font-weight: normal; }
-  .zen p { color: #4a4a4a; margin-bottom: 1.2em; }
-  .zen code { background: #ebe8e0; border-radius: 3px; padding: 0.15em 0.4em; color: #6b5b4f; }
-  .zen pre { background: #ebe8e0; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 1.2em 0; border-left: 2px solid #8b7355; }
-  .zen pre code { background: none; padding: 0; color: #4a4a4a; }
-  .zen blockquote { border-left: none; border-top: 1px solid #d4d4d4; border-bottom: 1px solid #d4d4d4; background: none; padding: 1em 1.5em; margin: 1.5em 0; color: #7a7a7a; text-align: center; font-style: normal; }
-  .zen hr { border: none; text-align: center; margin: 2em 0; }
-  .zen hr::after { content: '· · ·'; color: #8b7355; letter-spacing: 0.5em; font-size: 1.2em; }
-  .zen a { color: #8b7355; text-decoration: none; border-bottom: 1px solid transparent; }
-  .zen a:hover { border-bottom-color: #8b7355; }
-  .zen table { width: 100%; border-collapse: collapse; margin: 1.2em 0; }
-  .zen th { color: #8b7355; padding: 8px; border-top: 1px solid #d4d4d4; text-align: left; font-weight: normal; }
-  .zen td { padding: 6px; border-top: 1px solid #d4d4d4; }
-  .zen ul, .zen ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .zen li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 9. Retro Futurism */
-  .retro { background: #0d0d1a; background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, #1a1a2e 40px, #1a1a2e 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, #1a1a2e 40px, #1a1a2e 41px); color: #e0e0e0; font-size: 14px; line-height: 1.7em; }
-  .retro h1 { color: #ff6ec7; font-size: 1.4em; margin-bottom: 1rem; text-shadow: 3px 3px 0 #00d4ff, -1px -1px 0 #ffff00; transform: skewX(-5deg); text-transform: uppercase; letter-spacing: 0.1em; }
-  .retro h2 { color: #00d4ff; font-size: 1.15em; border-bottom: 2px solid #ff6ec7; padding-bottom: 0.2em; margin: 1.2em 0 0.6em; text-transform: uppercase; }
-  .retro h3 { color: #ffff00; font-size: 1em; text-transform: uppercase; }
-  .retro p { color: #e0e0e0; margin-bottom: 1em; }
-  .retro code { background: #ff6ec755; border: 1px solid #ff6ec7; border-radius: 0; padding: 0.2em 0.5em; color: #ff6ec7; font-family: Courier New, monospace; }
-  .retro pre { background: linear-gradient(135deg, #1a1a2e, #0d0d1a); border: 2px solid #ff6ec7; border-radius: 0; padding: 16px; overflow-x: auto; margin: 1em 0; box-shadow: 5px 5px 0 #00d4ff; }
-  .retro pre code { background: none; border: none; padding: 0; color: #00d4ff; box-shadow: none; }
-  .retro blockquote { border-left: 4px solid #ffff00; background: #1a1a2e; padding: 0.8rem 1rem; margin: 1em 0; color: #e0e0e0; transform: skewX(-3deg); }
-  .retro a { color: #00d4ff; text-decoration: none; text-transform: uppercase; }
-  .retro a:hover { color: #ff6ec7; text-shadow: 0 0 10px #ff6ec7; }
-  .retro table { border-collapse: separate; border-spacing: 2px; width: 100%; margin: 1em 0; }
-  .retro th { background: #1a1a2e; padding: 6px 10px; border: 1px solid #ff6ec7; color: #ffff00; text-align: center; }
-  .retro td { background: #1a1a2e; padding: 5px 8px; border: 1px solid #ff6ec7; color: #e0e0e0; }
-  .retro ul, .retro ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .retro li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 10. Midnight Library */
-  .midnight { background: #0f1a14; color: #d4c5a9; font-size: 14px; line-height: 1.9em; font-family: Lora, serif; background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231a2f23' fill-opacity='0.2'%3E%3Cpath d='M20 20v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 20v-4H4v4H0v2h4v4h2v-4h4v-2H6z'/%3E%3C/g%3E%3C/svg%3E"); }
-  .midnight h1 { color: #f5e6c8; font-size: 1.5em; margin-bottom: 1rem; text-align: center; text-shadow: 0 0 40px #ffd70044; border-bottom: 1px solid #3d5a45; padding-bottom: 0.5em; font-family: 'Playfair Display', serif; }
-  .midnight h2 { color: #c9a962; font-size: 1.2em; border-left: 3px solid #8b7355; padding-left: 0.8em; margin: 1.2em 0 0.6em; font-family: 'Playfair Display', serif; }
-  .midnight h3 { color: #b8956e; font-size: 1.05em; font-family: 'Playfair Display', serif; }
-  .midnight p { color: #d4c5a9; margin-bottom: 1em; }
-  .midnight code { background: #2a3f33; border-radius: 3px; padding: 0.15em 0.4em; color: #ffd700; }
-  .midnight pre { background: #1a2f23; border: 1px solid #3d5a45; border-radius: 4px; padding: 16px; overflow-x: auto; margin: 1em 0; box-shadow: inset 0 0 20px #0d1a1444; }
-  .midnight pre code { background: none; padding: 0; color: #d4c5a9; }
-  .midnight blockquote { border-left: 3px solid #8b7355; background: linear-gradient(90deg, #1a2f2344, transparent); padding: 0.8rem 1rem; margin: 1.2em 0; color: #b8956e; font-style: italic; }
-  .midnight hr { border: none; border-top: 1px solid #3d5a45; margin: 2em 0; }
-  .midnight a { color: #c9a962; text-decoration: none; border-bottom: 1px dotted #8b7355; }
-  .midnight a:hover { color: #ffd700; border-bottom-color: #ffd700; }
-  .midnight table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-  .midnight th { background: #1a2f23; padding: 8px; border: 1px solid #3d5a45; color: #c9a962; text-align: left; }
-  .midnight td { padding: 6px; border: 1px solid #3d5a45; }
-  .midnight ul, .midnight ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .midnight li { margin-bottom: 0.4em; }
-
-  /* ===================== */
-  /* 11. Brutalism */
-  .brutalism { background: #fff; color: #000; font-size: 14px; line-height: 1.6em; }
-  .brutalism h1 { color: #000; font-size: 1.8em; margin-bottom: 0.8rem; border: 4px solid #000; padding: 0.2em 0.4em; display: inline-block; transform: rotate(-1deg); font-weight: 900; text-transform: uppercase; }
-  .brutalism h2 { color: #000; font-size: 1.3em; border-bottom: 4px solid #000; padding-bottom: 0.2em; margin: 1em 0 0.5em; font-weight: 900; text-transform: uppercase; }
-  .brutalism h3 { color: #000; font-size: 1.1em; font-weight: 900; text-transform: uppercase; }
-  .brutalism p { color: #000; margin-bottom: 0.8em; font-weight: 500; }
-  .brutalism code { background: #000; border-radius: 0; padding: 0.2em 0.4em; color: #fff; font-family: monospace; font-weight: bold; }
-  .brutalism pre { background: #000; border-radius: 0; padding: 16px; overflow-x: auto; margin: 1em 0; }
-  .brutalism pre code { background: none; padding: 0; color: #fff; }
-  .brutalism blockquote { border: 4px solid #000; background: #f0f0f0; padding: 0.8rem 1rem; margin: 1em 0; }
-  .brutalism blockquote p { font-size: 1.1em; font-weight: 900; margin: 0; }
-  .brutalism hr { border: none; border-top: 4px solid #000; margin: 2em 0; }
-  .brutalism a { color: #000; text-decoration: none; background: #ffff00; padding: 0 0.2em; font-weight: bold; }
-  .brutalism a:hover { background: #000; color: #fff; }
-  .brutalism table { border-collapse: collapse; width: 100%; margin: 1em 0; border: 4px solid #000; }
-  .brutalism th { background: #000; padding: 8px; border: 2px solid #000; color: #fff; font-weight: 900; text-transform: uppercase; }
-  .brutalism td { padding: 6px; border: 2px solid #000; }
-  .brutalism ul, .brutalism ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .brutalism li { margin-bottom: 0.4em; font-weight: 600; }
-
-  /* ===================== */
-  /* 12. Neumorphism */
-  .neumorphism { background: #e0e5ec; color: #4a5568; font-size: 14px; line-height: 1.8em; }
-  .neumorphism h1 { color: #2d3748; font-size: 1.4em; margin-bottom: 1rem; text-align: center; text-shadow: 6px 6px 12px #b8bcc2, -6px -6px 12px #ffffff; padding: 0.5em; font-weight: 600; }
-  .neumorphism h2 { color: #4a5568; font-size: 1.15em; border-left: 4px solid #7c3aed; padding-left: 0.6em; margin: 1em 0 0.5em; font-weight: 600; }
-  .neumorphism h3 { color: #5a6577; font-size: 1.02em; font-weight: 600; }
-  .neumorphism p { color: #4a5568; margin-bottom: 1em; }
-  .neumorphism code { background: #e0e5ec; border-radius: 8px; padding: 0.2em 0.5em; color: #7c3aed; box-shadow: inset 2px 2px 4px #b8bcc2, inset -2px -2px 4px #ffffff; }
-  .neumorphism pre { background: #e0e5ec; border-radius: 16px; padding: 16px; overflow-x: auto; margin: 1em 0; box-shadow: 8px 8px 16px #b8bcc2, -8px -8px 16px #ffffff; }
-  .neumorphism pre code { background: none; padding: 0; color: #4a5568; box-shadow: none; }
-  .neumorphism blockquote { background: #e0e5ec; border-radius: 16px; padding: 1rem 1.5rem; margin: 1em 0; color: #5a6577; box-shadow: 8px 8px 16px #b8bcc2, -8px -8px 16px #ffffff; border-left: 4px solid #7c3aed; }
-  .neumorphism hr { border: none; margin: 1.5em 0; }
-  .neumorphism hr::after { content: '···'; color: #7c3aed; font-size: 1.3em; letter-spacing: 0.5em; }
-  .neumorphism a { color: #7c3aed; text-decoration: none; font-weight: 600; }
-  .neumorphism a:hover { color: #5b21b6; }
-  .neumorphism table { border-collapse: collapse; width: 100%; margin: 1em 0; background: #e0e5ec; border-radius: 16px; overflow: hidden; box-shadow: 8px 8px 16px #b8bcc2, -8px -8px 16px #ffffff; }
-  .neumorphism th { background: linear-gradient(145deg, #e6ebf2, #d1d9e6); padding: 10px; color: #7c3aed; font-weight: 600; }
-  .neumorphism td { padding: 8px 10px; }
-  .neumorphism ul, .neumorphism ol { padding-left: 1.5em; margin: 0.8em 0; }
-  .neumorphism li { margin-bottom: 0.4em; }
-
+  body { margin: 0; background: #f0efeb; font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  .page-head { max-width: 1100px; margin: 0 auto; padding: 32px 24px 8px; }
+  .page-head h1 { margin: 0 0 6px; font-size: 24px; }
+  .page-head p { margin: 0; color: #666; font-size: 14px; }
+  .theme-block { max-width: 1100px; margin: 24px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+  .theme-head { display: flex; align-items: baseline; gap: 12px; padding: 16px 24px; border-bottom: 1px solid #eee; background: #fafaf8; }
+  .theme-head h2 { margin: 0; font-size: 18px; font-family: monospace; }
+  .theme-desc { color: #888; font-size: 13px; }
+  .theme-body { padding: 16px 32px 32px; }
 </style>
 </head>
 <body>
+  <div class="page-head">
+    <h1>multi-publisher 内置主题预览</h1>
+    <p>同一篇示例文章（含卡片容器 :::tip/warning/note）在 4 套主题下的渲染效果。生成: npx tsx scripts/generate-all-themes-preview.ts</p>
+  </div>
+  
+    <div class="theme-block">
+      <div class="theme-head">
+        <h2>default</h2>
+        <span class="theme-desc">默认简洁，适合大多数文章</span>
+      </div>
+      <div class="theme-body"><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">同一台机器，同一个项目：<strong style="font-weight: bold; color: #1a1a1a;">原生文件系统 0.05s</strong>，桥接访问 8.8s——慢 169 倍。</p>
+<section class="callout callout-tip"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">先记住结论</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">项目放对地方：warm build <strong style="font-weight: bold; color: #1a1a1a;">2.63s</strong>；放错地方：直接卡死崩溃。</p>
+</section><h2 style="font-weight: bold; color: #2c3e50; margin: 1.2em 0 0.6em 0; font-size: 1.2em; border-left: 4px solid #07a35a; padding-left: 0.5em;">为什么慢</h2>
+<p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">WSL2 不是&quot;子系统&quot;，是台独立虚拟机。访问 <code style="background-color: rgba(175, 184, 193, 0.2); border-radius: 3px; padding: 0.2em 0.4em; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">/mnt/c</code> 时，每个文件操作都要经 9p 协议翻译一次。</p>
+<blockquote style="border-left: 4px solid #07a35a; background-color: #f6fbf8; padding: 0.8em 1em; margin: 1em 0; color: #555; border-radius: 0 4px 4px 0;">
+<p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">官方原话：For the fastest performance speed, store your files in the WSL file system.</p>
+</blockquote>
+<section class="callout callout-warning"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">验证纪律</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">TCP 三次握手能完成 ≠ 连接真的通了——<strong style="font-weight: bold; color: #1a1a1a;">黑洞连接也能握手</strong>。</p>
+</section><h2 style="font-weight: bold; color: #2c3e50; margin: 1.2em 0 0.6em 0; font-size: 1.2em; border-left: 4px solid #07a35a; padding-left: 0.5em;">三种放法</h2>
+<table style="border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14px;">
+<thead>
+<tr>
+<th style="border: 1px solid #e8e8e8; padding: 8px 12px; background-color: #f6f8fa; font-weight: bold; color: #2c3e50;">方式</th>
+<th style="border: 1px solid #e8e8e8; padding: 8px 12px; background-color: #f6f8fa; font-weight: bold; color: #2c3e50;">warm build</th>
+<th style="border: 1px solid #e8e8e8; padding: 8px 12px; background-color: #f6f8fa; font-weight: bold; color: #2c3e50;">命运</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">Windows 原生</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">4.23s</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">正常</td>
+</tr>
+<tr style="background-color: #fafafa;">
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">WSL /mnt 桥接</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">卡死</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">崩溃</td>
+</tr>
+<tr>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">WSL 原生 ext4</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">2.63s</td>
+<td style="border: 1px solid #e8e8e8; padding: 8px 12px;">最快</td>
+</tr>
+</tbody></table>
+<section class="callout callout-note"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">适合谁</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">纯轻编辑型 → Windows 原生也可；<strong style="font-weight: bold; color: #1a1a1a;">唯一不能选的是 /mnt 桥接</strong>。</p>
+</section><h2 style="font-weight: bold; color: #2c3e50; margin: 1.2em 0 0.6em 0; font-size: 1.2em; border-left: 4px solid #07a35a; padding-left: 0.5em;">代码示例</h2>
+<pre style="background-color: #f6f8fa; border: 1px solid #eaecef; border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1em 0; color: #24292e;"><code class="hljs language-bash" style="background-color: rgba(175, 184, 193, 0.2); border-radius: 3px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; background: none; padding: 0; border: none; font-size: 13.5px;"><span class="hljs-built_in">cp</span> -r /mnt/c/Dev/my-project ~/work/my-project
+<span class="hljs-keyword">time</span> dotnet build
+</code></pre><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">行内代码 <code style="background-color: rgba(175, 184, 193, 0.2); border-radius: 3px; padding: 0.2em 0.4em; font-size: 0.9em; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">dotnet restore</code> 与重点 <strong style="font-weight: bold; color: #1a1a1a;">加粗强调</strong> 效果如上。</p>
+</div>
+    </div>
 
-<h1>🎨 所有主题预览</h1>
-<p class="subtitle">共 12 款主题 — multi-publisher</p>
+    <div class="theme-block">
+      <div class="theme-head">
+        <h2>wechat</h2>
+        <span class="theme-desc">琥珀编辑风（Tufte 灵感）：重点高亮、金句引用、卡片容器</span>
+      </div>
+      <div class="theme-body"><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">同一台机器，同一个项目：<strong style="font-weight: bold; color: #b45309;">原生文件系统 0.05s</strong>，桥接访问 8.8s——慢 169 倍。</p>
+<section class="callout callout-tip" style="border: 1px solid #e6e2d8; border-radius: 10px; padding: 14px 18px; margin: 1.2em 0; font-size: 14.5px; border-left: 4px solid #b45309; background: #fef3e2;"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">先记住结论</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; margin: 0.4em 0;">项目放对地方：warm build <strong style="font-weight: bold; color: #b45309;">2.63s</strong>；放错地方：直接卡死崩溃。</p>
+</section><h2 style="font-weight: bold; color: #2b2116; margin: 1.5em 0 0.7em 0; line-height: 1.4em; font-size: 1.22em; border-left: 4px solid #b45309; border-bottom: 1px solid #e6e2d8; padding: 0.1em 0 0.3em 0.5em; letter-spacing: 0.5px;">为什么慢</h2>
+<p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">WSL2 不是&quot;子系统&quot;，是台独立虚拟机。访问 <code style="background-color: rgba(180, 83, 9, 0.08); border-radius: 4px; padding: 0.2em 0.4em; font-size: 0.88em; color: #9a5b1d; font-family: Consolas, 'Liberation Mono', Menlo, monospace;">/mnt/c</code> 时，每个文件操作都要经 9p 协议翻译一次。</p>
+<blockquote style="border-left: 4px solid #b45309; background-color: #fef3e2; padding: 0.8em 1.1em; margin: 1.2em 0; color: #3a2c12; font-style: italic; border-radius: 0 6px 6px 0;">
+<p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; margin: 0.3em 0; color: #3a2c12;">官方原话：For the fastest performance speed, store your files in the WSL file system.</p>
+</blockquote>
+<section class="callout callout-warning" style="border: 1px solid #e6e2d8; border-radius: 10px; padding: 14px 18px; margin: 1.2em 0; font-size: 14.5px; border-left: 4px solid #b3261e; background: #fdecea;"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">验证纪律</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; margin: 0.4em 0;">TCP 三次握手能完成 ≠ 连接真的通了——<strong style="font-weight: bold; color: #b45309;">黑洞连接也能握手</strong>。</p>
+</section><h2 style="font-weight: bold; color: #2b2116; margin: 1.5em 0 0.7em 0; line-height: 1.4em; font-size: 1.22em; border-left: 4px solid #b45309; border-bottom: 1px solid #e6e2d8; padding: 0.1em 0 0.3em 0.5em; letter-spacing: 0.5px;">三种放法</h2>
+<table style="border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: 14px;">
+<thead>
+<tr>
+<th style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6; background-color: #faf6ef; font-weight: bold; color: #6b4a1d;">方式</th>
+<th style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6; background-color: #faf6ef; font-weight: bold; color: #6b4a1d;">warm build</th>
+<th style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6; background-color: #faf6ef; font-weight: bold; color: #6b4a1d;">命运</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">Windows 原生</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">4.23s</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">正常</td>
+</tr>
+<tr>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">WSL /mnt 桥接</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">卡死</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">崩溃</td>
+</tr>
+<tr>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">WSL 原生 ext4</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">2.63s</td>
+<td style="border: 1px solid #e6e2d8; padding: 8px 12px; line-height: 1.6;">最快</td>
+</tr>
+</tbody></table>
+<section class="callout callout-note" style="border: 1px solid #e6e2d8; border-radius: 10px; padding: 14px 18px; margin: 1.2em 0; font-size: 14.5px; border-left: 4px solid #8a8a8a; background: #f7f7f5;"><p style="font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">适合谁</p><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; word-wrap: break-word; letter-spacing: 0.5px; margin: 0.4em 0;">纯轻编辑型 → Windows 原生也可；<strong style="font-weight: bold; color: #b45309;">唯一不能选的是 /mnt 桥接</strong>。</p>
+</section><h2 style="font-weight: bold; color: #2b2116; margin: 1.5em 0 0.7em 0; line-height: 1.4em; font-size: 1.22em; border-left: 4px solid #b45309; border-bottom: 1px solid #e6e2d8; padding: 0.1em 0 0.3em 0.5em; letter-spacing: 0.5px;">代码示例</h2>
+<pre style="background-color: #f6f8fa; border: 1px solid #eaecef; border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 1em 0; color: #24292e;"><code class="hljs language-bash" style="background-color: rgba(180, 83, 9, 0.08); border-radius: 4px; font-size: 0.88em; font-family: Consolas, 'Liberation Mono', Menlo, monospace; background: none; padding: 0; border: none; color: #24292e;"><span class="hljs-built_in">cp</span> -r /mnt/c/Dev/my-project ~/work/my-project
+<span class="hljs-keyword">time</span> dotnet build
+</code></pre><p style="color: rgb(51, 51, 51); font-size: 15px; line-height: 1.75em; margin: 0 0 1em 0; word-wrap: break-word; letter-spacing: 0.5px;">行内代码 <code style="background-color: rgba(180, 83, 9, 0.08); border-radius: 4px; padding: 0.2em 0.4em; font-size: 0.88em; color: #9a5b1d; font-family: Consolas, 'Liberation Mono', Menlo, monospace;">dotnet restore</code> 与重点 <strong style="font-weight: bold; color: #b45309;">加粗强调</strong> 效果如上。</p>
+</div>
+    </div>
 
-<div class="grid">
+    <div class="theme-block">
+      <div class="theme-head">
+        <h2>modern</h2>
+        <span class="theme-desc">现代风格：深色代码块，适合技术/知乎</span>
+      </div>
+      <div class="theme-body"><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">同一台机器，同一个项目：<strong>原生文件系统 0.05s</strong>，桥接访问 8.8s——慢 169 倍。</p>
+<section class="callout callout-tip"><p style="font-size: 15.5px; line-height: 1.85em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">先记住结论</p><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">项目放对地方：warm build <strong>2.63s</strong>；放错地方：直接卡死崩溃。</p>
+</section><h2 style="font-weight: 700; line-height: 1.35em; color: #1a1a1a; font-size: 1.2em; border-left: 4px solid #4a90d9; padding-left: 0.5em;">为什么慢</h2>
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">WSL2 不是&quot;子系统&quot;，是台独立虚拟机。访问 <code style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; padding: 0.15em 0.45em; font-size: 0.88em; color: #2f6fb0; font-family: 'SFMono-Regular', Consolas, Menlo, monospace;">/mnt/c</code> 时，每个文件操作都要经 9p 协议翻译一次。</p>
+<blockquote style="border-left: 4px solid #4a90d9; background-color: #f0f7ff; padding: 0.8em 1.2em; margin: 1.2em 0; color: #444; border-radius: 0 6px 6px 0;">
+<p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">官方原话：For the fastest performance speed, store your files in the WSL file system.</p>
+</blockquote>
+<section class="callout callout-warning"><p style="font-size: 15.5px; line-height: 1.85em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">验证纪律</p><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">TCP 三次握手能完成 ≠ 连接真的通了——<strong>黑洞连接也能握手</strong>。</p>
+</section><h2 style="font-weight: 700; line-height: 1.35em; color: #1a1a1a; font-size: 1.2em; border-left: 4px solid #4a90d9; padding-left: 0.5em;">三种放法</h2>
+<table style="border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: 14px;">
+<thead>
+<tr>
+<th style="border: 1px solid #e1e4e8; padding: 8px 12px; background-color: #4a90d9; color: #fff; font-weight: 600;">方式</th>
+<th style="border: 1px solid #e1e4e8; padding: 8px 12px; background-color: #4a90d9; color: #fff; font-weight: 600;">warm build</th>
+<th style="border: 1px solid #e1e4e8; padding: 8px 12px; background-color: #4a90d9; color: #fff; font-weight: 600;">命运</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">Windows 原生</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">4.23s</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">正常</td>
+</tr>
+<tr style="background-color: #f6f9fc;">
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">WSL /mnt 桥接</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">卡死</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">崩溃</td>
+</tr>
+<tr>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">WSL 原生 ext4</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">2.63s</td>
+<td style="border: 1px solid #e1e4e8; padding: 8px 12px;">最快</td>
+</tr>
+</tbody></table>
+<section class="callout callout-note"><p style="font-size: 15.5px; line-height: 1.85em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">适合谁</p><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">纯轻编辑型 → Windows 原生也可；<strong>唯一不能选的是 /mnt 桥接</strong>。</p>
+</section><h2 style="font-weight: 700; line-height: 1.35em; color: #1a1a1a; font-size: 1.2em; border-left: 4px solid #4a90d9; padding-left: 0.5em;">代码示例</h2>
+<pre style="background-color: #1e1e1e; border-radius: 8px; padding: 16px 18px; font-size: 13.5px; line-height: 1.6; margin: 1.3em 0; border: 1px solid #333; color: #d4d4d4;"><code class="hljs language-bash" style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; font-size: 0.88em; font-family: 'SFMono-Regular', Consolas, Menlo, monospace; background: none; padding: 0; border: none; color: #d4d4d4;"><span class="hljs-built_in">cp</span> -r /mnt/c/Dev/my-project ~/work/my-project
+<span class="hljs-keyword">time</span> dotnet build
+</code></pre><p style="color: rgb(45, 45, 45); font-size: 15.5px; line-height: 1.85em; margin: 0 0 1.3em 0;">行内代码 <code style="background-color: rgba(74, 144, 217, 0.12); border-radius: 4px; padding: 0.15em 0.45em; font-size: 0.88em; color: #2f6fb0; font-family: 'SFMono-Regular', Consolas, Menlo, monospace;">dotnet restore</code> 与重点 <strong>加粗强调</strong> 效果如上。</p>
+</div>
+    </div>
 
-<!-- 1. Wechat -->
-<div class="preview-card">
-<div class="preview-header"><span>Wechat 微信风格</span><span class="badge">保留</span></div>
-<div class="preview-body wechat">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
+    <div class="theme-block">
+      <div class="theme-head">
+        <h2>minimal</h2>
+        <span class="theme-desc">简约留白，适合头条轻阅读</span>
+      </div>
+      <div class="theme-body"><p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">同一台机器，同一个项目：<strong>原生文件系统 0.05s</strong>，桥接访问 8.8s——慢 169 倍。</p>
+<section class="callout callout-tip"><p style="font-size: 16px; line-height: 2em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">先记住结论</p><p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">项目放对地方：warm build <strong>2.63s</strong>；放错地方：直接卡死崩溃。</p>
+</section><h2 style="font-size: 1.25em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; color: #333;">为什么慢</h2>
+<p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">WSL2 不是&quot;子系统&quot;，是台独立虚拟机。访问 <code style="background-color: rgba(0,0,0,0.04); border-radius: 3px; color: #c7254e; padding: 0.15em 0.4em; font-family: 'SFMono-Regular', Consolas, monospace;">/mnt/c</code> 时，每个文件操作都要经 9p 协议翻译一次。</p>
+<blockquote style="border-left: none; background: #f9f9f9; font-style: italic; padding: 0.8em 1.2em; margin: 1.4em 0; color: #666; border-radius: 4px;">
+<p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">官方原话：For the fastest performance speed, store your files in the WSL file system.</p>
+</blockquote>
+<section class="callout callout-warning"><p style="font-size: 16px; line-height: 2em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">验证纪律</p><p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">TCP 三次握手能完成 ≠ 连接真的通了——<strong>黑洞连接也能握手</strong>。</p>
+</section><h2 style="font-size: 1.25em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; color: #333;">三种放法</h2>
+<table style="border-collapse: collapse; width: 100%; margin: 1.4em 0; font-size: 14px;">
+<thead>
+<tr>
+<th style="border: 1px solid #eee; padding: 8px 12px; background-color: #f5f5f5; font-weight: 600; color: #333;">方式</th>
+<th style="border: 1px solid #eee; padding: 8px 12px; background-color: #f5f5f5; font-weight: 600; color: #333;">warm build</th>
+<th style="border: 1px solid #eee; padding: 8px 12px; background-color: #f5f5f5; font-weight: 600; color: #333;">命运</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="border: 1px solid #eee; padding: 8px 12px;">Windows 原生</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">4.23s</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">正常</td>
+</tr>
+<tr>
+<td style="border: 1px solid #eee; padding: 8px 12px;">WSL /mnt 桥接</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">卡死</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">崩溃</td>
+</tr>
+<tr>
+<td style="border: 1px solid #eee; padding: 8px 12px;">WSL 原生 ext4</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">2.63s</td>
+<td style="border: 1px solid #eee; padding: 8px 12px;">最快</td>
+</tr>
+</tbody></table>
+<section class="callout callout-note"><p style="font-size: 16px; line-height: 2em; font-weight: bold; color: #b45309; margin: 0 0 0.4em 0;">适合谁</p><p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">纯轻编辑型 → Windows 原生也可；<strong>唯一不能选的是 /mnt 桥接</strong>。</p>
+</section><h2 style="font-size: 1.25em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; color: #333;">代码示例</h2>
+<pre style="background-color: #fafafa; border-radius: 6px; border: 1px solid #eee; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; margin: 1.2em 0;"><code class="hljs language-bash" style="background-color: rgba(0,0,0,0.04); border-radius: 3px; color: #c7254e; font-family: 'SFMono-Regular', Consolas, monospace; background: none; padding: 0; border: none;"><span class="hljs-built_in">cp</span> -r /mnt/c/Dev/my-project ~/work/my-project
+<span class="hljs-keyword">time</span> dotnet build
+</code></pre><p style="color: rgb(60, 60, 60); font-size: 16px; line-height: 2em; margin: 0 0 1.5em 0;">行内代码 <code style="background-color: rgba(0,0,0,0.04); border-radius: 3px; color: #c7254e; padding: 0.15em 0.4em; font-family: 'SFMono-Regular', Consolas, monospace;">dotnet restore</code> 与重点 <strong>加粗强调</strong> 效果如上。</p>
 </div>
-<div class="preview-footer">适用：微信公众号</div>
-</div>
-
-<!-- 2. Cyberpunk -->
-<div class="preview-card">
-<div class="preview-header"><span>2. Cyberpunk 赛博朋克</span><span class="badge">炫酷霓虹</span></div>
-<div class="preview-body cyberpunk">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：技术博客 / 极客风格</div>
-</div>
-
-<!-- 3. Nord -->
-<div class="preview-card">
-<div class="preview-header"><span>3. Nord 北欧冷淡</span><span class="badge">简洁克制</span></div>
-<div class="preview-body nord">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：技术文档 / 程序员</div>
-</div>
-
-<!-- 4. Paper -->
-<div class="preview-card">
-<div class="preview-header"><span>4. Paper 笔记本</span><span class="badge">文艺复古</span></div>
-<div class="preview-body paper">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：个人日记 / 文艺风格</div>
-</div>
-
-<!-- 5. Gradient -->
-<div class="preview-card">
-<div class="preview-header"><span>5. Gradient 现代渐变</span><span class="badge">年轻活力</span></div>
-<div class="preview-body gradient">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：社交媒体 / 吸引眼球</div>
-</div>
-
-<!-- 6. Dark Elite -->
-<div class="preview-card">
-<div class="preview-header"><span>6. Dark Elite 深色精英</span><span class="badge">专业硬核</span></div>
-<div class="preview-body darkelite">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：程序员 / GitHub风格</div>
-</div>
-
-<!-- 7. Sunset -->
-<div class="preview-card">
-<div class="preview-header"><span>7. Sunset 日落暖调</span><span class="badge">温暖治愈</span></div>
-<div class="preview-body sunset">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：生活分享 / 温暖风格</div>
-</div>
-
-<!-- 8. Zen -->
-<div class="preview-card">
-<div class="preview-header"><span>8. Zen 禅意风格</span><span class="badge">日式极简</span></div>
-<div class="preview-body zen">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：日式美学 / 极简主义</div>
-</div>
-
-<!-- 9. Retro Futurism -->
-<div class="preview-card">
-<div class="preview-header"><span>9. Retro Futurism 复古未来</span><span class="badge">80年代科幻</span></div>
-<div class="preview-body retro">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：创意设计 / 复古科技</div>
-</div>
-
-<!-- 10. Midnight Library -->
-<div class="preview-card">
-<div class="preview-header"><span>10. Midnight Library 深夜图书馆</span><span class="badge">书香氛围</span></div>
-<div class="preview-body midnight">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：阅读笔记 / 文艺深沉</div>
-</div>
-
-<!-- 11. Brutalism -->
-<div class="preview-card">
-<div class="preview-header"><span>11. Brutalism 粗野主义</span><span class="badge">大胆原始</span></div>
-<div class="preview-body brutalism">
-<h1>Claude Code</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你：</p>
-<ul>
-<li>自动完成编码</li>
-<li>修复 Bug</li>
-<li>生成测试</li>
-</ul>
-<blockquote><p>告别繁琐复制粘贴！</p></blockquote>
-<p>安装 <code>Node.js 18+</code></p>
-<pre><code>npm install -g claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问文档</a></p>
-</div>
-<div class="preview-footer">适用：大胆声明 / 设计师作品集</div>
-</div>
-
-<!-- 12. Neumorphism -->
-<div class="preview-card">
-<div class="preview-header"><span>12. Neumorphism 新拟态</span><span class="badge">软UI</span></div>
-<div class="preview-body neumorphism">
-<h1>Claude Code 实战指南</h1>
-<p>大家好，我是张三。今天给大家分享一个强大的 AI 编程助手——<strong>Claude Code</strong>。</p>
-<h2>为什么选择？</h2>
-<p>它能帮助你快速完成编码任务：</p>
-<ul>
-<li>自动完成重复性编码</li>
-<li>修复 Bug 和重构代码</li>
-<li>生成测试用例</li>
-</ul>
-<blockquote>告别繁琐的复制粘贴，让 AI 成为你的编程搭档！</blockquote>
-<p>首先，确保你已经安装了 <code>Node.js 18+</code></p>
-<pre><code>npm install -g @anthropic-ai/claude-code</code></pre>
-<table><tr><th>语言</th><th>领域</th></tr><tr><td>Python</td><td>数据科学</td></tr></table>
-<p><a href="#">访问官方文档</a></p>
-</div>
-<div class="preview-footer">适用：APP设计 / 苹果风</div>
-</div>
-
-</div>
+    </div>
 </body>
 </html>

@@ -9,7 +9,7 @@
 ## 功能特性
 
 | 特性 | 说明 |
-|------|------|
+| ------ | ------ |
 | **多平台支持** | 微信公众号、知乎、掘金、CSDN、微博、小红书、B站等 20+ 平台 |
 | **浏览器自动登录** | Playwright 驱动扫码/账号登录，Cookie 自动获取保存 |
 | **4 套精排主题** | default（通用）、wechat（公众号）、modern（技术/知乎）、minimal（轻阅读/头条），均按平台自动匹配 |
@@ -111,7 +111,7 @@ mpub publish -f article.md -p weixin -c cover.jpg
 ### 浏览器自动登录状态
 
 | 平台 | 登录命令 | Cookie 获取 | 草稿发布 | 备注 |
-|------|----------|-------------|----------|------|
+| ------ | ---------- | ------------- | ---------- | ------ |
 | 微信公众号 | `mpub credential --set` | ✅ | ✅ | AppID + AppSecret |
 | 知乎 | `mpub login -p zhihu` | ✅ | ✅ | 直接发布草稿 |
 | 掘金 | `mpub login -p juejin` | ✅ | ✅ | 直接发布草稿 |
@@ -157,9 +157,9 @@ mpub platforms
 mpub 内置 4 套浅色阅读主题，均针对公众号 / 知乎 / 头条等白底平台的真实排版规范做了优化：
 
 | 主题 | 风格 | 适配平台 |
-|------|------|----------|
+| ------ | ------ | ---------- |
 | `default` | 通用简洁，绿调标题/引用 | 兜底，所有平台可用 |
-| `wechat` | 微信官方排版（微信蓝链接、浅灰代码块、圆角图） | 微信公众号 |
+| `wechat` | **琥珀编辑风**（Tufte 灵感）：重点琥珀高亮、金句引用块、卡片容器 | 微信公众号 |
 | `modern` | 深色代码块、清晰层次（知乎/网页友好） | 知乎、技术博客 |
 | `minimal` | 极简留白、轻装饰 | 头条号等轻阅读平台 |
 
@@ -167,9 +167,28 @@ mpub 内置 4 套浅色阅读主题，均针对公众号 / 知乎 / 头条等白
 微信 → `wechat`，知乎 → `modern`，头条 → `minimal`，其余回退 `default`。
 （手动 `-t` 仍可覆盖。）
 
-完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)
+完整预览：[themes/all-themes-preview.html](themes/all-themes-preview.html)（含卡片容器示例，重新生成：`npx tsx scripts/generate-all-themes-preview.ts`）
+
+### 卡片容器语法（:::tip / :::warning / :::note）
+
+正文可用卡片容器突出重点——`tip`（重点，琥珀）、`warning`（警示，红）、`note`（说明，灰），标题可选，内部支持完整 Markdown：
+
+```markdown
+:::tip 先记住结论
+项目放对地方：warm build **2.63s**。
+:::
+
+:::warning 验证纪律
+黑洞连接也能完成 TCP 握手——验证必须看真实业务效果。
+:::
+
+:::note 适合谁
+纯轻编辑型 → Windows 原生也可。
+:::
+```
 
 **命令行预览：**
+
 ```bash
 mpub render -f article.md -t wechat
 mpub render -f article.md -t modern
