@@ -63,7 +63,7 @@ export class ToutiaoAdapter implements IPlatformAdapter {
    * 返回替换了 img src 的 HTML。外部图床 URL 会被头条编辑器过滤。
    */
   async uploadImagesToToutiao(
-    page: import('playwright').Page,
+    page: import("playwright").Page,
     html: string,
     baseDir?: string,
   ): Promise<string> {
@@ -93,7 +93,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
 
     let result = html;
     for (const src of localSrcs) {
-      const abs = path.isAbsolute(src) ? src : path.resolve(baseDir || ".", src);
+      const abs = path.isAbsolute(src)
+        ? src
+        : path.resolve(baseDir || ".", src);
       if (!existsSync(abs)) {
         console.warn(`[toutiao] 正文图片不存在，跳过: ${abs}`);
         continue;
@@ -102,7 +104,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         await input.setInputFiles(abs);
         const url = await page
           .evaluate(async () => {
-            const el = document.getElementById("__mpub_upload") as HTMLInputElement;
+            const el = document.getElementById(
+              "__mpub_upload",
+            ) as HTMLInputElement;
             const file = el?.files?.[0];
             if (!file) return null;
             const fd = new FormData();
@@ -125,7 +129,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           console.warn(`[toutiao] 正文图片上传头条失败: ${src}`);
         }
       } catch (err) {
-        console.warn(`[toutiao] 正文图片处理异常 ${src}: ${(err as Error).message}`);
+        console.warn(
+          `[toutiao] 正文图片处理异常 ${src}: ${(err as Error).message}`,
+        );
       }
     }
     return result;

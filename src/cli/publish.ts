@@ -1,97 +1,111 @@
 /**
  * publish 命令 - 渲染并发布文章到平台
  */
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { renderMarkdown } from '../core/renderer.js'
-import { createNodeRuntime } from '../runtime/node-runtime.js'
-import { initAdapterRegistry, getAdapter } from '../adapters/index.js'
-import { cleanupCoverFile } from '../tools/cover-fetcher.js'
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { renderMarkdown } from "../core/renderer.js";
+import { createNodeRuntime } from "../runtime/node-runtime.js";
+import { initAdapterRegistry, getAdapter } from "../adapters/index.js";
+import { cleanupCoverFile } from "../tools/cover-fetcher.js";
 
 export async function runPublish(
   options: {
-    file?: string
-    platform?: string
-    theme?: string
-    appId?: string
-    macStyle?: boolean
-    autoCover?: boolean
-    coverMode?: 'sharp' | 'network' | 'auto'
+    file?: string;
+    platform?: string;
+    theme?: string;
+    appId?: string;
+    macStyle?: boolean;
+    autoCover?: boolean;
+    coverMode?: "sharp" | "network" | "auto";
   },
-  input?: string
+  input?: string,
 ): Promise<void> {
   try {
     // 1. 读取内容
-    let content: string
+    let content: string;
     if (options.file) {
-      if (options.file.startsWith('http://') || options.file.startsWith('https://')) {
-        const res = await fetch(options.file)
-        if (!res.ok) throw new Error(`无法读取 URL: ${options.file}`)
-        content = await res.text()
+      if (
+        options.file.startsWith("http://") ||
+        options.file.startsWith("https://")
+      ) {
+        const res = await fetch(options.file);
+        if (!res.ok) throw new Error(`无法读取 URL: ${options.file}`);
+        content = await res.text();
       } else {
-        content = await readFile(options.file, 'utf-8')
+        content = await readFile(options.file, "utf-8");
       }
     } else if (input) {
-      content = input
+      content = input;
     } else {
-      throw new Error('请提供 -f 选项指定 Markdown 文件')
+      throw new Error("请提供 -f 选项指定 Markdown 文件");
     }
 
     // 微信固定唯一主题（琥珀编辑风，2026-08 优化版），不接受 -t 覆盖；其余平台按默认绑定或 -t 指定
-    const platformId = options.platform || 'weixin'
+    const platformId = options.platform || "weixin";
     const PLATFORM_DEFAULT_THEME: Record<string, string> = {
-      zhihu: 'modern',
-      toutiao: 'minimal',
+      zhihu: "modern",
+      toutiao: "minimal",
       // 其余平台回退到 default
-    }
-    const theme = platformId === 'weixin' ? 'wechat' : (options.theme || PLATFORM_DEFAULT_THEME[platformId] || 'default')
+    };
+    const theme =
+      platformId === "weixin"
+        ? "wechat"
+        : options.theme || PLATFORM_DEFAULT_THEME[platformId] || "default";
 
     // 文章目录（解析正文相对路径图片用）；URL 输入时无 baseDir
-    const baseDir = options.file && !options.file.startsWith('http') ? path.dirname(path.resolve(options.file)) : undefined
+    const baseDir =
+      options.file && !options.file.startsWith("http")
+        ? path.dirname(path.resolve(options.file))
+        : undefined;
 
     // 2. 渲染（不处理 mermaid，由各平台适配器自行处理）
     const result = await renderMarkdown(content, {
       theme,
       macStyle: options.macStyle !== false,
       autoCover: options.autoCover || false,
-      coverMode: (options.coverMode as 'sharp' | 'network' | 'auto') || 'auto',
-    })
+      coverMode: (options.coverMode as "sharp" | "network" | "auto") || "auto",
+    });
 
     // 3. 选择适配器
 
     // 校验 title
-    if (!result.title || result.title === '无标题') {
-      console.warn(`[publish] ⚠️ 警告：文章标题为空！`)
+    if (!result.title || result.title === "无标题") {
+      console.warn(`[publish] ⚠️ 警告：文章标题为空！`);
     } else {
-      console.log(`[publish] ✅ 文章标题: "${result.title}"`)
+      console.log(`[publish] ✅ 文章标题: "${result.title}"`);
     }
 
     // 初始化适配器注册表
-    const runtime = createNodeRuntime()
-    await initAdapterRegistry(runtime)
+    const runtime = createNodeRuntime();
+    await initAdapterRegistry(runtime);
 
-    const adapter = getAdapter(platformId)
+    const adapter = getAdapter(platformId);
     if (!adapter) {
       // 列出所有支持的平台
-      const { adapterRegistry } = await import('../adapters/index.js')
-      const allAdapters = Array.from(adapterRegistry.getAll().values())
-      const supportedPlatforms = allAdapters.map(a => a.meta.id).sort().join(', ')
-      throw new Error(`不支持的平台: ${platformId}。支持: ${supportedPlatforms}`)
+      const { adapterRegistry } = await import("../adapters/index.js");
+      const allAdapters = Array.from(adapterRegistry.getAll().values());
+      const supportedPlatforms = allAdapters
+        .map((a) => a.meta.id)
+        .sort()
+        .join(", ");
+      throw new Error(
+        `不支持的平台: ${platformId}。支持: ${supportedPlatforms}`,
+      );
     }
 
     // 注入 AppID 到运行时（如果提供了）
     if (options.appId) {
-      process.env.WECHAT_APP_ID = options.appId
+      process.env.WECHAT_APP_ID = options.appId;
     }
 
     // 使用封面图：
     // - coverMode=sharp/network: 强制用 autoCoverPath，忽略 front-matter 封面
     // - coverMode=auto: 优先用 front-matter 封面，其次 autoCoverPath
-    let coverImage: string | undefined
-    if (options.coverMode === 'sharp' || options.coverMode === 'network') {
-      coverImage = result.autoCoverPath
+    let coverImage: string | undefined;
+    if (options.coverMode === "sharp" || options.coverMode === "network") {
+      coverImage = result.autoCoverPath;
     } else {
-      coverImage = result.cover || result.autoCoverPath
+      coverImage = result.cover || result.autoCoverPath;
     }
 
     const syncResult = await adapter.publish({
@@ -103,28 +117,28 @@ export async function runPublish(
       source_url: result.source_url,
       summary: result.summary,
       baseDir,
-    })
+    });
 
     // 清理自动获取的临时封面图
     if (result.autoCoverPath) {
-      await cleanupCoverFile(result.autoCoverPath).catch(() => {})
+      await cleanupCoverFile(result.autoCoverPath).catch(() => {});
     }
 
     // 4. 输出结果
     if (syncResult.success) {
-      console.log(`✅ 发布成功！`)
+      console.log(`✅ 发布成功！`);
       if (syncResult.postUrl) {
-        console.log(`📝 草稿链接: ${syncResult.postUrl}`)
+        console.log(`📝 草稿链接: ${syncResult.postUrl}`);
       }
       if (syncResult.postId) {
-        console.log(`🆔 媒体 ID: ${syncResult.postId}`)
+        console.log(`🆔 媒体 ID: ${syncResult.postId}`);
       }
     } else {
-      console.error(`❌ 发布失败: ${syncResult.error}`)
-      process.exit(1)
+      console.error(`❌ 发布失败: ${syncResult.error}`);
+      process.exit(1);
     }
   } catch (err) {
-    console.error('[publish]', (err as Error).message)
-    process.exit(1)
+    console.error("[publish]", (err as Error).message);
+    process.exit(1);
   }
 }

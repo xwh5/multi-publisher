@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-inner-html-js": {
+      "disable": ["src/adapters/toutiao.ts", "toutiao-debug.mjs"]
+    }
+  }
+}
