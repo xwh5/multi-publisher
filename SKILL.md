@@ -22,10 +22,17 @@
 ```bash
 mpub publish -f <文章.md> -p <平台>
 ```
-- `-p weixin` — 微信公众号（默认）
+- `-p weixin` — 微信公众号（默认，主题锁定 wechat 琥珀编辑风）
 - `-p zhihu` — 知乎
+- `-p toutiao` — 头条号（playwright 浏览器自动化，需 GUI 环境，本机 WSLg 直跑）
 - `-p weixin,zhihu` — 同时发布到多个平台
-- `-t <theme>` — 指定主题（default/wechat/modern/minimal）
+- `-t <theme>` — 指定主题（default/wechat/modern/minimal；微信忽略此参数，固定 wechat）
+
+### 头条号发布（2026-08-15 实测全链路通过）
+- **登录**：`mpub login -p toutiao`（弹浏览器扫码）或 `mpub cookie -p toutiao --set`
+- **封面**：要求建议大于 672×462、不可小于 452×352（建议 900×600）；自动上传已打通
+- **正文图片**：自动上传头条自家图床（spice/image API → image-tt-private.toutiao.com）；外部图床会被头条编辑器过滤
+- **发布**：`mpub publish -p toutiao -f 文章.md`，结果进草稿箱，需后台确认
 
 ### 预览渲染
 ```bash
