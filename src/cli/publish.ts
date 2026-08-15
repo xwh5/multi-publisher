@@ -3,11 +3,9 @@
  */
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import type { Command } from 'commander'
 import { renderMarkdown } from '../core/renderer.js'
 import { createNodeRuntime } from '../runtime/node-runtime.js'
 import { initAdapterRegistry, getAdapter } from '../adapters/index.js'
-import { ConfigStore } from '../config.js'
 import { cleanupCoverFile } from '../tools/cover-fetcher.js'
 
 export async function runPublish(
@@ -39,15 +37,14 @@ export async function runPublish(
       throw new Error('请提供 -f 选项指定 Markdown 文件')
     }
 
-    // 平台未显式指定主题时，按平台绑定合适的默认主题
+    // 微信固定唯一主题（琥珀编辑风，2026-08 优化版），不接受 -t 覆盖；其余平台按默认绑定或 -t 指定
     const platformId = options.platform || 'weixin'
     const PLATFORM_DEFAULT_THEME: Record<string, string> = {
-      weixin: 'wechat',
       zhihu: 'modern',
       toutiao: 'minimal',
       // 其余平台回退到 default
     }
-    const theme = options.theme || PLATFORM_DEFAULT_THEME[platformId] || 'default'
+    const theme = platformId === 'weixin' ? 'wechat' : (options.theme || PLATFORM_DEFAULT_THEME[platformId] || 'default')
 
     // 文章目录（解析正文相对路径图片用）；URL 输入时无 baseDir
     const baseDir = options.file && !options.file.startsWith('http') ? path.dirname(path.resolve(options.file)) : undefined
