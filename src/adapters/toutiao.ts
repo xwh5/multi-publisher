@@ -139,7 +139,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           await mask.click({ force: true })
           await page.waitForTimeout(500)
         }
-      } catch {}
+      } catch (e) {
+        console.warn('[toutiao] 关闭提示遮罩失败，继续:', (e as Error).message)
+      }
 
       // 填写标题
       const titleTextarea = page.locator('textarea').first()
@@ -153,6 +155,8 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         await page.keyboard.press('Control+a')
         await page.waitForTimeout(200)
         const htmlContent = processedArticle.html || processedArticle.markdown || ''
+        // 富文本编辑器内容注入：HTML 由 mpub 渲染自用户自己的 Markdown（可信），
+        // 必须用 innerHTML 才能保留排版；不能用 textContent（会丢失全部格式）
         await page.evaluate((el) => {
           const div = document.querySelector('[contenteditable="true"]') as HTMLDivElement
           if (div) {
@@ -183,12 +187,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         if (existsSync(localCover)) {
           console.log('[toutiao] 检测到封面图片，准备上传...')
 
-          // 设置 filechooser 监听（必须在点击之前设置）
+          // 封面文件路径
           const absolutePath = path.resolve(localCover)
           console.log('[toutiao] 封面文件路径:', absolutePath)
-
-          // 使用 promise 等待 filechooser 事件
-          const fileChooserPromise = page.waitForEvent('filechooser', { timeout: 10000 })
 
           // 点击"预览并发布"按钮打开预览弹窗
           const previewBtn = page.locator('button:has-text("预览并发布")')
