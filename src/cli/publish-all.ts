@@ -29,7 +29,7 @@ export async function runPublishAll(options: {
     console.log('❌ 没有任何平台已登录')
     console.log('\n请先登录平台:')
     console.log('  mpub login -p <平台名>')
-    console.log('\n支持的平台: zhihu, juejin, csdn, weibo, bilibili, baijiahao, cnblogs, douban, eastmoney, imooc, oschina, segmentfault, sohu, woshipm, xueqiu')
+    console.log('\n支持的平台: zhihu, juejin, csdn, weibo, bilibili, xiaohongshu')
     return
   }
 

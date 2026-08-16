@@ -2,7 +2,7 @@
  * Playwright 浏览器运行时
  * 用于自动登录获取 Cookie
  */
-import { chromium, type Browser, type Page, type Cookie } from 'playwright'
+import { chromium, type Browser, type Page } from 'playwright'
 
 export interface PlatformLoginConfig {
   /** 平台 ID */
@@ -87,7 +87,12 @@ export class BrowserRuntime {
     }
 
     const { successCondition, extraCookieDomains = [] } = config
-    const allDomains = [new URL(config.loginUrl).hostname, ...extraCookieDomains]
+    let allDomains = extraCookieDomains
+    try {
+      allDomains = [new URL(config.loginUrl).hostname, ...extraCookieDomains]
+    } catch {
+      return { success: false, cookies: {}, error: `无效的登录地址: ${config.loginUrl}` }
+    }
 
     try {
       // 先检查是否已经登录（cookies已存在）
@@ -230,7 +235,14 @@ export class BrowserRuntime {
     if (!this.page) return {}
 
     const cookies: Record<string, string> = {}
-    const targets = domains || [new URL(this.page.url()).hostname]
+    let targets = domains
+    if (!targets) {
+      try {
+        targets = [new URL(this.page.url()).hostname]
+      } catch {
+        targets = []
+      }
+    }
 
     for (const domain of targets) {
       try {
@@ -255,8 +267,19 @@ export class BrowserRuntime {
     const { cookieName } = config.successCondition
     if (!cookieName) return false
 
-    const cookies = await this.getCookies([new URL(config.loginUrl).hostname])
+    const cookies = await this.getCookies(this.safeHost(config.loginUrl))
     return !!cookies[cookieName]
+  }
+
+  /**
+   * 从登录地址安全提取 hostname（无效地址返回空数组）
+   */
+  private safeHost(loginUrl: string): string[] {
+    try {
+      return [new URL(loginUrl).hostname]
+    } catch {
+      return []
+    }
   }
 }
 
@@ -294,16 +317,6 @@ export const PLATFORM_LOGIN_CONFIGS: Record<string, PlatformLoginConfig> = {
     },
     extraCookieDomains: ['.csdn.net', 'bizapi.csdn.net'],
   },
-  jianshu: {
-    id: 'jianshu',
-    name: '简书',
-    loginUrl: 'https://www.jianshu.com/',
-    successCondition: {
-      cookieName: 'remember_user_token',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.jianshu.com'],
-  },
   weibo: {
     id: 'weibo',
     name: '微博',
@@ -334,16 +347,6 @@ export const PLATFORM_LOGIN_CONFIGS: Record<string, PlatformLoginConfig> = {
     },
     extraCookieDomains: ['.toutiao.com', '.douyin.com'],
   },
-  baijiahao: {
-    id: 'baijiahao',
-    name: '百家号',
-    loginUrl: 'https://baijiahao.baidu.com/',
-    successCondition: {
-      cookieName: 'BDUSS',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.baidu.com', '.hao123.com'],
-  },
   bilibili: {
     id: 'bilibili',
     name: 'B站',
@@ -353,116 +356,6 @@ export const PLATFORM_LOGIN_CONFIGS: Record<string, PlatformLoginConfig> = {
       waitMs: 60000,
     },
     extraCookieDomains: ['.bilibili.com', 'api.bilibili.com'],
-  },
-  segmentfault: {
-    id: 'segmentfault',
-    name: '思否',
-    loginUrl: 'https://segmentfault.com/',
-    successCondition: {
-      cookieName: 'sa_user',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.segmentfault.com'],
-  },
-  cnblogs: {
-    id: 'cnblogs',
-    name: '博客园',
-    loginUrl: 'https://www.cnblogs.com/',
-    successCondition: {
-      cookieName: '.CNBlogsCookie',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.cnblogs.com'],
-  },
-  oschina: {
-    id: 'oschina',
-    name: '开源中国',
-    loginUrl: 'https://www.oschina.net/',
-    successCondition: {
-      cookieName: 'oscid',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.oschina.net'],
-  },
-  imooc: {
-    id: 'imooc',
-    name: '慕课网',
-    loginUrl: 'https://www.imooc.com/',
-    successCondition: {
-      cookieName: 'imooc_uuid',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.imooc.com'],
-  },
-  xueqiu: {
-    id: 'xueqiu',
-    name: '雪球',
-    loginUrl: 'https://xueqiu.com/',
-    successCondition: {
-      cookieName: 'xq_a_token',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.xueqiu.com'],
-  },
-  woshipm: {
-    id: 'woshipm',
-    name: '人人都是产品经理',
-    loginUrl: 'https://www.woshipm.com/',
-    successCondition: {
-      cookieName: 'woshipm_user',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.woshipm.com'],
-  },
-  douban: {
-    id: 'douban',
-    name: '豆瓣',
-    loginUrl: 'https://www.douban.com/',
-    successCondition: {
-      cookieName: 'ck',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.douban.com', '.douban.fm'],
-  },
-  sohu: {
-    id: 'sohu',
-    name: '搜狐号',
-    loginUrl: 'https://mp.sohu.com/',
-    successCondition: {
-      cookieName: 'SUV',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.sohu.com'],
-  },
-  eastmoney: {
-    id: 'eastmoney',
-    name: '东方财富',
-    loginUrl: 'https://www.eastmoney.com/',
-    successCondition: {
-      cookieName: 'qgqp_b_id',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.eastmoney.com'],
-  },
-  yuque: {
-    id: 'yuque',
-    name: '语雀',
-    loginUrl: 'https://www.yuque.com/',
-    successCondition: {
-      cookieName: 'yuque_token',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.yuque.com'],
-  },
-  cto51: {
-    id: 'cto51',
-    name: '51CTO',
-    loginUrl: 'https://blog.51cto.com/',
-    successCondition: {
-      cookieName: 'app_id',
-      waitMs: 60000,
-    },
-    extraCookieDomains: ['.51cto.com', '.cto51.com'],
   },
   qq: {
     id: 'qq',
@@ -559,22 +452,11 @@ function loadSavedCookies(platformId: string): Record<string, string> | null {
       case 'zhihu': return ConfigStore.getZhihuCookies()
       case 'juejin': return ConfigStore.getJuejinCookies()
       case 'csdn': return ConfigStore.getCSDNCookies()
-      case 'jianshu': return ConfigStore.getJianshuCookies()
       case 'weibo': return ConfigStore.getWeiboCookies()
       case 'xiaohongshu': return ConfigStore.getXiaohongshuCookies()
       case 'toutiao': return ConfigStore.getToutiaoCookies()
-      case 'baijiahao': return ConfigStore.getBaijiahaoCookies()
       case 'bilibili': return ConfigStore.getBilibiliCookies()
-      case 'segmentfault': return ConfigStore.getSegmentfaultCookies()
-      case 'cnblogs': return ConfigStore.getCnblogsCookies()
-      case 'oschina': return ConfigStore.getOschinaCookies()
-      case 'imooc': return ConfigStore.getImoocCookies()
-      case 'xueqiu': return ConfigStore.getYueqiuCookies()
-      case 'woshipm': return ConfigStore.getWoshipmCookies()
-      case 'douban': return ConfigStore.getDoubanCookies()
-      case 'sohu': return ConfigStore.getSohuCookies()
-      case 'eastmoney': return ConfigStore.getEastmoneyCookies()
-      case 'cto51': return ConfigStore.getCto51Cookies()
+      case 'qq': return ConfigStore.getQQCookies()
       default: return null
     }
   } catch {

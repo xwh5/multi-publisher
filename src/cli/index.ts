@@ -83,7 +83,7 @@ export function createProgram() {
   // capture 命令
   const captureCmd = program.command('capture')
     .description('抓包工具 - 打开浏览器并拦截上传请求')
-    .option('-p, --platform <platform>', '平台名称 (csdn|juejin|zhihu|toutiao|jianshu|weibo)', 'csdn')
+    .option('-p, --platform <platform>', '平台名称 (csdn|juejin|zhihu|toutiao|weibo)', 'csdn')
     .option('-t, --timeout <seconds>', '超时时间（秒）', '60')
     .action(runCapture)
 

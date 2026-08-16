@@ -2,7 +2,7 @@
 
 **一行命令，Markdown 发布到全网。**
 
-将排版好的 Markdown 文章一键发布到微信公众号、知乎、掘金、CSDN 等 20+ 平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，4 套精排渲染主题（按平台自动匹配），是内容创作者的效率神器。
+将排版好的 Markdown 文章一键发布到微信公众号、头条号、知乎、掘金、CSDN 等平台，无需手动复制粘贴。支持浏览器自动登录获取 Cookie，4 套精排渲染主题（按平台自动匹配），是内容创作者的效率神器。
 
 ---
 
@@ -10,7 +10,7 @@
 
 | 特性 | 说明 |
 | ------ | ------ |
-| **多平台支持** | 微信公众号、知乎、掘金、CSDN、微博、小红书、B站等 20+ 平台 |
+| **多平台支持** | 微信公众号、头条号、知乎、掘金、CSDN、小红书、企鹅号、微博、B站（9 个适配器，2 个已实测） |
 | **浏览器自动登录** | Playwright 驱动扫码/账号登录，Cookie 自动获取保存 |
 | **4 套精排主题** | default（通用）、wechat（公众号）、modern（技术/知乎）、minimal（轻阅读/头条），均按平台自动匹配 |
 | **自动封面图生成** | AI 根据标题生成封面图，自动上传到微信 CDN |
@@ -108,40 +108,22 @@ mpub publish -f article.md -p weixin -c cover.jpg
 
 ## 支持的平台
 
-### 浏览器自动登录状态
+### 平台可用性（如实标注，2026-08-15 更新）
 
-| 平台 | 登录命令 | Cookie 获取 | 草稿发布 | 备注 |
+| 平台 | 登录命令 | Cookie 获取 | 草稿发布 | 状态 |
 | ------ | ---------- | ------------- | ---------- | ------ |
-| 微信公众号 | `mpub credential --set` | ✅ | ✅ | AppID + AppSecret |
-| 知乎 | `mpub login -p zhihu` | ✅ | ✅ | 直接发布草稿 |
-| 掘金 | `mpub login -p juejin` | ✅ | ✅ | 直接发布草稿 |
-| CSDN | `mpub login -p csdn` | ✅ | ✅ | 直接发布草稿 |
-| 小红书 | `mpub login -p xiaohongshu` | ✅ | 🔄 测试中 | 需要更多测试 |
-| 简书 | `mpub login -p jianshu` | ✅ | ❌ 待实现 | |
-| 微博 | `mpub login -p weibo` | ✅ | ❌ 待实现 | |
-| 头条号 | `mpub login -p toutiao` | ✅ | 🔄 测试中 | 有反爬机制 |
-| 百家号 | `mpub login -p baijiahao` | ✅ | ❌ 待实现 | |
-| B站 | `mpub login -p bilibili` | ✅ | 🔄 测试中 | 需要更多测试 |
-| 思否 | `mpub login -p segmentfault` | ✅ | ❌ 待实现 | |
-| 博客园 | `mpub login -p cnblogs` | ✅ | ❌ 待实现 | |
-| 开源中国 | `mpub login -p oschina` | ✅ | ❌ 待实现 | |
-| 慕课网 | `mpub login -p imooc` | ✅ | ❌ 待实现 | |
-| 雪球 | `mpub login -p xueqiu` | ✅ | ❌ 待实现 | |
-| 人人都是产品经理 | `mpub login -p woshipm` | ✅ | ❌ 待实现 | |
-| 豆瓣 | `mpub login -p douban` | ✅ | ❌ 待实现 | |
-| 搜狐号 | `mpub login -p sohu` | ✅ | ❌ 待实现 | |
-| 东方财富 | `mpub login -p eastmoney` | ✅ | ❌ 待实现 | |
-| 51CTO | `mpub login -p cto51` | ✅ | ❌ 待实现 | |
+| 微信公众号 | `mpub credential --set` | ✅ | ✅ | ✅ **已实测**（AppID + AppSecret） |
+| 头条号 | `mpub login -p toutiao` | ✅ | ✅ | ✅ **已实测**（2026-08-15，含封面/正文图） |
+| 知乎 | `mpub login -p zhihu` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| 掘金 | `mpub login -p juejin` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| CSDN | `mpub login -p csdn` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| 小红书 | `mpub login -p xiaohongshu` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| 企鹅号 | `mpub login -p qq` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| 微博 | `mpub login -p weibo` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
+| B站 | `mpub login -p bilibili` | ✅ | 🔄 | 🔄 适配器就绪，待实测 |
 
-- ✅ 已验证可用
-- 🔄 测试中，可能存在问题
-- ❌ 待实现，适配器框架已搭建但未测试发布功能
-
-### 已验证平台
-
-**登录 + 草稿发布**：知乎、掘金、CSDN、微信公众号
-
-**仅登录验证**：小红书、微博、B站、头条号等（Cookie 获取成功，草稿发布待测试）
+- ✅ 已实测：作者真实环境验证可用
+- 🔄 适配器就绪：代码已实现，尚未在真实环境验证
 
 ```bash
 # 查看所有支持平台
@@ -400,7 +382,7 @@ export { MyPlatformAdapter } from './my-platform.js'
 > 需要已认证的公众号（订阅号或服务号），在微信公众平台 → 开发 → 基本配置获取 AppID 和 AppSecret。
 
 **Q: 浏览器自动登录支持哪些平台？**
-> 目前支持知乎、掘金、CSDN、小红书、微博、B站等 20+ 平台，更多平台持续添加中。
+> 目前支持：微信、头条号（已实测）＋知乎、掘金、CSDN、小红书、企鹅号、微博、B站（适配器就绪，待实测）。
 
 **Q: 多平台发布失败会怎样？**
 > 已发布成功的平台不受影响，失败平台返回具体错误信息，支持重试。

@@ -4,9 +4,10 @@
 
 **一行命令，Markdown 发布到全网。**
 
-纯 CLI 多平台文章发布工具，无浏览器依赖。输入排版好的 Markdown，输出各平台原生格式（微信公众号 HTML、知乎 Markdown 直发）。适合个人博主、技术写作者，开源免费。
+纯 CLI 多平台文章发布工具，主流程不依赖浏览器（渲染/配置/查询）；登录态获取与发布动作通过 Playwright 驱动真实浏览器完成（扫码登录 + Cookie 管理）。输入排版好的 Markdown，输出各平台原生格式（微信公众号 HTML、知乎 Markdown 直发）。适合个人博主、技术写作者，开源免费。
 
 **设计原则：**
+
 - 架构干净：全新实现，不复制参考项目源码
 - 配置统一：单一 `config.json`，无分散文件
 - 主题可扩展：内置 4 套主题，自定义 CSS 即插即用
@@ -98,7 +99,7 @@ mpub <command> [options]
 ### 子命令
 
 | 命令 | 说明 |
-|------|------|
+| ------ | ------ |
 | `mpub publish -f <file>` | 发布文章到指定平台 |
 | `mpub render -f <file>` | 预览渲染 HTML（输出到 stdout） |
 | `mpub platforms` | 列出所有支持平台及能力 |
@@ -116,7 +117,7 @@ mpub <command> [options]
 ### publish 选项
 
 | 选项 | 说明 |
-|------|------|
+| ------ | ------ |
 | `-p, --platform <ids>` | 目标平台，逗号分隔（默认 `weixin`） |
 | `-t, --theme <id>` | 渲染主题（默认 `default`） |
 | `--mac-style` | Mac 风格代码块（默认开启） |
@@ -125,7 +126,7 @@ mpub <command> [options]
 ### render 选项
 
 | 选项 | 说明 |
-|------|------|
+| ------ | ------ |
 | `-t, --theme <id>` | 主题 ID（默认 `default`） |
 | `-h, --highlight <theme>` | 代码高亮主题（默认 `solarized-light`） |
 | `--mac-style` | Mac 风格代码块（默认开启） |
@@ -242,7 +243,7 @@ cgi-bin/draft/add → 创建草稿
 ### 关键 API
 
 | 用途 | API |
-|------|-----|
+| ------ | ----- |
 | 获取 access_token | `GET /cgi-bin/token` |
 | 上传永久素材 | `POST /cgi-bin/material/add_material` |
 | 创建草稿 | `POST /cgi-bin/draft/add` |
@@ -250,7 +251,7 @@ cgi-bin/draft/add → 创建草稿
 ### 常见错误码
 
 | errcode | 说明 | 处理方式 |
-|---------|------|---------|
+| --------- | ------ | --------- |
 | 40001 | access_token 无效 | 重新获取 |
 | 40164 | IP 未加入白名单 | 在 mp.weixin.qq.com 添加 IP |
 | 40007 | media_id 无效 | 封面需用永久素材 |
@@ -331,7 +332,7 @@ Markdown + front-matter
 ### 内置主题
 
 | ID | 名称 | 特征 |
-|----|------|------|
+| ---- | ------ | ------ |
 | `default` | Default | 简洁朴素，通用场景 |
 | `wechat` | Wechat | 仿微信官方样式，左边框引用 |
 | `modern` | Modern | 深色代码块 + 蓝色调，技术文章 |

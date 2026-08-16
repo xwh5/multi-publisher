@@ -63,10 +63,6 @@ const PLATFORM_CONFIGS: Record<string, { editorUrl: string; uploadPatterns: RegE
     editorUrl: 'https://mp.toutiao.com/',
     uploadPatterns: [/upload/i, /file/i, /image/i, /img/i],
   },
-  jianshu: {
-    editorUrl: 'https://www.jianshu.com/writer',
-    uploadPatterns: [/upload/i, /file/i, /image/i, /img/i],
-  },
   weibo: {
     editorUrl: 'https://weibo.com/compose',
     uploadPatterns: [/upload/i, /file/i, /image/i, /img/i],
@@ -104,7 +100,6 @@ async function loadCookies(platform: string): Promise<Record<string, string>> {
       case 'zhihu': return await ConfigStore.getZhihuCookies() || {}
       case 'juejin': return await ConfigStore.getJuejinCookies() || {}
       case 'toutiao': return await ConfigStore.getToutiaoCookies() || {}
-      case 'jianshu': return await ConfigStore.getJianshuCookies() || {}
       case 'weibo': return await ConfigStore.getWeiboCookies() || {}
       case 'qq': return await ConfigStore.getQQCookies() || {}
       default: return {}
@@ -120,7 +115,6 @@ function getCookieDomains(platform: string): string[] {
     zhihu: ['.zhihu.com'],
     juejin: ['.juejin.cn', '.掘金.com'],
     toutiao: ['.toutiao.com'],
-    jianshu: ['.jianshu.com'],
     weibo: ['.weibo.com', '.sina.com.cn'],
     qq: ['.qq.com', '.om.qq.com'],
   }

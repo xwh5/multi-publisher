@@ -41,9 +41,6 @@ export interface ToutiaoConfig {
   cookies?: Record<string, string>
 }
 
-export interface JianshuConfig {
-  cookies?: Record<string, string>
-}
 
 export interface WeiboConfig {
   cookies?: Record<string, string>
@@ -81,9 +78,6 @@ export interface Cto51Config {
   cookies?: Record<string, string>
 }
 
-export interface YueqiuConfig {
-  cookies?: Record<string, string>
-}
 
 export interface WoshipmConfig {
   cookies?: Record<string, string>
@@ -112,21 +106,9 @@ export interface GlobalConfig {
   juejin?: JuejinConfig
   csdn?: CSDNConfig
   toutiao?: ToutiaoConfig
-  jianshu?: JianshuConfig
   weibo?: WeiboConfig
   xiaohongshu?: XiaohongshuConfig
-  baijiahao?: BaijiahaoConfig
   bilibili?: BilibiliConfig
-  segmentfault?: SegmentfaultConfig
-  cnblogs?: CnblogsConfig
-  oschina?: OschinaConfig
-  imooc?: ImoocConfig
-  cto51?: Cto51Config
-  yueqiu?: YueqiuConfig
-  woshipm?: WoshipmConfig
-  douban?: DoubanConfig
-  sohu?: SohuConfig
-  eastmoney?: EastmoneyConfig
   qq?: QQConfig
   // 其他平台继续扩展
 }
@@ -287,18 +269,7 @@ export class ConfigStore {
     })
   }
 
-  /** 获取简书 Cookie */
-  static async getJianshuCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.jianshu?.cookies || null
-  }
 
-  /** 设置简书 Cookie */
-  static async setJianshuCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.jianshu = { ...c.jianshu, cookies }
-    })
-  }
 
   /** 获取微博 Cookie */
   static async getWeiboCookies(): Promise<Record<string, string> | null> {
@@ -326,18 +297,7 @@ export class ConfigStore {
     })
   }
 
-  /** 获取百家号 Cookie */
-  static async getBaijiahaoCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.baijiahao?.cookies || null
-  }
 
-  /** 设置百家号 Cookie */
-  static async setBaijiahaoCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.baijiahao = { ...c.baijiahao, cookies }
-    })
-  }
 
   /** 获取B站 Cookie */
   static async getBilibiliCookies(): Promise<Record<string, string> | null> {
@@ -352,135 +312,25 @@ export class ConfigStore {
     })
   }
 
-  /** 获取思否 Cookie */
-  static async getSegmentfaultCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.segmentfault?.cookies || null
-  }
 
-  /** 设置思否 Cookie */
-  static async setSegmentfaultCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.segmentfault = { ...c.segmentfault, cookies }
-    })
-  }
 
-  /** 获取博客园 Cookie */
-  static async getCnblogsCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.cnblogs?.cookies || null
-  }
 
-  /** 设置博客园 Cookie */
-  static async setCnblogsCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.cnblogs = { ...c.cnblogs, cookies }
-    })
-  }
 
-  /** 获取开源中国 Cookie */
-  static async getOschinaCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.oschina?.cookies || null
-  }
 
-  /** 设置开源中国 Cookie */
-  static async setOschinaCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.oschina = { ...c.oschina, cookies }
-    })
-  }
 
-  /** 获取慕课网 Cookie */
-  static async getImoocCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.imooc?.cookies || null
-  }
 
-  /** 设置慕课网 Cookie */
-  static async setImoocCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.imooc = { ...c.imooc, cookies }
-    })
-  }
 
-  /** 获取 51CTO Cookie */
-  static async getCto51Cookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.cto51?.cookies || null
-  }
 
-  /** 设置 51CTO Cookie */
-  static async setCto51Cookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.cto51 = { ...c.cto51, cookies }
-    })
-  }
 
-  /** 获取雪球 Cookie */
-  static async getYueqiuCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.yueqiu?.cookies || null
-  }
 
-  /** 设置雪球 Cookie */
-  static async setYueqiuCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.yueqiu = { ...c.yueqiu, cookies }
-    })
-  }
 
-  /** 获取人人都是产品经理 Cookie */
-  static async getWoshipmCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.woshipm?.cookies || null
-  }
 
-  /** 设置人人都是产品经理 Cookie */
-  static async setWoshipmCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.woshipm = { ...c.woshipm, cookies }
-    })
-  }
 
-  /** 获取豆瓣 Cookie */
-  static async getDoubanCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.douban?.cookies || null
-  }
 
-  /** 设置豆瓣 Cookie */
-  static async setDoubanCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.douban = { ...c.douban, cookies }
-    })
-  }
 
-  /** 获取搜狐 Cookie */
-  static async getSohuCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.sohu?.cookies || null
-  }
 
-  /** 设置搜狐 Cookie */
-  static async setSohuCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.sohu = { ...c.sohu, cookies }
-    })
-  }
 
-  /** 获取东方财富 Cookie */
-  static async getEastmoneyCookies(): Promise<Record<string, string> | null> {
-    const config = await loadConfig()
-    return config.eastmoney?.cookies || null
-  }
 
-  /** 设置东方财富 Cookie */
-  static async setEastmoneyCookies(cookies: Record<string, string>): Promise<void> {
-    await updateConfig((c) => {
-      c.eastmoney = { ...c.eastmoney, cookies }
-    })
-  }
 
   /** 获取企鹅号 Cookie */
   static async getQQCookies(): Promise<Record<string, string> | null> {

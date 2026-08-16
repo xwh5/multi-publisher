@@ -53,9 +53,6 @@ async function saveCookies(platformId: string, cookies: Record<string, string>):
     case 'csdn':
       await ConfigStore.setCSDNCookies(cookies)
       break
-    case 'jianshu':
-      await ConfigStore.setJianshuCookies(cookies)
-      break
     case 'weibo':
       await ConfigStore.setWeiboCookies(cookies)
       break
@@ -65,45 +62,8 @@ async function saveCookies(platformId: string, cookies: Record<string, string>):
     case 'toutiao':
       await ConfigStore.setToutiaoCookies(cookies)
       break
-    case 'baijiahao':
-      await ConfigStore.setBaijiahaoCookies(cookies)
-      break
     case 'bilibili':
       await ConfigStore.setBilibiliCookies(cookies)
-      break
-    case 'segmentfault':
-      await ConfigStore.setSegmentfaultCookies(cookies)
-      break
-    case 'cnblogs':
-      await ConfigStore.setCnblogsCookies(cookies)
-      break
-    case 'oschina':
-      await ConfigStore.setOschinaCookies(cookies)
-      break
-    case 'imooc':
-      await ConfigStore.setImoocCookies(cookies)
-      break
-    case 'xueqiu':
-      await ConfigStore.setYueqiuCookies(cookies)
-      break
-    case 'woshipm':
-      await ConfigStore.setWoshipmCookies(cookies)
-      break
-    case 'douban':
-      await ConfigStore.setDoubanCookies(cookies)
-      break
-    case 'sohu':
-      await ConfigStore.setSohuCookies(cookies)
-      break
-    case 'eastmoney':
-      await ConfigStore.setEastmoneyCookies(cookies)
-      break
-    case 'yuque':
-      // 语雀使用 OAuth，Cookie 方式不支持
-      console.warn(`⚠️  语雀仅支持 OAuth 登录，请使用 wechatsync 浏览器扩展`)
-      break
-    case 'cto51':
-      await ConfigStore.setCto51Cookies(cookies)
       break
     case 'qq':
       await ConfigStore.setQQCookies(cookies)

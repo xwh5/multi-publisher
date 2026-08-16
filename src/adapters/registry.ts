@@ -9,18 +9,6 @@ import { JuejinAdapter } from './juejin.js'
 import { CSDNAdapter } from './csdn.js'
 import { WeiboAdapter } from './weibo.js'
 import { BilibiliAdapter } from './bilibili.js'
-import { BaijiahaoAdapter } from './baijiahao.js'
-import { CnblogsAdapter } from './cnblogs.js'
-import { DoubanAdapter } from './douban.js'
-import { EastmoneyAdapter } from './eastmoney.js'
-import { ImoocAdapter } from './imooc.js'
-import { OschinaAdapter } from './oschina.js'
-import { SegmentfaultAdapter } from './segmentfault.js'
-import { SohuAdapter } from './sohu.js'
-import { WoshipmAdapter } from './woshipm.js'
-import { XueqiuAdapter } from './xueqiu.js'
-import { YuqueAdapter } from './yuque.js'
-import { Cto51Adapter } from './cto51.js'
 import { ToutiaoAdapter } from './toutiao.js'
 import { XiaohongshuAdapter } from './xiaohongshu.js'
 import { QQAdapter } from './qq.js'
@@ -37,18 +25,6 @@ const ADAPTER_CLASSES: Record<string, AdapterConstructor> = {
   csdn: CSDNAdapter,
   weibo: WeiboAdapter,
   bilibili: BilibiliAdapter,
-  baijiahao: BaijiahaoAdapter,
-  cnblogs: CnblogsAdapter,
-  douban: DoubanAdapter,
-  eastmoney: EastmoneyAdapter,
-  imooc: ImoocAdapter,
-  oschina: OschinaAdapter,
-  segmentfault: SegmentfaultAdapter,
-  sohu: SohuAdapter,
-  woshipm: WoshipmAdapter,
-  xueqiu: XueqiuAdapter,
-  yuque: YuqueAdapter,
-  cto51: Cto51Adapter,
   toutiao: ToutiaoAdapter,
   xiaohongshu: XiaohongshuAdapter,
   qq: QQAdapter,

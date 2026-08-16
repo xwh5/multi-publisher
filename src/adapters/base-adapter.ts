@@ -36,18 +36,6 @@ export abstract class BaseAdapter implements IPlatformAdapter {
     const getterMap: Record<string, () => Promise<Record<string, string> | null>> = {
       weibo: () => ConfigStore.getWeiboCookies(),
       bilibili: () => ConfigStore.getBilibiliCookies(),
-      baijiahao: () => ConfigStore.getBaijiahaoCookies(),
-      cnblogs: () => ConfigStore.getCnblogsCookies(),
-      douban: () => ConfigStore.getDoubanCookies(),
-      eastmoney: () => ConfigStore.getEastmoneyCookies(),
-      imooc: () => ConfigStore.getImoocCookies(),
-      cto51: () => ConfigStore.getCto51Cookies(),
-      oschina: () => ConfigStore.getOschinaCookies(),
-      segmentfault: () => ConfigStore.getSegmentfaultCookies(),
-      sohu: () => ConfigStore.getSohuCookies(),
-      woshipm: () => ConfigStore.getWoshipmCookies(),
-      xueqiu: () => ConfigStore.getYueqiuCookies(), // xueqiu (雪球) uses yueqiu config key
-      jianshu: () => ConfigStore.getJianshuCookies(),
       xiaohongshu: () => ConfigStore.getXiaohongshuCookies(),
       toutiao: () => ConfigStore.getToutiaoCookies(),
     }
