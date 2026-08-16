@@ -3,6 +3,7 @@
 ## 触发场景
 
 当用户询问以下问题时激活：
+
 - "怎么发布文章到微信公众号"
 - "mpub 怎么用"
 - "multi-publisher 使用方法"
@@ -19,33 +20,46 @@
 ## 核心命令速查
 
 ### 发布文章
+
 ```bash
 mpub publish -f <文章.md> -p <平台>
 ```
+
 - `-p weixin` — 微信公众号（默认，主题锁定 wechat 琥珀编辑风）
 - `-p zhihu` — 知乎
 - `-p toutiao` — 头条号（playwright 浏览器自动化，需 GUI 环境，本机 WSLg 直跑）
 - `-p weixin,zhihu` — 同时发布到多个平台
 - `-t <theme>` — 指定主题（default/wechat/modern/minimal；微信忽略此参数，固定 wechat）
 
+## 支持的平台（v1.2.0 起收敛为 9 个）
+
+- ✅ **已实测**：微信公众号（weixin，AppID+AppSecret）、头条号（toutiao，playwright 浏览器自动化，需 GUI 环境，本机 WSLg 直跑）
+- 🔄 **适配器就绪待实测**：知乎（zhihu）、掘金（juejin）、CSDN（csdn）、小红书（xiaohongshu）、企鹅号（qq）、微博（weibo）、B站（bilibili）
+- v1.2.0 已移除 13 个未实装壳适配器（百家号/博客园/豆瓣/东方财富/慕课网/开源中国/思否/搜狐号/产品经理/雪球/语雀/51CTO/简书）
+
 ### 头条号发布（2026-08-15 实测全链路通过）
+
 - **登录**：`mpub login -p toutiao`（弹浏览器扫码）或 `mpub cookie -p toutiao --set`
 - **封面**：要求建议大于 672×462、不可小于 452×352（建议 900×600）；自动上传已打通
 - **正文图片**：自动上传头条自家图床（spice/image API → image-tt-private.toutiao.com）；外部图床会被头条编辑器过滤
 - **发布**：`mpub publish -p toutiao -f 文章.md`，结果进草稿箱，需后台确认
 
 ### 预览渲染
+
 ```bash
 mpub render -f <文章.md> -t <主题>
 ```
+
 直接输出 HTML 到终端，可重定向到文件查看效果。
 
 ### 列出平台
+
 ```bash
 mpub platforms
 ```
 
 ### 配置微信凭据
+
 ```bash
 mpub credential --set
 # 或直接传入
@@ -53,6 +67,7 @@ mpub credential --app-id <id> --app-secret <secret>
 ```
 
 ### 配置平台 Cookie（知乎等）
+
 ```bash
 mpub cookie --platform zhihu --set
 mpub cookie --platform zhihu --check
@@ -86,7 +101,7 @@ mpub publish -f article.md -p zhihu
 ## 主题使用指南
 
 | 主题 | 场景 | 命令示例 |
-|------|------|---------|
+| ------ | ------ | --------- |
 | `default` | 通用 | `mpub render -f a.md -t default` |
 | `wechat` | 微信公众号 | `mpub render -f a.md -t wechat` |
 | `modern` | 技术文章 | `mpub render -f a.md -t modern` |
@@ -112,19 +127,23 @@ tags: [技术, 前端]
 ## 常见错误处理
 
 ### 微信 40164（IP 未加入白名单）
+
 **错误**：`{"errcode":40164,"errmsg":"ip xxx not in whitelist"}`
 **解决**：登录 mp.weixin.qq.com → 开发 → 基本配置 → IP白名单 → 添加当前 IP
 
 ### 微信 40007（media_id 无效）
+
 **错误**：draft/add 返回 40007
 **原因**：封面图用了临时素材，需用永久素材
 **解决**：确认 `wechat-publisher.ts` 中 `uploadCover()` 使用 `material/add_material`（已修复）
 
 ### access_token 过期
+
 **原因**：token 有效期 2 小时
 **解决**：`mpub credential --app-id <id> --app-secret <secret>` 重新配置，或删除 `config.json` 重新来过
 
 ### 知乎 Cookie 无效
+
 **解决**：重新在浏览器登录知乎，复制新的 Cookie
 
 ## 配置位置
@@ -138,26 +157,26 @@ tags: [技术, 前端]
 ## 本地开发测试
 
 ```bash
-cd C:\Users\Administrator\.openclaw\workspace\projects\multi-publisher
+cd ~/ai-workspace/projects/repos/multi-publisher
 
 npm install      # 安装依赖
 npm run build    # 编译 TypeScript
-
-# 链接到全局（需先 npm install -g multi-publisher）
-npm link
-mpub platforms  # 测试
+npm link         # 链接到全局
+mpub platforms   # 测试
 ```
 
 ## 添加新平台
 
 1. 实现 `IPlatformAdapter` 接口（见 `SPEC.md`）
-2. 在 `src/adapters/index.ts` 注册
-3. 即可通过 `-p <platform>` 调用
+2. 在 `src/adapters/registry.ts` 注册（import + ADAPTER_CLASSES）
+3. 在 `src/cli/platforms.ts` 的 PLATFORM_LIST 补充平台信息
+4. 在 `src/runtime/browser-runtime.ts` 补充登录配置（PLATFORM_LOGIN）
+5. 即可通过 `-p <platform>` 调用
 
 ## 关键文件索引
 
 | 文件 | 作用 |
-|------|------|
+| ------ | ------ |
 | `src/adapters/interface.ts` | 平台适配器接口定义 |
 | `src/adapters/weixin.ts` | 微信公众号适配器 |
 | `src/adapters/zhihu.ts` | 知乎适配器 |
