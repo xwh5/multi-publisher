@@ -6,6 +6,17 @@ All notable changes will be documented in this file.
 
 ### Added
 
+- `mpub publish --package <dir>`：**图文分支**（小红书形态）——不走 Markdown→HTML 渲染，直接吃图文包
+  - `--via-script <path>`：把投递交给带闸门的外部脚本（查重/检查/回查），mpub 只做编排与校验；默认传 `--dry-run`（不真发），`--publish-now` 才真发布
+  - `-f` 改为可选（图文包路径不需要 Markdown 文件）
+
+### Changed
+
+- **小红书从长文改成图文**：适配器 `capabilities` 由 `['article','draft','image_upload']` 改为 `['image_post','image_upload']`；`publish(article)` 现在直接报错并提示走图文包（避免误发长文）
+- 新增 `publishImagePost?(post, { publishNow })` 适配器钩子：上传图集 + 标题 + 正文与话题标签，**默认只存草稿**（不可撤销的平台需要这道闸门）
+
+### Added
+
 - `mpub xhs-package`：把 Markdown 转成**小红书发布包**（图集 + ≤20 字短标题 + ≤1000 字短正文 + 标签），产出 `post.md` / `meta.json` / `images/`，并打印投递命令
   - front-matter 新增可选 `xhs` 块（`title` / `body` / `tags`），原 `title`/`summary`/`tags` 语义不变，其它平台不受影响
   - 标题超 20 字、正文超 1000 字、图片比例非 3:4 均给出警告并按上限截断

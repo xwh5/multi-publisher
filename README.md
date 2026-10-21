@@ -232,10 +232,27 @@ xhs:                                 # 小红书专用块（可选，见下）
 正文内容...
 ```
 
-### 小红书发布包（`xhs-package`）
+### 小红书发布包（`xhs-package` → `publish --package`）
 
-小红书的笔记是"图集 + 短标题 + 短正文 + 标签"，不吃长文排版；而且**发出去不能删除**。
-所以 mpub 对小红书只做**产出发布包**，不做投递：
+小红书的笔记是"图集 + 短标题 + 短正文 + 标签"，**不吃长文排版**；而且**发出去不能删除**。
+所以小红书在 mpub 里走**图文分支**，完全绕开 Markdown→HTML 渲染：
+
+```bash
+# 1) 出包（长文 → 图文包）
+mpub xhs-package -f article.md -i cover.png -i 2.png -i 3.png
+
+# 2) 发（默认不真发：只体检 + 预览）
+mpub publish -p xiaohongshu --package dist/xhs/<slug> --via-script ./my-publish.sh
+
+# 3) 真发布（小红书不可撤销，需要显式确认）
+mpub publish -p xiaohongshu --package dist/xhs/<slug> --via-script ./my-publish.sh --publish-now
+```
+
+- `--via-script <path>`：把投递交给**带闸门的脚本**（查重 / AI 腔检查 / 发布后回查），mpub 只做编排与校验 ⇒ 通用包不绑死某台机器
+- 不带 `--via-script` 时走 mpub 自带的 Playwright 适配器（**仅存草稿**，除非加 `--publish-now`）
+- 小红书适配器的 `capabilities` 已从 `article` 改为 `image_post`：**长文路径对它直接报错**，防止误用
+
+出包命令：
 
 ```bash
 mpub xhs-package -f article.md -i cover.png -i 2.png -i 3.png

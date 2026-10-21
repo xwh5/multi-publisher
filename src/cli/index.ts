@@ -28,13 +28,16 @@ export function createProgram() {
   // publish 命令
   const publishCmd = program.command('publish')
     .description('渲染 Markdown 并发布到平台')
-    .requiredOption('-f, --file <path>', 'Markdown 文件路径（支持本地文件和 URL）')
+    .option('-f, --file <path>', 'Markdown 文件路径（支持本地文件和 URL）；图文包用 --package')
     .option('-p, --platform <platform>', '目标平台 (weixin|zhihu|juejin|csdn)', 'weixin')
     .option('-t, --theme <theme-id>', '主题 ID', 'default')
     .option('-m, --cover-mode <mode>', '封面模式 (sharp|network|auto)', 'auto')
     .option('--app-id <appId>', '微信公众号 AppID（可省略，从配置文件读取）')
     .option('--no-mac-style', '禁用 Mac 风格代码块')
     .option('--auto-cover', '当文章无封面图时，根据标题自动从网络获取封面')
+    .option('--package <dir>', '图文包目录（小红书等图文平台；配合 mpub xhs-package 产出）')
+    .option('--via-script <path>', '外部投递脚本：把发布交给带闸门的脚本执行（如查重/检查/回查）')
+    .option('--publish-now', '图文包路径：真发布（默认只存草稿；小红书发布不可撤销）')
     .action(runPublish)
 
   // render 命令
@@ -86,7 +89,7 @@ export function createProgram() {
   // publish-all 命令
   const publishAllCmd = program.command('publish-all')
     .description('一键发布到所有已登录平台')
-    .requiredOption('-f, --file <path>', 'Markdown 文件路径（支持本地文件和 URL）')
+    .option('-f, --file <path>', 'Markdown 文件路径（支持本地文件和 URL）；图文包用 --package')
     .option('-t, --theme <theme-id>', '主题 ID', 'default')
     .option('-h, --highlight <theme>', '代码高亮主题', 'solarized-light')
     .option('--mac-style', '启用 Mac 风格代码块', true)

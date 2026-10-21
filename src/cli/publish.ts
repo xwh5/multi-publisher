@@ -17,10 +17,19 @@ export async function runPublish(
     macStyle?: boolean;
     autoCover?: boolean;
     coverMode?: "sharp" | "network" | "auto";
+    package?: string;
+    viaScript?: string;
+    publishNow?: boolean;
   },
   input?: string,
 ): Promise<void> {
   try {
+    // 0. 图文包分支（小红书形态）：不走 Markdown 渲染，直接吃图文包
+    if (options.package) {
+      await runPackagePublish(options)
+      return
+    }
+
     // 1. 读取内容
     let content: string;
     if (options.file) {
@@ -141,4 +150,80 @@ export async function runPublish(
     console.error("[publish]", (err as Error).message);
     process.exit(1);
   }
+}
+
+interface XhsPackageMeta {
+  title?: string
+  body?: string
+  tags?: string[]
+  images?: string[]
+  cover?: string
+}
+
+/** 图文包发布：小红书等"图文平台"专用，不经过 Markdown 渲染 */
+async function runPackagePublish(options: {
+  package?: string
+  platform?: string
+  viaScript?: string
+  publishNow?: boolean
+}): Promise<void> {
+  const fs = await import("node:fs/promises")
+  const path = await import("node:path")
+  const { spawnSync } = await import("node:child_process")
+
+  const pkgDir = path.resolve(options.package as string)
+  const metaPath = path.join(pkgDir, "meta.json")
+  let meta: XhsPackageMeta
+  try {
+    meta = JSON.parse(await fs.readFile(metaPath, "utf-8"))
+  } catch (err) {
+    throw new Error(`读不到发布包元数据: ${metaPath}（先跑 mpub xhs-package）`)
+  }
+  const platformId = options.platform || "xiaohongshu"
+  const title = meta.title || ""
+  const body = meta.body || ""
+  const tags = meta.tags || []
+  const images = (meta.images || []).map((i) => path.join(pkgDir, "images", i))
+
+  if ([...title].length > 20) {
+    throw new Error(`标题 ${[...title].length} 字 > 小红书上限 20`)
+  }
+  if (images.length === 0) {
+    throw new Error("发布包没有图片（小红书至少 1 张图）")
+  }
+  console.log(`[publish] 图文包：${pkgDir}`)
+  console.log(`[publish] 标题(${[...title].length}/20)：${title}`)
+  console.log(`[publish] 图集 ${images.length} 张｜标签 ${tags.length} 个`)
+
+  // 外部投递器：把闸门（查重/检查/回查）交给脚本，mpub 只做编排
+  if (options.viaScript) {
+    // 默认不真发（--dry-run：体检 + 预览）；带 --publish-now 才真发
+    const args = [
+      "--package", pkgDir,
+      ...(options.publishNow ? [] : ["--dry-run"]),
+    ]
+    const r = spawnSync("bash", [options.viaScript, ...args], { stdio: "inherit" })
+    process.exit(r.status ?? 1)
+  }
+
+  // 走平台适配器（Playwright 路线）
+  const runtime = createNodeRuntime()
+  await initAdapterRegistry(runtime)
+  const adapter = getAdapter(platformId)
+  if (!adapter) {
+    throw new Error(`不支持的平台: ${platformId}`)
+  }
+  if (!adapter.meta.capabilities.includes("image_post") || !adapter.publishImagePost) {
+    throw new Error(`${platformId} 不支持图文包发布（capabilities: ${adapter.meta.capabilities.join(",")}）`)
+  }
+  const res = await adapter.publishImagePost({ title, body, tags, images, cover: meta.cover }, {
+    publishNow: options.publishNow,
+  })
+  if (!res.success) {
+    console.error(`❌ 发布失败: ${res.error}`)
+    process.exit(1)
+  }
+  console.log(res.draftOnly ? "✅ 已保存草稿（未发布；加 --publish-now 才真发布）" : "✅ 发布成功！")
+  if (res.postUrl) console.log(`📝 链接: ${res.postUrl}`)
+  if (res.postId) console.log(`🆔 笔记 ID: ${res.postId}`)
 }

@@ -3,7 +3,7 @@
  */
 import type { RuntimeInterface } from '../runtime/index.js'
 
-export type PlatformCapability = 'article' | 'draft' | 'image_upload'
+export type PlatformCapability = 'article' | 'draft' | 'image_upload' | 'image_post'
 
 export interface PlatformMeta {
   id: string
@@ -24,6 +24,15 @@ export interface Article {
   tags?: string[]
   /** Markdown 文件所在目录，用于解析相对路径图片 */
   baseDir?: string
+}
+
+/** 图文帖（小红书形态）：标题 + 图集 + 短正文 + 标签 */
+export interface ImagePost {
+  title: string
+  body: string
+  tags: string[]
+  images: string[]
+  cover?: string
 }
 
 export interface SyncResult {
@@ -63,4 +72,11 @@ export interface IPlatformAdapter {
   processMermaid?(html: string): Promise<MermaidProcessResult>
 
   publish(article: Article): Promise<SyncResult>
+
+  /**
+   * 可选钩子：发布图文帖（小红书形态）。
+   * 只有 capabilities 含 'image_post' 的平台才实现；默认只存草稿，
+   * 真发布要显式传 publishNow（不可撤销的平台需要这道闸门）。
+   */
+  publishImagePost?(post: ImagePost, options?: { publishNow?: boolean }): Promise<SyncResult>
 }
