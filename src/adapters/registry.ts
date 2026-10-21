@@ -2,7 +2,7 @@
  * 平台适配器注册表
  * 使用注册表模式管理所有平台适配器
  */
-import type { IPlatformAdapter, PlatformMeta } from './interface.js'
+import type { IPlatformAdapter, PlatformMeta, Article } from './interface.js'
 import { WeixinAdapter } from './weixin.js'
 import { ZhihuAdapter } from './zhihu.js'
 import { JuejinAdapter } from './juejin.js'
@@ -126,7 +126,7 @@ export async function getLoggedInPlatforms(): Promise<PlatformMeta[]> {
  */
 export async function publishToPlatforms(
   platformIds: string[],
-  article: { title: string; markdown: string; html?: string },
+  article: Article,
   onProgress?: (platform: string, result: import('./interface.js').SyncResult) => void
 ): Promise<import('./interface.js').SyncResult[]> {
   const results: import('./interface.js').SyncResult[] = []

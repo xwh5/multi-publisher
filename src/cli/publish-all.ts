@@ -4,6 +4,7 @@
 import { Command } from 'commander'
 import { initAdapterRegistry, getLoggedInPlatforms, publishToPlatforms } from '../adapters/index.js'
 import { renderMarkdown } from '../core/renderer.js'
+import path from 'node:path'
 import type { SyncResult } from '../adapters/interface.js'
 
 export async function runPublishAll(options: {
@@ -53,41 +54,28 @@ export async function runPublishAll(options: {
     return
   }
 
-  // 提取 frontmatter
-  const frontmatterMatch = markdownContent.match(/^---\n([\s\S]*?)\n---\n?/)
-  let title = '无标题文章'
-  let author = ''
-  let cover = ''
-
-  if (frontmatterMatch) {
-    const frontmatter = frontmatterMatch[1]
-    const titleMatch = frontmatter.match(/title:\s*(.+)/)
-    const authorMatch = frontmatter.match(/author:\s*(.+)/)
-    const coverMatch = frontmatter.match(/cover:\s*(.+)/)
-
-    if (titleMatch) title = titleMatch[1].trim()
-    if (authorMatch) author = authorMatch[1].trim()
-    if (coverMatch) cover = coverMatch[1].trim()
-
-    markdownContent = markdownContent.slice(frontmatterMatch[0].length)
-  }
-
-  // 渲染 HTML（不处理 mermaid，由各平台适配器自行处理）
+  // 渲染 HTML：front-matter 交给 parseMarkdown 解析（不再手写正则，见 core/parser）
   const renderResult = await renderMarkdown(markdownContent, {
     theme,
     highlight,
     macStyle,
   })
 
+  // 文章目录：相对路径图片按它解析（之前没传 ⇒ publish-all 的相对路径图片解析不了）
+  const baseDir = path.dirname(path.resolve(file))
+
   const article = {
-    title: renderResult.title || title,
+    title: renderResult.title || '无标题文章',
     markdown: markdownContent,
     html: renderResult.html,
-    author: renderResult.author || author,
-    cover: renderResult.cover || cover,
+    author: renderResult.author,
+    cover: renderResult.cover,
+    summary: renderResult.summary,
+    source_url: renderResult.source_url,
+    baseDir,
   }
 
-  console.log(`📝 开始发布文章: "${title}"`)
+  console.log(`📝 开始发布文章: "${article.title}"`)
   console.log(`   平台数量: ${loggedInPlatforms.length}`)
   console.log()
 

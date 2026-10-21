@@ -258,4 +258,3 @@ page.on('filechooser', async (fileChooser) => {
 
 ### 相关文件
 - `src/adapters/toutiao.ts` - 头条号适配器，集成封面上传
-- `src/tools/toutiao-upload.ts` - 头条号封面上传工具（备用独立工具）

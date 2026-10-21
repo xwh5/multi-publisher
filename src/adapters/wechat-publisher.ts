@@ -240,9 +240,8 @@ export class WechatPublisher {
    * 返回处理后的 HTML、第一张 media_id（临时）和第一张本地路径（用于封面永久上传）
    * 本地相对路径优先按 baseDir 解析（文章所在目录），其次按进程 cwd
    */
-  async processImages(html: string, baseDir?: string): Promise<{ html: string; firstMediaId?: string; firstLocalPath?: string }> {
+  async processImages(html: string, baseDir?: string): Promise<{ html: string; firstLocalPath?: string }> {
     const imgPattern = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi
-    let firstMediaId: string | undefined
     let firstLocalPath: string | undefined
     let replaced = html
 
@@ -272,7 +271,7 @@ export class WechatPublisher {
       }
     }
 
-    return { html: replaced, firstMediaId, firstLocalPath }
+    return { html: replaced, firstLocalPath }
   }
 
   /**
@@ -289,7 +288,7 @@ export class WechatPublisher {
   }): Promise<{ media_id: string }> {
     const token = await this.getAccessToken()
 
-    const { html: processedHtml, firstMediaId, firstLocalPath } = await this.processImages(options.content, options.baseDir)
+    const { html: processedHtml, firstLocalPath } = await this.processImages(options.content, options.baseDir)
 
     // 上传封面图：优先用 front-matter 指定的封面图，其次用正文第一张图片的 media_id
     let thumbMediaId: string | undefined
@@ -301,10 +300,6 @@ export class WechatPublisher {
       if (firstLocalPath) {
         thumbMediaId = await this.uploadPermanentImageFromPath(firstLocalPath)
         console.log('[WechatPublisher] 使用正文第一张图片作为封面（永久素材）')
-      } else if (firstMediaId) {
-        // 外部 URL 图片用临时素材
-        thumbMediaId = firstMediaId
-        console.log('[WechatPublisher] 使用正文第一张图片作为封面（临时素材）')
       } else {
         // fallback：直接从 processedHtml 中查找 img 标签
         const imgMatches = [...processedHtml.matchAll(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/gi)]
