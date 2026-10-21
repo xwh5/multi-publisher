@@ -2,6 +2,15 @@
 
 All notable changes will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `mpub xhs-package`：把 Markdown 转成**小红书发布包**（图集 + ≤20 字短标题 + ≤1000 字短正文 + 标签），产出 `post.md` / `meta.json` / `images/`，并打印投递命令
+  - front-matter 新增可选 `xhs` 块（`title` / `body` / `tags`），原 `title`/`summary`/`tags` 语义不变，其它平台不受影响
+  - 标题超 20 字、正文超 1000 字、图片比例非 3:4 均给出警告并按上限截断
+  - **只产出不投递**：小红书笔记不可删除，直发需带幂等（查重）与发布后回查，交由带闸门的脚本执行
+
 ## [1.2.0] - 2026-08-15
 
 ### Removed

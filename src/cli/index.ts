@@ -12,9 +12,13 @@ import { runCookie } from './cookie.js'
 import { runLogin } from './login.js'
 import { runPublishAll } from './publish-all.js'
 import { runCapture } from './capture.js'
+import { runXhsPackage } from './xhs-package.js'
 
 export function createProgram() {
   const program = new Command()
+
+  /** 收集可重复的 -i/--image 参数 */
+  const collectImages = (value: string, previous: string[]): string[] => [...previous, value]
 
   program
     .name('mpub')
@@ -69,6 +73,15 @@ export function createProgram() {
     .description('通过浏览器自动登录获取 Cookie')
     .option('-p, --platform <platform>', '平台名称', 'zhihu')
     .action(runLogin)
+
+  // xhs-package 命令
+  const xhsCmd = program.command('xhs-package')
+    .description('把 Markdown 转成小红书发布包（图集+短标题+短正文+标签），不直接投递')
+    .requiredOption('-f, --file <path>', 'Markdown 文件路径')
+    .option('-o, --out <dir>', '输出目录（默认 dist/xhs/<文件名>）')
+    .option('-i, --image <path>', '图集图片（可重复指定）', collectImages, [])
+    .option('-c, --cover <path>', '封面图')
+    .action(runXhsPackage)
 
   // publish-all 命令
   const publishAllCmd = program.command('publish-all')

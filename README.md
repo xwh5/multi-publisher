@@ -223,10 +223,40 @@ description: 文章描述（可选）          # 用于公众号摘要
 cover: https://example.com/cover.jpg # 可选，有 --auto-cover 可省略
 source_url: https://original.url     # 原文链接（可选）
 tags: [技术, 前端, JavaScript]        # 标签（可选）
+xhs:                                 # 小红书专用块（可选，见下）
+  title: 20 字内的短标题
+  body: 小红书正文（短文案）
+  tags: [AI, 副业]
 ---
 
 正文内容...
 ```
+
+### 小红书发布包（`xhs-package`）
+
+小红书的笔记是"图集 + 短标题 + 短正文 + 标签"，不吃长文排版；而且**发出去不能删除**。
+所以 mpub 对小红书只做**产出发布包**，不做投递：
+
+```bash
+mpub xhs-package -f article.md -i cover.png -i 2.png -i 3.png
+```
+
+产物（默认 `dist/xhs/<文件名>/`）：
+
+```
+post.md      # 带 front-matter 的短文案（可直接作为发布正文）
+meta.json    # 标题/正文/标签/图集/警告（给脚本消费）
+images/      # 拷进来的图集
+```
+
+- 标题取 `xhs.title` → `title`，超过 **20 字**自动截断并警告
+- 正文取 `xhs.body` → `summary`（≥600 字）→ 长文正文（截到 1000 字）
+- 标签取 `xhs.tags` → `tags`
+- 会检查图片比例（小红书封面建议 1080×1440，3:4）
+- 结尾打印**投递命令**：把发布交给带查重/回查的闸门脚本，而不是 mpub 直发
+
+> 为什么不在 mpub 里直发小红书：小红书笔记不可删除，误发与双发都收不回来。
+> 直发链路应当带幂等（发布前查重）、发布后回查与人工确认。
 
 ---
 
