@@ -34,7 +34,7 @@ export interface XhsPackageOptions {
   cover?: string
 }
 
-interface PackageMeta {
+export interface PackageMeta {
   title: string
   body: string
   tags: string[]

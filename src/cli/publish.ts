@@ -7,6 +7,7 @@ import { renderMarkdown } from "../core/renderer.js";
 import { createNodeRuntime } from "../runtime/node-runtime.js";
 import { initAdapterRegistry, getAdapter } from "../adapters/index.js";
 import { cleanupCoverFile } from "../tools/cover-fetcher.js";
+import type { PackageMeta } from "./xhs-package.js";
 
 export async function runPublish(
   options: {
@@ -152,14 +153,6 @@ export async function runPublish(
   }
 }
 
-interface XhsPackageMeta {
-  title?: string
-  body?: string
-  tags?: string[]
-  images?: string[]
-  cover?: string
-}
-
 /** 图文包发布：小红书等"图文平台"专用，不经过 Markdown 渲染 */
 async function runPackagePublish(options: {
   package?: string
@@ -173,7 +166,7 @@ async function runPackagePublish(options: {
 
   const pkgDir = path.resolve(options.package as string)
   const metaPath = path.join(pkgDir, "meta.json")
-  let meta: XhsPackageMeta
+  let meta: Partial<PackageMeta>
   try {
     meta = JSON.parse(await fs.readFile(metaPath, "utf-8"))
   } catch (err) {
@@ -184,6 +177,7 @@ async function runPackagePublish(options: {
   const body = meta.body || ""
   const tags = meta.tags || []
   const images = (meta.images || []).map((i) => path.join(pkgDir, "images", i))
+  const cover = meta.cover ? path.join(pkgDir, "images", meta.cover) : undefined
 
   if ([...title].length > 20) {
     throw new Error(`标题 ${[...title].length} 字 > 小红书上限 20`)
@@ -216,7 +210,7 @@ async function runPackagePublish(options: {
   if (!adapter.meta.capabilities.includes("image_post") || !adapter.publishImagePost) {
     throw new Error(`${platformId} 不支持图文包发布（capabilities: ${adapter.meta.capabilities.join(",")}）`)
   }
-  const res = await adapter.publishImagePost({ title, body, tags, images, cover: meta.cover }, {
+  const res = await adapter.publishImagePost({ title, body, tags, images, cover }, {
     publishNow: options.publishNow,
   })
   if (!res.success) {

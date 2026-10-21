@@ -18,7 +18,7 @@ export class ZhihuAdapter implements IPlatformAdapter {
     name: '知乎',
     icon: 'https://static.zhihu.com/favicon.ico',
     homepage: 'https://www.zhihu.com',
-    capabilities: ['article', 'draft', 'image_upload'],
+    capabilities: ['article', 'draft'],
   }
 
   private runtime!: RuntimeInterface

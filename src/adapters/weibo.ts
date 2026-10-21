@@ -11,7 +11,7 @@ export class WeiboAdapter extends BaseAdapter {
     name: '微博',
     icon: 'https://weibo.com/favicon.ico',
     homepage: 'https://card.weibo.com/article/v5/editor',
-    capabilities: ['article', 'draft', 'image_upload'],
+    capabilities: ['article', 'draft'],
   }
 
   private cookieData: Record<string, string> | null = null

@@ -6,7 +6,7 @@
 import type { IPlatformAdapter, Article, SyncResult, AuthResult, PlatformMeta } from './interface.js'
 import type { RuntimeInterface } from '../runtime/index.js'
 import { ConfigStore } from '../config.js'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 export class QQAdapter implements IPlatformAdapter {
   readonly meta: PlatformMeta = {
@@ -52,17 +52,12 @@ export class QQAdapter implements IPlatformAdapter {
    * 上传封面图片到企鹅号，返回图片 URL
    */
   private async uploadCover(imagePath: string, cookieStr: string): Promise<string | null> {
-    const FormData = require('form-data')
-    const fs = require('fs')
-
     const form = new FormData()
-    const fileBuffer = fs.readFileSync(imagePath)
+    const fileBuffer = readFileSync(imagePath)
     const fileName = imagePath.split(/[\\/]/).pop() || 'image.jpg'
 
-    form.append('file', fileBuffer, {
-      filename: fileName,
-      contentType: 'image/jpeg',
-    })
+    // 原生 FormData + Blob：node fetch 才认（form-data 包的实例 node fetch 不认）
+    form.append('file', new Blob([fileBuffer], { type: 'image/jpeg' }), fileName)
 
     const response = await this.runtime.fetch(
       'https://image.om.qq.com/cpom_pimage/ArchacaleUploadViaFile',
@@ -72,7 +67,7 @@ export class QQAdapter implements IPlatformAdapter {
           'Cookie': cookieStr,
           'Referer': 'https://om.qq.com/',
           'X-Requested-With': 'XMLHttpRequest',
-          ...form.getHeaders(),
+          // 不手动设 content-type：node fetch 自己带 multipart boundary
         },
         body: form,
       }

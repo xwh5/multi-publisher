@@ -11,7 +11,7 @@ export class BilibiliAdapter extends BaseAdapter {
     name: 'B站',
     icon: 'https://www.bilibili.com/favicon.ico',
     homepage: 'https://member.bilibili.com/articles/edit',
-    capabilities: ['article', 'draft', 'image_upload'],
+    capabilities: ['article', 'draft'],
   }
 
   private cookieData: Record<string, string> | null = null

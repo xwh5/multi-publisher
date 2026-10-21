@@ -28,7 +28,7 @@ export class JuejinAdapter implements IPlatformAdapter {
     name: '掘金',
     icon: 'https://lf-web-assets.juejin.cn/obj/juejin-web/xitu_juejin_web/static/favicons/favicon-32x32.png',
     homepage: 'https://juejin.cn',
-    capabilities: ['article', 'draft', 'image_upload'],
+    capabilities: ['article', 'draft'],
   }
 
   private runtime!: RuntimeInterface

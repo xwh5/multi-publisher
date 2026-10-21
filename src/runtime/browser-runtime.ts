@@ -3,6 +3,7 @@
  * 用于自动登录获取 Cookie
  */
 import { chromium, type Browser, type Page } from 'playwright'
+import { ConfigStore } from '../config.js'
 
 export interface PlatformLoginConfig {
   /** 平台 ID */
@@ -379,7 +380,7 @@ export async function loginPlatform(platformId: string): Promise<LoginResult> {
   }
 
   // 先检查配置中是否已有保存的 cookies（从之前登录获取）
-  const savedCookies = loadSavedCookies(platformId)
+  const savedCookies = await loadSavedCookies(platformId)
   if (savedCookies && Object.keys(savedCookies).length > 0) {
     // 验证 cookies 是否仍然有效
     console.log(`检测到已保存的 ${Object.keys(savedCookies).length} 个 cookies，正在验证...`)
@@ -445,9 +446,8 @@ export async function loginPlatform(platformId: string): Promise<LoginResult> {
 /**
  * 从配置文件加载保存的 cookies
  */
-function loadSavedCookies(platformId: string): Record<string, string> | null {
+async function loadSavedCookies(platformId: string): Promise<Record<string, string> | null> {
   try {
-    const { ConfigStore } = require('../config.js')
     switch (platformId) {
       case 'zhihu': return ConfigStore.getZhihuCookies()
       case 'juejin': return ConfigStore.getJuejinCookies()
