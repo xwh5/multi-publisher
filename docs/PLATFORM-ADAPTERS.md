@@ -1,5 +1,15 @@
 # 平台适配器开发经验总结
 
+> ⚠️ **本文是按日期累积的经验笔记，不是现状清单。**下面的"平台列表"是 2026-04-17 的快照，已经过时。
+>
+> **现状（2026-10-21 核实，以代码为准）**：
+> - 平台适配器 **9 个**：weixin / toutiao / zhihu / juejin / csdn / xiaohongshu / qq / weibo / bilibili（历史上曾有 22 个壳适配器，2026-08 移除 13 个未实装壳）
+> - **已实测跑通 2 个**：`weixin`、`toutiao`（头条 2026-08-15：标题/正文/配图/封面全链路）；其余 7 个是"适配器就绪、发布未实测"
+> - 渲染主题 **4 套**：`default` / `wechat`（微信锁定）/ `modern` / `minimal`
+> - 小红书走**图文分支**（`mpub xhs-package` 出包 → `mpub publish --package` 投递），不走长文
+> - 查状态用 `mpub platforms`（capabilities 直接从 adapter registry 读，不会手抄漂移）
+> - 领域词与边界见 `../GLOSSARY.md`；架构票据与决策见 `../docs/architecture-plan.md` 与 `../docs/adr/`
+
 ## 2026-04-17
 
 ---
