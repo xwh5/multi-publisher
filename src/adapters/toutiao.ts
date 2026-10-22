@@ -3,6 +3,7 @@
  * 使用 Playwright 直接操作页面发布
  */
 import { chromium } from "playwright";
+import type { Page } from "playwright";
 import type {
   Article,
   AuthResult,
@@ -168,11 +169,34 @@ export class ToutiaoAdapter implements IPlatformAdapter {
     });
     try {
       const context = await browser.newContext({
-        viewport: { width: 1280, height: 900 },
-        userAgent:
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        viewport: { width: 1440, height: 900 },
+        // 正文用剪贴板粘贴注入，需要剪贴板权限
+        permissions: ["clipboard-read", "clipboard-write"],
+        // 不覆写 UA：覆写成旧版本 Chrome 会让 UA 与 sec-ch-ua 打架，
+        // 被头条风控判为异常请求，服务端返回 7050「保存失败」（2026-10-22 实测）
       });
       const page = await context.newPage();
+
+      // 记录头条的写接口回执：只有服务端明确返回 code=0，才算草稿投递成功。
+      // 教训（2026-10-22）：HTTP 200 不代表成功，头条会在 200 的 body 里回
+      // {"code":7050,"message":"保存失败"}；也曾把「封面图片信息查询」误当成保存成功。
+      const saveResponses: { url: string; status: number; body: string }[] = [];
+      page.on("response", (res) => {
+        const url = res.url();
+        if (
+          res.request().method() !== "GET" &&
+          /draft|save|publish|article/i.test(url)
+        ) {
+          saveResponses.push({ url, status: res.status(), body: "" });
+          res
+            .text()
+            .then((t) => {
+              const rec = saveResponses[saveResponses.length - 1];
+              if (rec) rec.body = t.slice(0, 300);
+            })
+            .catch(() => undefined);
+        }
+      });
 
       // 使用 CDP 隐藏自动化特征
       const cdp = await page.context().newCDPSession(page);
@@ -224,9 +248,16 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         console.warn("[toutiao] 关闭提示遮罩失败，继续:", (e as Error).message);
       }
 
-      // 填写标题
+      // 填写标题：必须逐字敲（fill() 不触发头条标题框的绑定，
+      // 服务端会因标题为空返回 7050「保存失败」——2026-10-22 实测）
       const titleTextarea = page.locator("textarea").first();
-      await titleTextarea.fill(processedArticle.title);
+      await titleTextarea.click({ force: true });
+      await page.keyboard.type(processedArticle.title, { delay: 8 });
+      await page.waitForTimeout(500);
+      const typedTitle = await titleTextarea.inputValue().catch(() => "");
+      if (typedTitle.trim() !== processedArticle.title.trim()) {
+        await titleTextarea.fill(processedArticle.title);
+      }
       console.log("[toutiao] 已填写标题");
 
       // 填写内容
@@ -243,19 +274,10 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           htmlContent,
           (processedArticle as { baseDir?: string }).baseDir,
         );
-        // 富文本编辑器内容注入：HTML 由 mpub 渲染自用户自己的 Markdown（可信），
-        // 必须用 innerHTML 才能保留排版；不能用 textContent（会丢失全部格式）
-        await page.evaluate((el) => {
-          const div = document.querySelector(
-            '[contenteditable="true"]',
-          ) as HTMLDivElement;
-          if (div) {
-            // eslint-disable-next-line no-unsafe-innerhtml -- 见上方注释：内容可信、功能必需
-            Reflect.set(div, "innerHTML", el);
-            div.dispatchEvent(new InputEvent("input", { bubbles: true }));
-          }
-        }, finalHtml);
-        console.log("[toutiao] 已填写内容");
+        // 注入富文本：头条编辑器只认自己的 paste 解析，
+        // 直接 innerHTML 注入进不了数据模型（服务端返回 7050「保存失败」）
+        const fillMode = await this.fillRichText(page, finalHtml);
+        console.log("[toutiao] 已填写内容，注入方式:", fillMode);
         await page.waitForTimeout(1000);
       }
 
@@ -468,35 +490,18 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         }
       }
 
-      // 关闭预览弹窗（如果还在的话）
-      try {
-        const continueBtn = page.locator('button:has-text("继续编辑")');
-        if (await continueBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await continueBtn.click({ force: true });
-          await page.waitForTimeout(2000);
-        } else {
-          const closeIcon = page.locator(
-            '[class*="close"], .ai-assistant-drawer-wrapper [class*="close"]',
-          );
-          if (await closeIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
-            await closeIcon.click({ force: true });
-            await page.waitForTimeout(1000);
-          }
-        }
-      } catch (e) {
-        // 关闭弹窗失败，继续
-      }
-
-      // 等待编辑器稳定
+      // 注意：不要在这里关闭「预览」弹窗。
+      // 2026-10-22 实测：点掉预览弹窗会触发一次异常重存，服务端返回 7050「保存失败」；
+      // 保持弹窗打开，等保存回执即可（弹窗关闭由浏览器生命周期处理）。
       await page.waitForTimeout(2000);
 
-      // 点击发布按钮
+      // 点击「预览并发布」触发保存，随后关闭预览面板（面板内才会真正落库）
       console.log("[toutiao] 查找发布按钮...");
       try {
         // 尝试多种发布按钮选择器
         const publishSelectors = [
-          'button:has-text("发布")',
           'button:has-text("预览并发布")',
+          'button:has-text("发布")',
         ];
         for (const selector of publishSelectors) {
           const btn = page.locator(selector);
@@ -506,10 +511,13 @@ export class ToutiaoAdapter implements IPlatformAdapter {
             break;
           }
         }
-        await page.waitForTimeout(10000);
+        await page.waitForTimeout(3000);
       } catch (e) {
         console.log("[toutiao] 发布按钮点击失败:", (e as Error).message);
       }
+
+      // 等保存真正完成再关浏览器（保存未完成就关 ⇒ 稿子丢失）
+      const saved = await this.waitForDraftSaved(page, saveResponses);
 
       const finalUrl = page.url();
       const idMatch = finalUrl.match(/[?&]id=(\d+)/);
@@ -526,7 +534,24 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         };
       }
 
-      console.log("[toutiao] 草稿已保存");
+      if (!saved.ok) {
+        const state = await page
+          .evaluate(() => {
+            const ta = document.querySelector("textarea") as HTMLTextAreaElement | null;
+            const el = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
+            const wc = document.body.innerText.match(/共\s*(\d+)\s*字/);
+            return `标题="${ta?.value?.slice(0, 30) ?? ""}" 字数=${wc?.[1] ?? "?"} 正文首段="${(el?.innerText || "").slice(0, 40)}"`;
+          })
+          .catch(() => "（状态读取失败）");
+        return {
+          platform: this.meta.id,
+          success: false,
+          error: `草稿保存未确认（${saved.evidence}）；编辑器状态：${state}。浏览器已关闭，请到草稿箱核对`,
+          timestamp: Date.now() - start,
+        };
+      }
+
+      console.log("[toutiao] 草稿已保存:", saved.evidence);
       return {
         platform: this.meta.id,
         success: true,
@@ -545,6 +570,184 @@ export class ToutiaoAdapter implements IPlatformAdapter {
     } finally {
       await browser.close();
     }
+  }
+
+  /**
+   * 把 HTML 富文本填进头条编辑器。
+   *
+   * 头条编辑器（ProseMirror 系）只认自己的 paste 解析：
+   *  - innerHTML + 伪造 InputEvent ⇒ 进了 DOM 视图但没进数据模型
+   *    ⇒ 服务端返回 code 7050「保存失败」（2026-10-22 实测）
+   *  - 剪贴板只有 text/plain ⇒ 会把 HTML 源码当纯文本贴进去（能存，但排版全丢）
+   *
+   * 因此按四档递进，并用「编辑器可见文本里有没有残留标签」做校验：
+   *  1. 剪贴板写 text/html + text/plain，再 Ctrl+V（最像真人粘贴）
+   *  2. 合成 paste 事件带 text/html
+   *  3. document.execCommand('insertHTML')
+   *  4. 兜底：只贴纯文本（至少不显示源码）
+   */
+  private async fillRichText(page: Page, html: string): Promise<string> {
+    const editor = page.locator('div[contenteditable="true"]').first();
+    const looksRaw = async (): Promise<boolean> =>
+      page
+        .evaluate(() => {
+          const el = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
+          const text = el?.innerText || "";
+          return /<(p|li|section|strong|em)\s|<br/i.test(text);
+        })
+        .catch(() => false);
+
+    const prepare = async (): Promise<void> => {
+      await editor.click({ force: true });
+      await page.keyboard.press("Control+a");
+      await page.waitForTimeout(200);
+    };
+
+    // 1) 剪贴板 text/html + Ctrl+V
+    try {
+      await prepare();
+      await page.evaluate(async (h) => {
+        const plain = h
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const item = new ClipboardItem({
+          "text/html": new Blob([h], { type: "text/html" }),
+          "text/plain": new Blob([plain], { type: "text/plain" }),
+        });
+        await navigator.clipboard.write([item]);
+      }, html);
+      await page.keyboard.press("Control+V");
+      await page.waitForTimeout(1500);
+      if (!(await looksRaw())) return "剪贴板 text/html 粘贴";
+    } catch {
+      /* 落到下一档 */
+    }
+
+    // 2) 合成 paste 事件
+    try {
+      await prepare();
+      await page.evaluate((h) => {
+        const el = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
+        if (!el) return;
+        el.focus();
+        const dt = new DataTransfer();
+        dt.setData("text/html", h);
+        dt.setData(
+          "text/plain",
+          h.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " "),
+        );
+        el.dispatchEvent(
+          new ClipboardEvent("paste", {
+            clipboardData: dt,
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      }, html);
+      await page.waitForTimeout(1500);
+      if (!(await looksRaw())) return "合成 paste 事件";
+    } catch {
+      /* 落到下一档 */
+    }
+
+    // 3) execCommand insertHTML
+    try {
+      await prepare();
+      await page.evaluate((h) => {
+        const el = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
+        if (!el) return;
+        el.focus();
+        document.execCommand("insertHTML", false, h);
+      }, html);
+      await page.waitForTimeout(1500);
+      if (!(await looksRaw())) return "execCommand insertHTML";
+    } catch {
+      /* 落到下一档 */
+    }
+
+    // 4) 兜底：纯文本（至少不会显示 HTML 源码）
+    await prepare();
+    await page.evaluate(async (h) => {
+      const plain = h
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/(p|li|section|h[1-6]|tr)>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+      await navigator.clipboard.writeText(plain);
+    }, html);
+    await page.keyboard.press("Control+V");
+    await page.waitForTimeout(1200);
+    return "纯文本兜底（富文本未生效）";
+  }
+
+  /**
+   * 等待头条草稿真正保存完成。
+   *
+   * 判定依据（任一成立即算已保存）：
+   *  1. 写接口返回 2xx（服务端已落库）
+   *  2. 编辑器保存状态从「保存中」变为「已保存 / 保存成功 / 保存于 xx:xx」
+   *
+   * 超时未确认 ⇒ 返回 ok:false，调用方必须报错，不允许假成功。
+   * 背景：2026-10-22 实测，编辑器显示「草稿保存中…」时关浏览器，草稿箱里什么都没有。
+   */
+  private async waitForDraftSaved(
+    page: Page,
+    saveResponses: { url: string; status: number; body: string }[],
+    timeoutMs = 90000,
+  ): Promise<{ ok: boolean; evidence: string }> {
+    const deadline = Date.now() + timeoutMs;
+    let lastStatus = "";
+    let logged = 0;
+    while (Date.now() < deadline) {
+      const status = await page
+        .evaluate(() => {
+          const text = document.body.innerText || "";
+          const m = text.match(
+            /保存中|保存成功|已保存|保存于[^\n，。]{0,12}/,
+          );
+          return m ? m[0].trim() : "";
+        })
+        .catch(() => "");
+      if (status && status !== lastStatus) {
+        lastStatus = status;
+        console.log("[toutiao] 保存状态:", status);
+      }
+      // 打印新到的写接口回执（头条常在 HTTP 200 里塞失败码）
+      while (logged < saveResponses.length) {
+        const r = saveResponses[logged++];
+        if (/article\/publish|draft/i.test(r.url)) {
+          console.log(`[toutiao] 回执 ${r.status} ${r.url.split("?")[0]} ${r.body}`);
+        }
+      }
+
+      // 只有「文章保存/发布」这个接口 code=0 才算保存成功
+      const apiOk = saveResponses.filter(
+        (r) =>
+          r.status >= 200 &&
+          r.status < 300 &&
+          /article\/publish|article\/save|draft/i.test(r.url) &&
+          /"code"\s*:\s*0|"success"\s*:\s*true/.test(r.body),
+      );
+      const textSaved =
+        /保存成功|已保存|保存于/.test(status) && !/保存中/.test(status);
+      if (textSaved || apiOk.length > 0) {
+        return {
+          ok: true,
+          evidence: textSaved
+            ? status
+            : `写接口 ${apiOk.length} 个返回成功（${apiOk[0].url.slice(0, 80)}）`,
+        };
+      }
+      await page.waitForTimeout(1000);
+    }
+    return { ok: false, evidence: lastStatus || "无保存状态信号" };
   }
 }
 
