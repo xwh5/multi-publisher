@@ -240,8 +240,15 @@ export async function publishWeixinViaBackend(options: {
     const title = options.title;
     const before = await page.evaluate((t) => document.body.innerText.includes(t), title);
     if (!before) {
+      // 后台的草稿箱是微前端（frame 架构），在无头/自动化上下文里常渲染不出来
+      // ⇒ 不硬报错，给"人工一步"的直达路径：草稿箱第一篇就是刚更新的那篇
+      const listUrl = `https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&type=77&action=list_card&token=${token}&lang=zh_CN`;
       emitFailure(
-        { code: "DRAFT_NOT_FOUND", message: `草稿箱里找不到《${title}》`, hint: "确认标题完全一致（草稿箱按标题显示）" },
+        {
+          code: "BACKEND_UI_NOT_RENDERABLE",
+          message: `后台草稿箱在自动化上下文里渲染不出来，没法代点「发表」（API 侧该号无发表权限：freepublish/mass send 全 48001）`,
+          hint: `请打开草稿箱，点最上面那篇《${title}》的「发表」：${listUrl}`,
+        },
         { json },
       );
       return;
