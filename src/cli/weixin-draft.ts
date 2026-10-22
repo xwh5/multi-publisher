@@ -49,43 +49,6 @@ interface WeixinErr {
   errmsg?: string;
 }
 
-/** 删草稿 */
-export async function runDeleteDraft(options: {
-  mediaId?: string;
-  platform?: string;
-  json?: boolean;
-}): Promise<void> {
-  const json = Boolean(options.json);
-  if (options.platform && options.platform !== "weixin") {
-    emitFailure({ code: "UNSUPPORTED", message: `删草稿目前只支持 weixin（收到 ${options.platform}）` }, { json });
-    return;
-  }
-  if (!options.mediaId) {
-    emitFailure({ code: "MISSING_ARG", message: "请用 --media-id 指定草稿 media_id" }, { json });
-    return;
-  }
-  try {
-    const token = await weixinToken();
-    const res = await weixinPost<WeixinErr>(token, "/cgi-bin/draft/delete", {
-      media_id: options.mediaId,
-    });
-    if (res.errcode) {
-      emitFailure(
-        {
-          code: `WECHAT_${res.errcode}`,
-          message: res.errmsg ?? "删除失败",
-          hint: "media_id 不对或已失效；先用 mpub publish 输出里的 media_id",
-        },
-        { json },
-      );
-      return;
-    }
-    emitSuccess({ deleted: options.mediaId }, { json, human: () => `✅ 已删除草稿 ${options.mediaId}` });
-  } catch (err) {
-    emitFailure({ code: "DELETE_FAILED", message: (err as Error).message }, { json });
-  }
-}
-
 /** 改草稿（渲染 Markdown → draft/update；草稿改完仍在箱里，发表仍需人工） */
 export async function runUpdateDraft(options: {
   mediaId?: string;

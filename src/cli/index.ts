@@ -16,7 +16,8 @@ import { runXhsPackage } from './xhs-package.js'
 import { runDoctor } from './doctor.js'
 import { runList } from './list.js'
 import { runPublishDraft } from './publish-draft.js'
-import { runDeleteDraft, runUpdateDraft, runPublishWeixinDraft } from './weixin-draft.js'
+import { runUpdateDraft, runPublishWeixinDraft } from './weixin-draft.js'
+import { runDeleteDraft } from './delete-draft.js'
 import { runXhs } from './xhs.js'
 
 export function createProgram() {
@@ -131,9 +132,10 @@ export function createProgram() {
   // delete-draft 命令：删草稿（公众号）
   program
     .command('delete-draft')
-    .description('删除草稿（当前支持公众号 draft/delete）')
-    .requiredOption('--media-id <id>', '草稿 media_id')
-    .option('-p, --platform <platform>', '平台', 'weixin')
+    .description('删除草稿（公众号按 media_id，头条按标题；小红书无删除接口）')
+    .option('--media-id <id>', '草稿 media_id（公众号）')
+    .option('-t, --title <title>', '草稿标题（头条号，按标题定位）')
+    .option('-p, --platform <platform>', '平台 (weixin|toutiao|xiaohongshu)', 'weixin')
     .option('--json', '输出 JSON（{ok,data}）')
     .action(runDeleteDraft)
 
