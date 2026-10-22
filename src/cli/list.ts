@@ -183,6 +183,65 @@ export async function listWeixinFansBackend(): Promise<Record<string, unknown>> 
   }
 }
 
+
+/**
+ * 头条作品数据回读（展现/阅读/点赞/评论）。
+ * 作品管理是微前端 + 客户端翻页 ⇒ 只能开浏览器刮（列表接口是 appmsgpublish，只给"已发表"）
+ */
+export async function listToutiaoWorksForJudge(limit: number): Promise<Record<string, unknown>[]> {
+  const cookies = await ConfigStore.getToutiaoCookies();
+  if (!cookies || Object.keys(cookies).length === 0) throw new Error("未配置头条 cookie");
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: false, args: ["--no-sandbox"] });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    await context.addCookies(
+      Object.entries(cookies).map(([name, value]) => ({
+        name,
+        value,
+        domain: ".toutiao.com",
+        path: "/",
+      })),
+    );
+    const page = await context.newPage();
+    await page.goto("https://mp.toutiao.com/profile_v4/manage/content/all?enter_from=left_menu", {
+      waitUntil: "networkidle",
+      timeout: 90000,
+    });
+    await page.waitForTimeout(8000);
+    const rows = await page.evaluate(() => {
+      const t = document.body.innerText.split("\n").map((s) => s.trim()).filter(Boolean);
+      const STAT = /展现\s*(\d+)\s*阅读\s*(\d+)\s*点赞\s*(\d+)\s*评论\s*(\d+)/;
+      const out = [];
+      for (let i = 0; i < t.length; i++) {
+        if (!/^\d{2}-\d{2} \d{2}:\d{2}$/.test(t[i])) continue;
+        let hit = null;
+        for (let j = i + 1; j <= Math.min(i + 7, t.length - 1); j++) {
+          const m = t[j].match(STAT);
+          if (m) { hit = { m, j }; break; }
+        }
+        if (!hit) continue;
+        let title = t[i - 1] || "";
+        if (/^\+\d+$/.test(title) || !title) title = t[i - 2] || "";
+        out.push({
+          title,
+          time: t[i],
+          status: t[i + 1] || "",
+          firstClaim: t.slice(i + 1, hit.j).some((x) => x.includes("首发")),
+          impressions: Number(hit.m[1]),
+          reads: Number(hit.m[2]),
+          likes: Number(hit.m[3]),
+          comments: Number(hit.m[4]),
+        });
+      }
+      return out;
+    });
+    return rows.slice(0, limit);
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function runList(
   what: string,
   options: { platform?: string; count?: string; json?: boolean; backend?: boolean } = {},
@@ -221,6 +280,26 @@ export async function runList(
         { json },
       )
       return
+    }
+
+    if (what === 'works') {
+      const rows = await listToutiaoWorksForJudge(Number(options.count || 20));
+      emitSuccess({ platform, count: rows.length, works: rows }, {
+        json,
+        human: () =>
+          formatTable(
+            rows.map((w) => ({
+              时间: String(w.time),
+              展现: String(w.impressions),
+              阅读: String(w.reads),
+              赞: String(w.likes),
+              评: String(w.comments),
+              首发: w.firstClaim ? "是" : "",
+              标题: String(w.title).slice(0, 34),
+            })),
+          ) + `\n\n共 ${rows.length} 篇。`,
+      });
+      return;
     }
 
     if (what === 'fans') {

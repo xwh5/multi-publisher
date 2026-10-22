@@ -120,7 +120,7 @@ export function createProgram() {
   const listCmd = program
     .command('list')
     .description('回读平台状态')
-    .argument('<what>', '要回读什么：drafts（草稿）| fans（粉丝）')
+    .argument('<what>', '要回读什么：drafts（草稿）| fans（粉丝）| works（作品数据）')
     .option('-p, --platform <platform>', '平台 (toutiao|weixin)', 'toutiao')
     .option('-n, --count <number>', '条数', '20')
     .option('--backend', '走平台后台读（公众号粉丝数：API 无权限，只能读后台）')
