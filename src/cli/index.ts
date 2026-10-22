@@ -211,7 +211,7 @@ export function createProgram() {
     .option('--is-original', '声明原创')
     .option('--yes', '确认发表（不可撤销）')
     .option('--json', '输出 JSON（{ok,data}）')
-    .action((opts) => runXhsPublish(opts));
+    .action((opts, cmd) => runXhsPublish({ ...opts, _parentOpts: cmd?.parent?.opts?.() ?? {} }));
 
   // xhs trust 子命令：读单篇的信任指标（藏/转/留言质量）
   xhsToolsCmd
@@ -220,7 +220,7 @@ export function createProgram() {
     .requiredOption('--title <title>', '笔记标题（前 8 个字就够）')
     .option('--limit <number>', '抓多少条评论', '20')
     .option('--json', '输出 JSON（{ok,data}）')
-    .action((opts) => runXhsTrust(opts));
+    .action((opts, cmd) => runXhsTrust({ ...opts, _parentOpts: cmd?.parent?.opts?.() ?? {} }));
 
   // capture 命令
   const captureCmd = program.command('capture')

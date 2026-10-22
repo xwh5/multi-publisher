@@ -134,8 +134,14 @@ export async function runXhsPublish(options: {
   isOriginal?: boolean;
   yes?: boolean;
   json?: boolean;
+  // commander 14 父子命令同名 option 时值落在 parent 那份 opts 里
+  // （2026-10-22 21:00 实测：xhs publish --yes 的 yes 跑到 parent 上），
+  // 这里显式合并，CLI 表面保持不变
+  _parentOpts?: { yes?: boolean; json?: boolean };
 }): Promise<void> {
-  const json = Boolean(options.json);
+  const parentOpts = options._parentOpts ?? {};
+  const yes = options.yes ?? parentOpts.yes ?? false;
+  const json = Boolean(options.json ?? parentOpts.json);
   const title = options.title ?? "";
   const body = options.body ?? (options.bodyFile ? await readFile(path.resolve(options.bodyFile), "utf-8") : "");
   const images = options.images ?? options.image ?? [];
@@ -167,7 +173,7 @@ export async function runXhsPublish(options: {
     emitFailure({ code: "IMAGE_NOT_FOUND", message: `图片不存在：${missing.join(", ")}` }, { json });
     return;
   }
-  if (!options.yes) {
+  if (!yes) {
     emitFailure(
       {
         code: "NEEDS_CONFIRM",
@@ -249,8 +255,8 @@ export async function runXhsPublish(options: {
  * 为什么要有：目标是"用收藏率/转发率/留言质量衡量信任度"，
  * 而这些数字必须能**一键读到**，否则回盘只能靠肉眼。
  */
-export async function runXhsTrust(options: { title?: string; limit?: string; json?: boolean }): Promise<void> {
-  const json = Boolean(options.json);
+export async function runXhsTrust(options: { title?: string; limit?: string; json?: boolean; _parentOpts?: { json?: boolean } }): Promise<void> {
+  const json = Boolean(options.json ?? options._parentOpts?.json);
   const title = options.title ?? "";
   if (!title) {
     emitFailure({ code: "MISSING_ARG", message: "请用 --title 指定笔记标题（前 6 个字就够）" }, { json });
