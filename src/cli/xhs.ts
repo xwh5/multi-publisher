@@ -231,3 +231,170 @@ export async function runXhsPublish(options: {
     emitFailure({ code: "XHS_PUBLISH_FAILED", message: (err as Error).message }, { json });
   }
 }
+
+/**
+ * mpub xhs trust —— 读某篇笔记的信任指标（赞/藏/转/评 + 三比率 + 留言样本）。
+ *
+ * 为什么要有：目标是"用收藏率/转发率/留言质量衡量信任度"，
+ * 而这些数字必须能**一键读到**，否则回盘只能靠肉眼。
+ */
+export async function runXhsTrust(options: { title?: string; limit?: string; json?: boolean }): Promise<void> {
+  const json = Boolean(options.json);
+  const title = options.title ?? "";
+  if (!title) {
+    emitFailure({ code: "MISSING_ARG", message: "请用 --title 指定笔记标题（前 6 个字就够）" }, { json });
+    return;
+  }
+  const client = new XhsMcpClient();
+  const key = title.slice(0, 6);
+
+  // 1) 搜索：结果自带标题 + 赞/藏/转/评（最省）
+  let hit: {
+    id: string;
+    xsecToken: string;
+    title: string;
+    liked: number;
+    collected: number;
+    shared: number;
+    commented: number;
+  } | null = null;
+
+  const num = (v: unknown): number => {
+    const n = Number(String(v ?? 0).replace(/[^\d.]/g, ""));
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  try {
+    const s = await client.callTool("search_feeds", { keyword: key });
+    const sd = unwrapToolResult(s) as {
+      feeds?: {
+        id?: string;
+        xsecToken?: string;
+        noteCard?: {
+          displayTitle?: string;
+          interactInfo?: Record<string, string | number>;
+        };
+      }[];
+    };
+    for (const f of sd?.feeds ?? []) {
+      const t = f.noteCard?.displayTitle ?? "";
+      if (!t.includes(key) || !f.id || !f.xsecToken) continue;
+      const ii = f.noteCard?.interactInfo ?? {};
+      hit = {
+        id: f.id,
+        xsecToken: f.xsecToken,
+        title: t,
+        liked: num(ii.likedCount),
+        collected: num(ii.collectedCount),
+        shared: num(ii.sharedCount),
+        commented: num(ii.commentCount),
+      };
+      break;
+    }
+  } catch {
+    /* 搜索失败就落到主页回退 */
+  }
+
+  // 2) 回退：我的主页（主页不带标题 ⇒ 逐条取详情比对）
+  if (!hit) {
+    const prof = await client.callTool("get_my_profile", { tab: "note" });
+    const p = unwrapToolResult(prof) as {
+      feeds?: {
+        id?: string;
+        xsecToken?: string;
+        noteCard?: {
+          displayTitle?: string;
+          interactInfo?: Record<string, string | number>;
+        };
+      }[];
+    };
+    for (const f of (p?.feeds ?? []).slice(0, 12)) {
+      if (!f.id || !f.xsecToken) continue;
+      const t = f.noteCard?.displayTitle ?? "";
+      if (!t.includes(key)) continue;
+      const ii = f.noteCard?.interactInfo ?? {};
+      hit = {
+        id: f.id,
+        xsecToken: f.xsecToken,
+        title: t,
+        liked: num(ii.likedCount),
+        collected: num(ii.collectedCount),
+        shared: num(ii.sharedCount),
+        commented: num(ii.commentCount),
+      };
+      break;
+    }
+  }
+
+  if (!hit) {
+    emitFailure(
+      { code: "NOTE_NOT_FOUND", message: `没找到《${title}》（搜索与主页都没命中）` },
+      { json },
+    );
+    return;
+  }
+
+  // 3) 留言（判断"留言质量"要看到内容，不能只看条数）
+  let list: { content?: string; user_info?: { nickname?: string } }[] = [];
+  try {
+    const res = await client.callTool("get_feed_detail", {
+      feed_id: hit.id,
+      xsec_token: hit.xsecToken,
+      load_all_comments: true,
+      limit: Number(options.limit ?? 20),
+    });
+    const d = unwrapToolResult(res) as {
+      data?: {
+        note?: { title?: string; interactInfo?: Record<string, string | number> };
+        comments?: { list?: { content?: string; user_info?: { nickname?: string } }[] };
+      };
+      comments?: { list?: { content?: string; user_info?: { nickname?: string } }[] };
+    };
+    list = d?.data?.comments?.list ?? d?.comments?.list ?? [];
+    const ni = d?.data?.note?.interactInfo ?? {};
+    // 只补空缺：详情接口的分享/收藏字段可能是空串，不能覆盖搜索结果里的真值
+    const fill = (cur: number, v: unknown): number => {
+      const n = num(v);
+      return cur > 0 ? cur : n;
+    };
+    hit.liked = fill(hit.liked, ni.likedCount);
+    hit.collected = fill(hit.collected, ni.collectedCount);
+    hit.shared = fill(hit.shared, ni.sharedCount);
+    hit.commented = fill(hit.commented, ni.commentCount);
+    if (d?.data?.note?.title) hit.title = d.data.note.title;
+  } catch {
+    /* 评论读不到不影响三个比率 */
+  }
+
+  // 4) 留言质量：含"具体处境/具体问题"的评论占比
+  const specific = list.filter((c) =>
+    /\d+\s*(年|岁|个月|人)|我在|我做的是|怎么接|哪家|收不收|能不能|适合|我的/.test(c.content ?? ""),
+  );
+  const data = {
+    title: hit.title,
+    noteId: hit.id,
+    liked: hit.liked,
+    collected: hit.collected,
+    shared: hit.shared,
+    commented: hit.commented,
+    collectRatio: hit.liked ? +(hit.collected / hit.liked).toFixed(2) : null,
+    shareRatio: hit.liked ? +(hit.shared / hit.liked).toFixed(2) : null,
+    commentRatio: hit.liked ? +(hit.commented / hit.liked).toFixed(2) : null,
+    specificCommentRatio: list.length ? +(specific.length / list.length).toFixed(2) : null,
+    commentsFetched: list.length,
+    commentSamples: list.slice(0, 8).map((c) => `${c.user_info?.nickname ?? "?"}: ${(c.content ?? "").slice(0, 50)}`),
+  };
+  emitSuccess(data, {
+    json,
+    human: () =>
+      [
+        `《${data.title}》`,
+        `赞 ${hit.liked}｜藏 ${hit.collected}｜转 ${hit.shared}｜评 ${hit.commented}`,
+        `收藏率 ${data.collectRatio ?? "?"}（清单/表类基准 ≥1.5）｜转发率 ${data.shareRatio ?? "?"}（避坑类基准 ≥1.0）`,
+        `留言质量：具体处境型占比 ${data.specificCommentRatio ?? "?"}（基准 ≥0.5，取到 ${list.length} 条）`,
+        "",
+        "留言样本：",
+        ...data.commentSamples.map((c) => "  " + c),
+      ].join("\n"),
+  });
+}

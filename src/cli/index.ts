@@ -18,7 +18,7 @@ import { runList } from './list.js'
 import { runPublishDraft } from './publish-draft.js'
 import { runUpdateDraft, runPublishWeixinDraft, publishWeixinViaBackend } from './weixin-draft.js'
 import { runDeleteDraft } from './delete-draft.js'
-import { runXhs, runXhsPublish } from './xhs.js'
+import { runXhs, runXhsPublish, runXhsTrust } from './xhs.js'
 import { runMetrics } from './metrics.js'
 import { runDaily } from './daily.js'
 
@@ -212,6 +212,15 @@ export function createProgram() {
     .option('--yes', '确认发表（不可撤销）')
     .option('--json', '输出 JSON（{ok,data}）')
     .action((opts) => runXhsPublish(opts));
+
+  // xhs trust 子命令：读单篇的信任指标（藏/转/留言质量）
+  xhsToolsCmd
+    .command('trust')
+    .description('读某篇笔记的信任指标：赞/藏/转/评 + 收藏率/转发率/留言质量')
+    .requiredOption('--title <title>', '笔记标题（前 8 个字就够）')
+    .option('--limit <number>', '抓多少条评论', '20')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action((opts) => runXhsTrust(opts));
 
   // capture 命令
   const captureCmd = program.command('capture')
