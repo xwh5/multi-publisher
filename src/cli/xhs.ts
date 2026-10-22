@@ -126,6 +126,10 @@ export async function runXhsPublish(options: {
   body?: string;
   images?: string[];
   tags?: string[];
+  // commander 把 `--image` 存成单数 `image`、`--tag` 存成单数 `tag`，
+  // 这里两种都认（2026-10-22 预检抓到：读复数导致 -i 传了也判空）
+  image?: string[];
+  tag?: string[];
   visibility?: string;
   isOriginal?: boolean;
   yes?: boolean;
@@ -134,7 +138,7 @@ export async function runXhsPublish(options: {
   const json = Boolean(options.json);
   const title = options.title ?? "";
   const body = options.body ?? (options.bodyFile ? await readFile(path.resolve(options.bodyFile), "utf-8") : "");
-  const images = options.images ?? [];
+  const images = options.images ?? options.image ?? [];
   if (!title) {
     emitFailure({ code: "MISSING_ARG", message: "请用 --title 指定标题" }, { json });
     return;
@@ -189,7 +193,8 @@ export async function runXhsPublish(options: {
       content: body,
       images: images.map((f) => path.resolve(f)),
     };
-    if (options.tags?.length) args.tags = options.tags;
+    const tags = options.tags ?? options.tag ?? [];
+    if (tags.length) args.tags = tags;
     if (options.visibility) args.visibility = options.visibility;
     if (options.isOriginal !== undefined) args.is_original = options.isOriginal;
     const res = await client.callTool("publish_content", args);
