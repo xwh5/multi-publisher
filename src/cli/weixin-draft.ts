@@ -166,6 +166,7 @@ export async function runPublishWeixinDraft(options: {
 export async function publishWeixinViaBackend(options: {
   title?: string;
   yes?: boolean;
+  open?: boolean;
   json?: boolean;
 }): Promise<void> {
   const json = Boolean(options.json);
@@ -177,7 +178,7 @@ export async function publishWeixinViaBackend(options: {
     emitFailure(
       {
         code: "NEEDS_CONFIRM",
-        message: "后台点「发表」是对外动作（不可撤销地公开）",
+        message: "后台点「发表」是对外动作（对外公开）",
         hint: "确认后加 --yes 再跑",
       },
       { json },
@@ -213,92 +214,105 @@ export async function publishWeixinViaBackend(options: {
       })),
     );
     const page = await context.newPage();
-    // 1) 首页会带 token 跳到后台
     await page.goto("https://mp.weixin.qq.com/", { waitUntil: "networkidle", timeout: 90000 });
     await page.waitForTimeout(4000);
     const token = new URL(page.url()).searchParams.get("token");
     if (!token) {
-      const stillLogin = await page.evaluate(() => document.body.innerText.includes("扫码登录"));
+      emitFailure(
+        { code: "NEEDS_SCAN", message: "公众号后台未登录（没拿到 token）", hint: "重新跑 mpub login -p weixin 扫码" },
+        { json },
+      );
+      return;
+    }
+
+    // 草稿列表接口（type=77 才是草稿；type=10 是旧路由）
+    const draft = await page.evaluate(
+      async ({ t, tk }) => {
+        const res = await fetch(
+          `/cgi-bin/appmsg?begin=0&count=20&type=77&action=list&item_show_type=0&token=${tk}&lang=zh_CN&f=json&ajax=1`,
+          { credentials: "include" },
+        );
+        const body = (await res.json()) as {
+          app_msg_info?: { item?: { app_id?: number; title?: string; multi_item?: { aid?: string }[] }[] };
+        };
+        const items = body.app_msg_info?.item ?? [];
+        const hit = items.find((i) =>
+          JSON.stringify(i).includes(t.slice(0, 10)),
+        );
+        return hit ? { appId: hit.app_id ?? null, title: hit.title ?? "" } : null;
+      },
+      { t: options.title, tk: token },
+    );
+    if (!draft || !draft.appId) {
       emitFailure(
         {
-          code: stillLogin ? "NEEDS_SCAN" : "NO_TOKEN",
-          message: stillLogin
-            ? "公众号后台未登录（页面在等扫码）"
-            : `没拿到后台 token（当前 URL=${page.url()}）`,
-          hint: "重新跑 mpub login -p weixin 扫码",
+          code: "DRAFT_NOT_FOUND",
+          message: `草稿箱里找不到《${options.title}》`,
+          hint: "确认标题前 10 个字一致",
         },
         { json },
       );
       return;
     }
-    console.log("[weixin] 后台 token 已拿到");
 
-    // 2) 草稿箱
-    const draftUrl = `https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&type=10&action=list_card&token=${token}&lang=zh_CN`;
-    await page.goto(draftUrl, { waitUntil: "networkidle", timeout: 90000 });
-    await page.waitForTimeout(5000);
-    const title = options.title;
-    const before = await page.evaluate((t) => document.body.innerText.includes(t), title);
-    if (!before) {
-      // 后台的草稿箱是微前端（frame 架构），在无头/自动化上下文里常渲染不出来
-      // ⇒ 不硬报错，给"人工一步"的直达路径：草稿箱第一篇就是刚更新的那篇
-      const listUrl = `https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&type=77&action=list_card&token=${token}&lang=zh_CN`;
+    // 打开这篇草稿的编辑页（编辑页能渲染，草稿箱列表页渲染不出来）
+    const editUrl = `https://mp.weixin.qq.com/cgi-bin/appmsg?action=edit&type=10&appmsgid=${draft.appId}&fromview=list&isSend=1&token=${token}&lang=zh_CN`;
+    await page.goto(editUrl, { waitUntil: "networkidle", timeout: 90000 });
+    const loaded = await page
+      .waitForFunction(
+        (t) => {
+          const ta = document.querySelector("textarea") as HTMLTextAreaElement | null;
+          return !!ta && ta.value.includes(t.slice(0, 8));
+        },
+        options.title,
+        { timeout: 30000 },
+      )
+      .then(() => true)
+      .catch(() => false);
+
+    if (!loaded) {
       emitFailure(
         {
-          code: "BACKEND_UI_NOT_RENDERABLE",
-          message: `后台草稿箱在自动化上下文里渲染不出来，没法代点「发表」（API 侧该号无发表权限：freepublish/mass send 全 48001）`,
-          hint: `请打开草稿箱，点最上面那篇《${title}》的「发表」：${listUrl}`,
+          code: "EDITOR_NOT_LOADED",
+          message: "编辑页没加载出这篇稿子",
+          hint: `手动打开：${editUrl}`,
         },
         { json },
       );
       return;
     }
-    console.log("[weixin] 草稿已找到，点发表");
 
-    // 3) 点该行的「发表」
-    const clicked = await page.evaluate((t) => {
-      const rows = [...document.querySelectorAll("a, span, em, div")].filter(
-        (e) => e.children.length === 0 && (e.textContent || "").trim() === t,
-      );
-      const row = rows[0]?.closest("li, tr, .weui-desktop-card, div.weui-desktop-card__content") || rows[0]?.parentElement?.parentElement;
-      const scope = row?.parentElement || row;
-      const btn = scope?.querySelector?.("a, button") as HTMLElement | null;
-      if (!btn) return false;
-      btn.click();
-      return true;
-    }, title);
-    if (!clicked) {
-      emitFailure({ code: "PUBLISH_BTN_NOT_FOUND", message: "没找到这一行的「发表」按钮" }, { json });
-      return;
+    // 走到这一步：微信设计上要求「发表」由人点 + 管理员扫码验证
+    // ⇒ 默认只给直达链接（不占浏览器窗口）；--open 才把编辑器开到屏幕上
+    if (options.open) {
+      console.log("[weixin] 编辑器已打开（--open），请点「发表」并按提示扫码验证");
     }
-    await page.waitForTimeout(3000);
-    // 4) 确认弹窗
-    const confirm = page.locator("button:visible").filter({ hasText: /^(确定|发表|确认发表|发送)$/ }).last();
-    if (await confirm.isVisible({ timeout: 4000 }).catch(() => false)) {
-      console.log("[weixin] 二次确认:", (await confirm.textContent())?.trim());
-      await confirm.click({ force: true });
-    }
-    await page.waitForTimeout(6000);
-    await page.screenshot({ path: "/tmp/weixin-publish.png" });
-
-    // 5) 回查：草稿箱里这篇应消失
-    await page.goto(draftUrl, { waitUntil: "networkidle", timeout: 90000 });
-    await page.waitForTimeout(5000);
-    const stillThere = await page.evaluate((t) => document.body.innerText.includes(t), title);
-    if (stillThere) {
-      emitFailure(
-        { code: "PUBLISH_UNCONFIRMED", message: "点了发表后草稿仍在箱里，未确认", hint: "可能弹窗没确认成功，看 /tmp/weixin-publish.png" },
-        { json },
-      );
-      return;
-    }
-    emitSuccess({ platform: "weixin", title, published: true }, {
-      json,
-      human: () => `✅ 已发表：${title}（回查：草稿箱里这篇已不在）`,
-    });
+    emitSuccess(
+      {
+        platform: "weixin",
+        title: options.title,
+        appmsgid: draft.appId,
+        editorOpened: Boolean(options.open),
+        nextStep: "打开链接 → 点右下角「发表」→ 按弹出的「微信验证」用管理员微信扫码",
+        editUrl,
+      },
+      {
+        json,
+        human: () =>
+          [
+            `✅ 已定位到《${options.title}》（appmsgid=${draft.appId}）`,
+            "下一步（必须你做）：打开下面链接 → 点右下角「发表」→ 按弹出的「微信验证」用管理员微信扫码",
+            "为什么必须人点：后台把「发表」设计成要管理员扫码验证；接口层这个号也没有发表权限（个人未认证订阅号）",
+            "",
+            editUrl,
+          ].join("\n"),
+      },
+    );
+    await browser.close();
+    return;
   } catch (err) {
     emitFailure({ code: "BACKEND_PUBLISH_FAILED", message: (err as Error).message }, { json });
   } finally {
-    await browser.close();
+    await browser.close().catch(() => undefined);
   }
 }

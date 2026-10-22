@@ -110,7 +110,7 @@ mpub publish -f article.md -p weixin -c cover.jpg
 
 ## 运营命令（2026-10-22 新增）
 
-面向"每天要发、要回盘"的用法，三条命令都只读或只做可回退的动作：
+面向"每天要发、要回盘"的用法。这些命令只读、或只做可回退的动作。
 
 ```bash
 # 1) 体检：凭据存在 ≠ 凭据可用（头条 cookie、公众号 token 都可能已过期）
@@ -121,11 +121,40 @@ mpub doctor -p toutiao   # 只查某个平台
 mpub list drafts -p toutiao -n 20
 mpub list drafts -p weixin
 mpub list fans  -p toutiao
+mpub list fans  -p weixin --backend    # 公众号粉丝数只能从后台读（见下）
 
 # 3) 发表已有草稿（不重新渲染；发表后回查草稿箱确认这篇消失）
 mpub publish-draft -p toutiao -t "标题前 10 个字就够"
-mpub publish -f a.md -p toutiao --publish-now   # 新稿：先存草稿再发表
+mpub publish -f a.md -p toutiao --publish-now      # 新稿：先存草稿再发表
+mpub publish -f a.md -p toutiao --no-first-claim   # 内容先在别的平台发过 ⇒ 不声明首发
+
+# 4) 小红书（走本地 xiaohongshu-mcp，mpub 当客户端）
+mpub xhs status
+mpub xhs tools
+mpub xhs call get_my_profile --args '{"tab":"note"}'
+mpub xhs publish --title "标题" --body-file a.txt -i 1.png -i 2.png --yes
+#   ⇒ 发完自动回查我的主页；笔记不可撤销，务必 --yes
+
+# 5) 每天一条命令：读排期 → 拉三平台数字 → 回填 metrics.csv → 报异常
+mpub daily --plan growth/schedule.json --metrics growth/metrics.csv
+mpub metrics        # 三平台一张表（粉丝/草稿/笔记数）
 ```
+
+### 平台接口权限的现实（2026-10-22 实测，别踩）
+
+**微信公众号（个人未认证订阅号）**
+
+| 能力 | 接口 | 结果 |
+|---|---|---|
+| 草稿增删改查 | `draft/add` `draft/get` `draft/update` `draft/delete` `draft/count` | ✅ |
+| 素材 | `material/*` | ✅ |
+| **发表** | `freepublish/submit` `message/mass/send` `message/mass/sendall` | ❌ **48001** |
+| **粉丝数** | `user/info` | ❌ **48001** |
+
+⇒ 个人未认证订阅号**在接口层就没有"发表"这个能力**（所有个人订阅号都是在后台点群发）。
+`mpub publish-weixin --backend` 的作用是**帮你定位到那一篇的编辑页并给出直达链接**，
+最后一步必须人点「发表」并按弹出的「微信验证」用管理员微信扫码——这一步是微信的设计，不是自动化能绕过的。
+粉丝数改从后台读：`mpub list fans -p weixin --backend`（先 `mpub login -p weixin` 扫码一次）。
 
 判定原则（与 OpenCLI 对齐）：**"我点了按钮"不算成功**。头条以服务端回执 `code=0` 为准，
 公众号以 `draft/get` 回查为准，发表成功以"这篇从草稿箱消失"为准。

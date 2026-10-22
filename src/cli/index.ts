@@ -163,6 +163,7 @@ export function createProgram() {
     .option('-t, --title <title>', '草稿标题（后台模式）')
     .option('--backend', '走公众号后台 UI 点「发表」（需先 mpub login -p weixin 扫码）')
     .option('--yes', '确认发表（对外动作，后台模式必须加）')
+    .option('--open', '顺便把编辑页在浏览器里打开（默认只给直达链接）')
     .option('--json', '输出 JSON（{ok,data}）')
     .action((opts) => {
       if (opts.backend) return publishWeixinViaBackend(opts)
