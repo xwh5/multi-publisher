@@ -46,6 +46,7 @@ export function createProgram() {
     .option('--via-script <path>', '外部投递脚本：把发布交给带闸门的脚本执行（如查重/检查/回查）')
     .option('--publish-now', '图文包路径：真发布（默认只存草稿；小红书发布不可撤销）')
     .option('--json', '输出 JSON（{ok,data}）')
+    .option('--no-first-claim', '不声明「头条首发」（内容若已在别的平台发过，必须关掉，否则是假声明）')
     .action(runPublish)
 
   // render 命令

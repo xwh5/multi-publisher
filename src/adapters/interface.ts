@@ -25,6 +25,11 @@ export interface Article {
   /** Markdown 文件所在目录，用于解析相对路径图片 */
   baseDir?: string
   /**
+   * 头条「首发」声明：true=声明首发（默认），false=不声明。
+   * 同一内容若已在别的平台发过，声明首发就是假声明 ⇒ 必须显式关掉。
+   */
+  firstClaim?: boolean
+  /**
    * 真发表（不可逆）而不是只进草稿箱。
    * 仅在 CLI 显式 --publish-now 时为 true；适配器仍须先保存草稿（可回退）再发表。
    */

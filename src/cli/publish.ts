@@ -23,6 +23,7 @@ export async function runPublish(
     package?: string;
     viaScript?: string;
     publishNow?: boolean;
+    firstClaim?: boolean;
     json?: boolean;
   },
   input?: string,
@@ -146,6 +147,7 @@ export async function runPublish(
       summary: result.summary,
       baseDir,
       publishNow: options.publishNow,
+      firstClaim: options.firstClaim,
     });
 
     await lease.release?.();

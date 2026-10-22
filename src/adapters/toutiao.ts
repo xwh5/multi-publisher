@@ -495,6 +495,13 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       // 保持弹窗打开，等保存回执即可（弹窗关闭由浏览器生命周期处理）。
       await page.waitForTimeout(2000);
 
+      // 首发声明：默认勾选「头条首发」。若内容已在别的平台发过，
+      // 声明首发 = 假声明（头条会取消首发激励）⇒ 按需取消并回读确认。
+      if (processedArticle.firstClaim === false) {
+        const state = await this.setFirstClaim(page, false);
+        console.log("[toutiao] 首发声明:", state);
+      }
+
       // 点击「预览并发布」触发保存，随后关闭预览面板（面板内才会真正落库）
       console.log("[toutiao] 查找发布按钮...");
       try {
@@ -780,6 +787,48 @@ export class ToutiaoAdapter implements IPlatformAdapter {
     } finally {
       await browser.close();
     }
+  }
+
+
+  /**
+   * 勾选/取消「声明首发 · 头条首发」。返回回读到的最终状态。
+   * 找不到控件时如实返回 unknown（不假装成功）。
+   */
+  private async setFirstClaim(
+    page: Page,
+    want: boolean,
+  ): Promise<string> {
+    const result = await page
+      .evaluate((wanted) => {
+        const boxes = Array.from(
+          document.querySelectorAll('input[type="checkbox"]'),
+        ) as HTMLInputElement[];
+        // 找离「首发」文字最近的 checkbox
+        const texts = Array.from(document.querySelectorAll("body *")).filter(
+          (el) => el.children.length === 0 && /首发/.test(el.textContent || ""),
+        );
+        let target: HTMLInputElement | undefined;
+        for (const t of texts) {
+          const scope = t.closest("div")?.parentElement || t.parentElement;
+          const box = scope?.querySelector<HTMLInputElement>(
+            'input[type="checkbox"]',
+          );
+          if (box) {
+            target = box;
+            break;
+          }
+        }
+        if (!target) {
+          target = boxes.find((b) => b.checked) ?? boxes[0];
+        }
+        if (!target) return "unknown（页面没有复选框）";
+        if (target.checked !== wanted) {
+          target.click();
+        }
+        return target.checked ? "已声明首发" : "已取消首发声明";
+      }, want)
+      .catch(() => "unknown（操作失败）");
+    return result;
   }
 
   /**
