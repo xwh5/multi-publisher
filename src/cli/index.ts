@@ -16,6 +16,8 @@ import { runXhsPackage } from './xhs-package.js'
 import { runDoctor } from './doctor.js'
 import { runList } from './list.js'
 import { runPublishDraft } from './publish-draft.js'
+import { runDeleteDraft, runUpdateDraft, runPublishWeixinDraft } from './weixin-draft.js'
+import { runXhs } from './xhs.js'
 
 export function createProgram() {
   const program = new Command()
@@ -125,6 +127,43 @@ export function createProgram() {
     .option('-p, --platform <platform>', '平台', 'toutiao')
     .option('--json', '输出 JSON（{ok,data}）')
     .action(runPublishDraft)
+
+  // delete-draft 命令：删草稿（公众号）
+  program
+    .command('delete-draft')
+    .description('删除草稿（当前支持公众号 draft/delete）')
+    .requiredOption('--media-id <id>', '草稿 media_id')
+    .option('-p, --platform <platform>', '平台', 'weixin')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runDeleteDraft)
+
+  // update-draft 命令：改草稿内容（改完仍在箱里，发表仍需人工点）
+  program
+    .command('update-draft')
+    .description('用新的 Markdown 更新草稿内容（保留原封面）')
+    .requiredOption('--media-id <id>', '草稿 media_id')
+    .requiredOption('-f, --file <path>', '新的 Markdown 文件')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runUpdateDraft)
+
+  // publish-weixin 命令：调发表 API（订阅号通常无权限→如实报错给人工路径）
+  program
+    .command('publish-weixin')
+    .description('尝试用 API 发表公众号草稿（订阅号通常 errcode 48001，需人工点发表）')
+    .requiredOption('--media-id <id>', '草稿 media_id')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runPublishWeixinDraft)
+
+  // xhs 命令：小红书 MCP 工具直通（mpub 当 MCP 客户端）
+  const xhsToolsCmd = program
+    .command('xhs')
+    .description('小红书：直连本地 xiaohongshu-mcp 的工具（status / tools / call）')
+    .argument('<what>', 'status（登录与健康）| tools（工具清单）| call（调用某个工具）')
+    .argument('[tool]', 'call 时指定工具名')
+    .option('--args <json>', '工具参数（JSON 字符串）')
+    .option('--yes', '写操作确认（发布/评论/点赞/收藏等不可撤销的写操作必须加）')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action((what: string, tool: string | undefined, opts) => runXhs(what, tool, opts))
 
   // capture 命令
   const captureCmd = program.command('capture')
