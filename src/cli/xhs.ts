@@ -210,11 +210,17 @@ export async function runXhsPublish(options: {
     for (let i = 0; i < 6 && !verified; i++) {
       await new Promise((r) => setTimeout(r, 5000));
       const prof = await client.callTool("get_my_profile", { tab: "note" });
-      const p = unwrapToolResult(prof) as { feeds?: { title?: string; noteId?: string; id?: string }[] };
-      const hit = (p?.feeds ?? []).find((f) => (f.title || "").includes(title.slice(0, 8)));
+      const p = unwrapToolResult(prof) as {
+        feeds?: { id?: string; noteCard?: { displayTitle?: string } }[];
+      };
+      // 注意：主页 feeds 没有顶层 title，标题在 noteCard.displayTitle 里
+      // （2026-10-22 预检抓到：旧写法读 f.title 永远匹配不上，成功也会报 PUBLISH_UNCONFIRMED）
+      const hit = (p?.feeds ?? []).find((f) =>
+        (f.noteCard?.displayTitle ?? "").includes(title.slice(0, 8)),
+      );
       if (hit) {
         verified = true;
-        found = { title: hit.title, noteId: hit.noteId ?? hit.id };
+        found = { title: hit.noteCard?.displayTitle, noteId: hit.id };
       }
     }
     if (!verified) {
