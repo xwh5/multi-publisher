@@ -156,3 +156,142 @@ export async function runPublishWeixinDraft(options: {
     emitFailure({ code: "PUBLISH_FAILED", message: (err as Error).message }, { json });
   }
 }
+
+/**
+ * 后台 UI 发表：订阅号没有 freepublish 权限，只能在 mp.weixin.qq.com 点「发表」。
+ * 前提：先 `mpub login -p weixin` 扫码，后台 cookie 存在配置里。
+ *
+ * 判定：发表成功后这篇会从草稿箱消失 ⇒ 回查草稿箱确认。
+ */
+export async function publishWeixinViaBackend(options: {
+  title?: string;
+  yes?: boolean;
+  json?: boolean;
+}): Promise<void> {
+  const json = Boolean(options.json);
+  if (!options.title) {
+    emitFailure({ code: "MISSING_ARG", message: "后台发表请用 --title 指定草稿标题" }, { json });
+    return;
+  }
+  if (!options.yes) {
+    emitFailure(
+      {
+        code: "NEEDS_CONFIRM",
+        message: "后台点「发表」是对外动作（不可撤销地公开）",
+        hint: "确认后加 --yes 再跑",
+      },
+      { json },
+    );
+    return;
+  }
+  const cookies = await ConfigStore.getWeixinBackendCookies();
+  if (!cookies || Object.keys(cookies).length === 0) {
+    emitFailure(
+      {
+        code: "NO_BACKEND_SESSION",
+        message: "没有公众号后台登录态",
+        hint: "先跑 mpub login -p weixin（浏览器扫码一次）",
+      },
+      { json },
+    );
+    return;
+  }
+
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({
+    headless: false,
+    args: ["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+  });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    await context.addCookies(
+      Object.entries(cookies).map(([name, value]) => ({
+        name,
+        value,
+        domain: ".qq.com",
+        path: "/",
+      })),
+    );
+    const page = await context.newPage();
+    // 1) 首页会带 token 跳到后台
+    await page.goto("https://mp.weixin.qq.com/", { waitUntil: "networkidle", timeout: 90000 });
+    await page.waitForTimeout(4000);
+    const token = new URL(page.url()).searchParams.get("token");
+    if (!token) {
+      const stillLogin = await page.evaluate(() => document.body.innerText.includes("扫码登录"));
+      emitFailure(
+        {
+          code: stillLogin ? "NEEDS_SCAN" : "NO_TOKEN",
+          message: stillLogin
+            ? "公众号后台未登录（页面在等扫码）"
+            : `没拿到后台 token（当前 URL=${page.url()}）`,
+          hint: "重新跑 mpub login -p weixin 扫码",
+        },
+        { json },
+      );
+      return;
+    }
+    console.log("[weixin] 后台 token 已拿到");
+
+    // 2) 草稿箱
+    const draftUrl = `https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&type=10&action=list_card&token=${token}&lang=zh_CN`;
+    await page.goto(draftUrl, { waitUntil: "networkidle", timeout: 90000 });
+    await page.waitForTimeout(5000);
+    const title = options.title;
+    const before = await page.evaluate((t) => document.body.innerText.includes(t), title);
+    if (!before) {
+      emitFailure(
+        { code: "DRAFT_NOT_FOUND", message: `草稿箱里找不到《${title}》`, hint: "确认标题完全一致（草稿箱按标题显示）" },
+        { json },
+      );
+      return;
+    }
+    console.log("[weixin] 草稿已找到，点发表");
+
+    // 3) 点该行的「发表」
+    const clicked = await page.evaluate((t) => {
+      const rows = [...document.querySelectorAll("a, span, em, div")].filter(
+        (e) => e.children.length === 0 && (e.textContent || "").trim() === t,
+      );
+      const row = rows[0]?.closest("li, tr, .weui-desktop-card, div.weui-desktop-card__content") || rows[0]?.parentElement?.parentElement;
+      const scope = row?.parentElement || row;
+      const btn = scope?.querySelector?.("a, button") as HTMLElement | null;
+      if (!btn) return false;
+      btn.click();
+      return true;
+    }, title);
+    if (!clicked) {
+      emitFailure({ code: "PUBLISH_BTN_NOT_FOUND", message: "没找到这一行的「发表」按钮" }, { json });
+      return;
+    }
+    await page.waitForTimeout(3000);
+    // 4) 确认弹窗
+    const confirm = page.locator("button:visible").filter({ hasText: /^(确定|发表|确认发表|发送)$/ }).last();
+    if (await confirm.isVisible({ timeout: 4000 }).catch(() => false)) {
+      console.log("[weixin] 二次确认:", (await confirm.textContent())?.trim());
+      await confirm.click({ force: true });
+    }
+    await page.waitForTimeout(6000);
+    await page.screenshot({ path: "/tmp/weixin-publish.png" });
+
+    // 5) 回查：草稿箱里这篇应消失
+    await page.goto(draftUrl, { waitUntil: "networkidle", timeout: 90000 });
+    await page.waitForTimeout(5000);
+    const stillThere = await page.evaluate((t) => document.body.innerText.includes(t), title);
+    if (stillThere) {
+      emitFailure(
+        { code: "PUBLISH_UNCONFIRMED", message: "点了发表后草稿仍在箱里，未确认", hint: "可能弹窗没确认成功，看 /tmp/weixin-publish.png" },
+        { json },
+      );
+      return;
+    }
+    emitSuccess({ platform: "weixin", title, published: true }, {
+      json,
+      human: () => `✅ 已发表：${title}（回查：草稿箱里这篇已不在）`,
+    });
+  } catch (err) {
+    emitFailure({ code: "BACKEND_PUBLISH_FAILED", message: (err as Error).message }, { json });
+  } finally {
+    await browser.close();
+  }
+}

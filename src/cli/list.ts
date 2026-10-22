@@ -127,9 +127,65 @@ async function listWeixinDrafts(): Promise<Record<string, unknown>> {
   return { totalDrafts: draft.total_count }
 }
 
+
+/**
+ * 从公众号后台读粉丝数（API 的 user/info 对这个号 48001，只能读后台）。
+ * 需要先 `mpub login -p weixin` 扫码，后台 cookie 存在配置里。
+ */
+async function listWeixinFansBackend(): Promise<Record<string, unknown>> {
+  const cookies = await ConfigStore.getWeixinBackendCookies();
+  if (!cookies || Object.keys(cookies).length === 0) {
+    throw new Error("没有公众号后台登录态，先跑 mpub login -p weixin 扫码");
+  }
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: false, args: ["--no-sandbox"] });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    await context.addCookies(
+      Object.entries(cookies).map(([name, value]) => ({
+        name,
+        value,
+        domain: ".qq.com",
+        path: "/",
+      })),
+    );
+    const page = await context.newPage();
+    await page.goto("https://mp.weixin.qq.com/", { waitUntil: "networkidle", timeout: 90000 });
+    await page.waitForTimeout(5000);
+    const token = new URL(page.url()).searchParams.get("token");
+    if (!token) {
+      throw new Error("公众号后台未登录（没拿到 token）⇒ 重新跑 mpub login -p weixin 扫码");
+    }
+    await page.goto(`https://mp.weixin.qq.com/cgi-bin/home?t=home/index&token=${token}&lang=zh_CN`, {
+      waitUntil: "networkidle",
+      timeout: 90000,
+    });
+    await page.waitForTimeout(6000);
+    const text = await page.evaluate(() => document.body.innerText.replace(/\n{2,}/g, "\n"));
+    // 抓「累计关注人数 / 粉丝数 / 昨日新增关注」这类标签后面的数字
+    const pick = (labels: string[]): number | null => {
+      for (const label of labels) {
+        const m = text.match(new RegExp(label + "[^0-9]{0,12}([0-9,]+)"));
+        if (m) return Number(m[1].replace(/,/g, ""));
+      }
+      return null;
+    };
+    return {
+      totalFans: pick(["总用户数", "累计关注人数", "总粉丝数", "粉丝总数", "关注人数"]),
+      newFansYesterday: pick(["昨日新增关注\\(人\\)", "昨日新增关注", "新增关注人数"]),
+      readsYesterday: pick(["昨日阅读\\(人\\)", "昨日阅读次数", "昨日阅读"]),
+      sharesYesterday: pick(["昨日分享\\(人\\)", "昨日分享次数", "昨日分享"]),
+      originalCount: pick(["原创内容"]),
+      raw: text.slice(0, 700),
+    };
+  } finally {
+    await browser.close();
+  }
+}
+
 export async function runList(
   what: string,
-  options: { platform?: string; count?: string; json?: boolean } = {},
+  options: { platform?: string; count?: string; json?: boolean; backend?: boolean } = {},
 ): Promise<void> {
   const platform = options.platform || 'toutiao'
   const count = Number(options.count || 20)
@@ -168,6 +224,20 @@ export async function runList(
     }
 
     if (what === 'fans') {
+      if (platform === 'weixin' && options.backend) {
+        const data = await listWeixinFansBackend()
+        emitSuccess({ platform, source: 'backend', ...data }, {
+          json,
+          human: () =>
+            [
+              `粉丝总数：${data.totalFans ?? '?'}`,
+              `昨日新增关注：${data.newFansYesterday ?? '?'}`,
+              `昨日阅读：${data.readsYesterday ?? '?'}　昨日分享：${data.sharesYesterday ?? '?'}`,
+              '（来源：公众号后台首页；API 的 user/info 对该号返回 48001）',
+            ].join('\n'),
+        })
+        return
+      }
       if (platform === 'toutiao') {
         const data = await listToutiaoFans()
         emitSuccess({ platform, ...data }, {

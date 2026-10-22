@@ -16,16 +16,19 @@ import { runXhsPackage } from './xhs-package.js'
 import { runDoctor } from './doctor.js'
 import { runList } from './list.js'
 import { runPublishDraft } from './publish-draft.js'
-import { runUpdateDraft, runPublishWeixinDraft } from './weixin-draft.js'
+import { runUpdateDraft, runPublishWeixinDraft, publishWeixinViaBackend } from './weixin-draft.js'
 import { runDeleteDraft } from './delete-draft.js'
-import { runXhs } from './xhs.js'
+import { runXhs, runXhsPublish } from './xhs.js'
 import { runMetrics } from './metrics.js'
+import { runDaily } from './daily.js'
 
 export function createProgram() {
   const program = new Command()
 
   /** 收集可重复的 -i/--image 参数 */
   const collectImages = (value: string, previous: string[]): string[] => [...previous, value]
+  /** 收集可重复的 --tag 参数 */
+  const collectTags = (value: string, previous: string[]): string[] => [...previous, value]
 
   program
     .name('mpub')
@@ -120,6 +123,7 @@ export function createProgram() {
     .argument('<what>', '要回读什么：drafts（草稿）| fans（粉丝）')
     .option('-p, --platform <platform>', '平台 (toutiao|weixin)', 'toutiao')
     .option('-n, --count <number>', '条数', '20')
+    .option('--backend', '走平台后台读（公众号粉丝数：API 无权限，只能读后台）')
     .option('--json', '输出 JSON（{ok,data}）')
     .action((what: string, opts) => runList(what, opts))
 
@@ -154,10 +158,16 @@ export function createProgram() {
   // publish-weixin 命令：调发表 API（订阅号通常无权限→如实报错给人工路径）
   program
     .command('publish-weixin')
-    .description('尝试用 API 发表公众号草稿（订阅号通常 errcode 48001，需人工点发表）')
-    .requiredOption('--media-id <id>', '草稿 media_id')
+    .description('发表公众号草稿：默认走 API（订阅号 48001）；--backend 走后台 UI 点发表')
+    .option('--media-id <id>', '草稿 media_id（API 模式）')
+    .option('-t, --title <title>', '草稿标题（后台模式）')
+    .option('--backend', '走公众号后台 UI 点「发表」（需先 mpub login -p weixin 扫码）')
+    .option('--yes', '确认发表（对外动作，后台模式必须加）')
     .option('--json', '输出 JSON（{ok,data}）')
-    .action(runPublishWeixinDraft)
+    .action((opts) => {
+      if (opts.backend) return publishWeixinViaBackend(opts)
+      return runPublishWeixinDraft(opts)
+    })
 
   // xhs 命令：小红书 MCP 工具直通（mpub 当 MCP 客户端）
   const xhsToolsCmd = program
@@ -176,6 +186,31 @@ export function createProgram() {
     .description('一次拉齐三平台运营数字（粉丝/草稿/笔记数，只读）')
     .option('--json', '输出 JSON（{ok,data}）')
     .action(runMetrics)
+
+  // daily 命令：每天的运营动作一条命令（体检→今日待发→拉数→回填→报告）
+  program
+    .command('daily')
+    .description('每天的运营动作：读排期、拉三平台数字、回填 metrics、报异常')
+    .option('--plan <file>', '排期 JSON（{date,items:[{time,platform,title,action}]}）')
+    .option('--metrics <file>', '要回填的 metrics.csv')
+    .option('--date <YYYY-MM-DD>', '按哪一天看（默认今天）')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runDaily)
+
+  // xhs publish 子命令：发小红书图文 + 发布后回查
+  const xhsPublish = xhsToolsCmd
+    .command('publish')
+    .description('发一篇小红书图文（发完自动回查主页；笔记不可删，务必确认后再发）')
+    .requiredOption('--title <title>', '标题（≤20 字）')
+    .option('--body-file <path>', '正文文件（≤1000 字）')
+    .option('--body <text>', '正文（直接给）')
+    .option('-i, --image <path>', '图片（可重复，至少 1 张）', collectImages, [])
+    .option('--tag <tag>', '话题标签（可重复）', collectTags, [])
+    .option('--visibility <v>', '可见范围（公开可见/仅自己可见/仅互关好友可见）')
+    .option('--is-original', '声明原创')
+    .option('--yes', '确认发表（不可撤销）')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action((opts) => runXhsPublish(opts));
 
   // capture 命令
   const captureCmd = program.command('capture')

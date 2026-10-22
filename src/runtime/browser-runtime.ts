@@ -338,6 +338,16 @@ export const PLATFORM_LOGIN_CONFIGS: Record<string, PlatformLoginConfig> = {
     },
     extraCookieDomains: ['.xiaohongshu.com', '.edith.xiaohongshu.com'],
   },
+  weixin: {
+    id: 'weixin',
+    name: '微信公众号后台',
+    loginUrl: 'https://mp.weixin.qq.com/',
+    successCondition: {
+      cookieName: 'slave_user',
+      waitMs: 180000,
+    },
+    extraCookieDomains: ['.weixin.qq.com', '.qq.com'],
+  },
   toutiao: {
     id: 'toutiao',
     name: '头条号',

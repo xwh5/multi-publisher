@@ -23,6 +23,8 @@ export interface WeixinConfig {
   appSecret?: string
   access_token?: string
   token_expires_at?: number   // Unix ms
+  /** 公众号后台（mp.weixin.qq.com）登录态：用于在后台点「发表」 */
+  cookies?: Record<string, string>
 }
 
 export interface ZhihuConfig {
@@ -211,6 +213,18 @@ export class ConfigStore {
   }
 
   /** 更新微信配置 */
+  /** 获取公众号后台 cookie（用于后台 UI 操作） */
+  static async getWeixinBackendCookies(): Promise<Record<string, string> | null> {
+    const config = await loadConfig()
+    return config.weixin?.cookies || null
+  }
+
+  static async setWeixinBackendCookies(cookies: Record<string, string>): Promise<void> {
+    await updateConfig((c) => {
+      c.weixin = { ...c.weixin, cookies }
+    })
+  }
+
   static async setWeixin(update: Partial<WeixinConfig>): Promise<void> {
     await updateConfig((c) => {
       c.weixin = { ...c.weixin, ...update }
