@@ -132,7 +132,7 @@ async function listWeixinDrafts(): Promise<Record<string, unknown>> {
  * 从公众号后台读粉丝数（API 的 user/info 对这个号 48001，只能读后台）。
  * 需要先 `mpub login -p weixin` 扫码，后台 cookie 存在配置里。
  */
-async function listWeixinFansBackend(): Promise<Record<string, unknown>> {
+export async function listWeixinFansBackend(): Promise<Record<string, unknown>> {
   const cookies = await ConfigStore.getWeixinBackendCookies();
   if (!cookies || Object.keys(cookies).length === 0) {
     throw new Error("没有公众号后台登录态，先跑 mpub login -p weixin 扫码");

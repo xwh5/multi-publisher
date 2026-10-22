@@ -50,6 +50,49 @@ async function toutiaoMetrics(): Promise<Record<string, unknown>> {
 }
 
 async function weixinMetrics(): Promise<Record<string, unknown>> {
+  // 优先走后台：API 的 user/info 对个人未认证订阅号是 48001
+  const backendCookies = await ConfigStore.getWeixinBackendCookies();
+  if (backendCookies && Object.keys(backendCookies).length > 0) {
+    try {
+      const { listWeixinFansBackend } = await import("./list.js");
+      const b = await listWeixinFansBackend();
+      // 草稿数走 API（draft/count 对这个号是通的）
+      let drafts: number | undefined;
+      try {
+        const cfg = await ConfigStore.getWeixin();
+        const tok = (await (
+          await fetch(
+            `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${cfg.appId}&secret=${cfg.appSecret}`,
+          )
+        ).json()) as { access_token?: string };
+        if (tok.access_token) {
+          const cnt = (await (
+            await fetch(`https://api.weixin.qq.com/cgi-bin/draft/count?access_token=${tok.access_token}`)
+          ).json()) as { total_count?: number };
+          drafts = cnt.total_count;
+        }
+      } catch {
+        /* 草稿数拿不到就不填 */
+      }
+      return {
+        status: "ok",
+        source: "backend",
+        fans: b.totalFans ?? "?",
+        newFansYesterday: b.newFansYesterday ?? "?",
+        readsYesterday: b.readsYesterday ?? "?",
+        sharesYesterday: b.sharesYesterday ?? "?",
+        drafts,
+      };
+    } catch (err) {
+      // 后台读不到就退回 API（草稿数仍可用）
+      const api = await weixinMetricsApi();
+      return { ...api, backendError: (err as Error).message };
+    }
+  }
+  return weixinMetricsApi();
+}
+
+async function weixinMetricsApi(): Promise<Record<string, unknown>> {
   const cfg = await ConfigStore.getWeixin();
   if (!cfg.appId || !cfg.appSecret) return { status: "unconfigured", detail: "未配置公众号凭据" };
   const tok = (await (
@@ -119,7 +162,7 @@ export async function runMetrics(options: { json?: boolean }): Promise<void> {
             },
             {
               平台: "微信公众号",
-              粉丝: "不可用",
+              粉丝: String(weixin.fans ?? "不可用"),
               昨日涨掉: "-",
               活跃粉: "-",
               草稿: String(weixin.drafts ?? "-"),
