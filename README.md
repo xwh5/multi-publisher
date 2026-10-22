@@ -17,6 +17,8 @@
 | **Markdown 直发** | front-matter 元数据、代码高亮、LaTeX 公式 |
 | **CI/CD 友好** | 纯命令行无需浏览器，配置文件统一管理 |
 | **草稿箱发布** | 微信公众号 → 草稿箱，其他平台 → 各自草稿箱 |
+| **全流程运营命令** | `doctor` 体检三平台凭据（真实请求探测）、`list drafts/fans` 回读状态、`publish-draft` 发表已有草稿；成功判定一律靠可回查的证据 |
+| **诚实契约** | 命令输出 `{ok, data}` / `{ok, false, error{code,message,hint}}`，失败非零退出码 |
 
 ---
 
@@ -103,6 +105,30 @@ mpub publish -f article.md -p weixin --auto-cover
 # 指定封面图
 mpub publish -f article.md -p weixin -c cover.jpg
 ```
+
+---
+
+## 运营命令（2026-10-22 新增）
+
+面向"每天要发、要回盘"的用法，三条命令都只读或只做可回退的动作：
+
+```bash
+# 1) 体检：凭据存在 ≠ 凭据可用（头条 cookie、公众号 token 都可能已过期）
+mpub doctor              # 人读表格；加 --json 输出 {ok,data}
+mpub doctor -p toutiao   # 只查某个平台
+
+# 2) 回读：草稿 / 粉丝（只读 API，不开浏览器）
+mpub list drafts -p toutiao -n 20
+mpub list drafts -p weixin
+mpub list fans  -p toutiao
+
+# 3) 发表已有草稿（不重新渲染；发表后回查草稿箱确认这篇消失）
+mpub publish-draft -p toutiao -t "标题前 10 个字就够"
+mpub publish -f a.md -p toutiao --publish-now   # 新稿：先存草稿再发表
+```
+
+判定原则（与 OpenCLI 对齐）：**"我点了按钮"不算成功**。头条以服务端回执 `code=0` 为准，
+公众号以 `draft/get` 回查为准，发表成功以"这篇从草稿箱消失"为准。
 
 ---
 

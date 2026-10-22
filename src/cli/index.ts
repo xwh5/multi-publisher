@@ -13,6 +13,9 @@ import { runLogin } from './login.js'
 import { runPublishAll } from './publish-all.js'
 import { runCapture } from './capture.js'
 import { runXhsPackage } from './xhs-package.js'
+import { runDoctor } from './doctor.js'
+import { runList } from './list.js'
+import { runPublishDraft } from './publish-draft.js'
 
 export function createProgram() {
   const program = new Command()
@@ -95,6 +98,33 @@ export function createProgram() {
     .option('--mac-style', '启用 Mac 风格代码块', true)
     .option('--no-mac-style', '禁用 Mac 风格代码块')
     .action(runPublishAll)
+
+  // doctor 命令：平台凭据/能力体检（凭据存在 ≠ 可用，必须发真实请求）
+  program
+    .command('doctor')
+    .description('体检各平台凭据与可用性（真实请求探测，不看本地配置）')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .option('-p, --platform <platform>', '只查指定平台')
+    .action(runDoctor)
+
+  // list 命令：回读平台状态（草稿 / 粉丝）
+  const listCmd = program
+    .command('list')
+    .description('回读平台状态')
+    .argument('<what>', '要回读什么：drafts（草稿）| fans（粉丝）')
+    .option('-p, --platform <platform>', '平台 (toutiao|weixin)', 'toutiao')
+    .option('-n, --count <number>', '条数', '20')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action((what: string, opts) => runList(what, opts))
+
+  // publish-draft 命令：发表已有草稿（不重渲染，发表后可回查）
+  program
+    .command('publish-draft')
+    .description('发表草稿箱里已有的一篇（按标题定位；草稿会从箱里消失）')
+    .requiredOption('-t, --title <title>', '草稿标题（可给前 10 字）')
+    .option('-p, --platform <platform>', '平台', 'toutiao')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runPublishDraft)
 
   // capture 命令
   const captureCmd = program.command('capture')

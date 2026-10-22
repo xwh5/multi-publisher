@@ -24,6 +24,11 @@ export interface Article {
   tags?: string[]
   /** Markdown 文件所在目录，用于解析相对路径图片 */
   baseDir?: string
+  /**
+   * 真发表（不可逆）而不是只进草稿箱。
+   * 仅在 CLI 显式 --publish-now 时为 true；适配器仍须先保存草稿（可回退）再发表。
+   */
+  publishNow?: boolean
 }
 
 /** 图文帖（小红书形态）：标题 + 图集 + 短正文 + 标签 */
@@ -79,4 +84,10 @@ export interface IPlatformAdapter {
    * 真发布要显式传 publishNow（不可撤销的平台需要这道闸门）。
    */
   publishImagePost?(post: ImagePost, options?: { publishNow?: boolean }): Promise<SyncResult>
+  /**
+   * 发表**已有草稿**（按标题定位），不重新渲染、不重复入库。
+   * 用途：草稿已在箱里（人工或前一次命令放进去的），要真发表时用这条路径。
+   * 成功判定必须可回查（例：草稿箱里这篇消失了）。
+   */
+  publishDraftByTitle?(title: string): Promise<SyncResult>
 }

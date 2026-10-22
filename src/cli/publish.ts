@@ -127,6 +127,7 @@ export async function runPublish(
       source_url: result.source_url,
       summary: result.summary,
       baseDir,
+      publishNow: options.publishNow,
     });
 
     // 清理自动获取的临时封面图

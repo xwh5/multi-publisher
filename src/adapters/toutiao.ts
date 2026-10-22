@@ -552,6 +552,28 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       }
 
       console.log("[toutiao] 草稿已保存:", saved.evidence);
+
+      // --publish-now：草稿已落库（可回退）后再真发表
+      if (processedArticle.publishNow) {
+        const published = await this.publishDraftNow(page, processedArticle.title);
+        if (!published.ok) {
+          return {
+            platform: this.meta.id,
+            success: false,
+            error: `草稿已保存，但发表未确认（${published.detail}）。草稿仍在草稿箱，可人工点发表`,
+            timestamp: Date.now() - start,
+          };
+        }
+        console.log("[toutiao] 已发表:", published.detail);
+        return {
+          platform: this.meta.id,
+          success: true,
+          postUrl: published.detail,
+          draftOnly: false,
+          timestamp: Date.now() - start,
+        };
+      }
+
       return {
         platform: this.meta.id,
         success: true,
@@ -561,6 +583,194 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       };
     } catch (err) {
       console.error("[toutiao] 错误:", err);
+      return {
+        platform: this.meta.id,
+        success: false,
+        error: (err as Error).message,
+        timestamp: Date.now() - start,
+      };
+    } finally {
+      await browser.close();
+    }
+  }
+
+
+  /**
+   * 发表已有草稿（按标题定位）：不重新渲染、不重复入库。
+   *
+   * 流程：草稿列表接口取 gid → 打开该草稿的编辑器 → 点「确认发布」
+   *      → 回查草稿列表确认这篇消失了（发表后草稿会从箱里移除）。
+   */
+  async publishDraftByTitle(title: string): Promise<SyncResult> {
+    const start = Date.now();
+    if (!this.cookieData) {
+      return {
+        platform: this.meta.id,
+        success: false,
+        error: "未配置头条号 Cookie",
+        timestamp: Date.now() - start,
+      };
+    }
+    const browser = await chromium.launch({
+      headless: false,
+      args: ["--disable-blink-features=AutomationControlled", "--disable-dev-shm-usage", "--no-sandbox"],
+    });
+    try {
+      const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+      await context.addCookies(
+        Object.entries(this.cookieData).map(([name, value]) => ({
+          name,
+          value,
+          domain: ".toutiao.com",
+          path: "/",
+        })),
+      );
+      const page = await context.newPage();
+      await page.goto("https://mp.toutiao.com/profile_v4/manage/draft?enter_from=left_menu", {
+        waitUntil: "networkidle",
+        timeout: 90000,
+      });
+      await page.waitForTimeout(5000);
+
+      const gid = await page.evaluate(async (t) => {
+        const res = await fetch(
+          "/mp/agw/creator_center/draft_list?type=0&count=50&app_id=1231",
+          { credentials: "include" },
+        );
+        const body = (await res.json()) as { code?: number };
+        if (body.code !== 0) return null;
+        const items: { title: string; gid: string }[] = [];
+        const walk = (node: unknown): void => {
+          if (!node || typeof node !== "object") return;
+          if (Array.isArray(node)) {
+            node.forEach(walk);
+            return;
+          }
+          const obj = node as Record<string, unknown>;
+          if (typeof obj.title === "string" && obj.gid) {
+            items.push({ title: obj.title, gid: String(obj.gid) });
+          }
+          Object.values(obj).forEach(walk);
+        };
+        walk(body);
+        const hit = items.find((i) => i.title === t) || items.find((i) => i.title.includes(t.slice(0, 10)));
+        return hit?.gid ?? null;
+      }, title);
+      if (!gid) {
+        return {
+          platform: this.meta.id,
+          success: false,
+          error: `草稿箱里找不到《${title}》（先跑 mpub list drafts -p toutiao 看现有草稿）`,
+          timestamp: Date.now() - start,
+        };
+      }
+      console.log("[toutiao] 找到草稿 gid:", gid);
+
+      await page.goto(`https://mp.toutiao.com/profile_v4/graphic/publish?pgc_id=${gid}`, {
+        waitUntil: "networkidle",
+        timeout: 90000,
+      });
+      // 等编辑器真的把草稿内容加载出来（标题框出现且有值），再找发表按钮
+      await page
+        .waitForFunction(
+          () => {
+            const ta = document.querySelector("textarea") as HTMLTextAreaElement | null;
+            return !!ta && ta.value.trim().length > 0;
+          },
+          { timeout: 45000 },
+        )
+        .catch(() => undefined);
+      await page.waitForTimeout(2000);
+
+      // 草稿编辑器的按钮是「预览并发布」；真正的「确认发布」在预览面板里
+      const direct = page.locator("button:visible").filter({ hasText: /^(确认发布|立即发布)$/ }).last();
+      let publishClicked = false;
+      if (await direct.isVisible({ timeout: 4000 }).catch(() => false)) {
+        console.log("[toutiao] 点击:", (await direct.textContent())?.trim());
+        await direct.click({ force: true });
+        publishClicked = true;
+      } else {
+        const previewBtn = page.locator("button:visible").filter({ hasText: /^预览并发布$/ }).last();
+        if (!(await previewBtn.isVisible({ timeout: 6000 }).catch(() => false))) {
+          const buttons = await page
+            .evaluate(() =>
+              [...document.querySelectorAll("button")]
+                .filter((b) => (b as HTMLElement).offsetParent !== null)
+                .map((b) => (b.textContent || "").trim())
+                .filter(Boolean),
+            )
+            .catch(() => [] as string[]);
+          return {
+            platform: this.meta.id,
+            success: false,
+            error: `编辑器里没找到发表入口（可见按钮=${buttons.join("/") || "无"}）`,
+            timestamp: Date.now() - start,
+          };
+        }
+        console.log("[toutiao] 点击: 预览并发布（打开预览面板）");
+        await previewBtn.click({ force: true });
+        await page.waitForTimeout(5000);
+        const confirmBtn = page
+          .locator("button:visible")
+          .filter({ hasText: /^(确认发布|立即发布|发布)$/ })
+          .last();
+        if (await confirmBtn.isVisible({ timeout: 10000 }).catch(() => false)) {
+          console.log("[toutiao] 点击:", (await confirmBtn.textContent())?.trim());
+          await confirmBtn.click({ force: true });
+          publishClicked = true;
+        }
+      }
+      if (!publishClicked) {
+        return {
+          platform: this.meta.id,
+          success: false,
+          error: "预览面板里没找到『确认发布』按钮",
+          timestamp: Date.now() - start,
+        };
+      }
+      await page.waitForTimeout(4000);
+      const confirm = page.locator("button:visible").filter({ hasText: /^(确定|确认)$/ }).last();
+      if (await confirm.isVisible({ timeout: 2500 }).catch(() => false)) {
+        await confirm.click({ force: true });
+      }
+
+      // 回查：草稿箱里这篇应该消失了
+      const deadline = Date.now() + 60000;
+      while (Date.now() < deadline) {
+        await page.waitForTimeout(3000);
+        const state = await page
+          .evaluate(async (t) => {
+            try {
+              const res = await fetch(
+                "/mp/agw/creator_center/draft_list?type=0&count=50&app_id=1231",
+                { credentials: "include" },
+              );
+              const body = (await res.json()) as { code?: number };
+              if (body.code !== 0) return "unknown";
+              return JSON.stringify(body).includes(t.slice(0, 10)) ? "yes" : "no";
+            } catch {
+              return "unknown";
+            }
+          }, title)
+          .catch(() => "unknown");
+        if (state === "no") {
+          return {
+            platform: this.meta.id,
+            success: true,
+            postId: gid,
+            postUrl: `https://www.toutiao.com/item/${gid}/`,
+            draftOnly: false,
+            timestamp: Date.now() - start,
+          };
+        }
+      }
+      return {
+        platform: this.meta.id,
+        success: false,
+        error: "点了发表但草稿仍在箱里，未确认（可人工到后台核对）",
+        timestamp: Date.now() - start,
+      };
+    } catch (err) {
       return {
         platform: this.meta.id,
         success: false,
@@ -685,6 +895,63 @@ export class ToutiaoAdapter implements IPlatformAdapter {
     await page.keyboard.press("Control+V");
     await page.waitForTimeout(1200);
     return "纯文本兜底（富文本未生效）";
+  }
+
+
+  /**
+   * 把已保存的草稿真发表（--publish-now）。
+   *
+   * 判定依据（不是"我点了按钮"）：发表后这篇会从草稿箱消失
+   * ⇒ 用草稿列表接口回查标题是否还在。
+   */
+  private async publishDraftNow(
+    page: Page,
+    title: string,
+    timeoutMs = 60000,
+  ): Promise<{ ok: boolean; detail: string }> {
+    const btn = page
+      .locator("button:visible")
+      .filter({ hasText: /^(确认发布|立即发布|发布|确定发布)$/ })
+      .last();
+    if (await btn.isVisible({ timeout: 8000 }).catch(() => false)) {
+      console.log("[toutiao] 点击发表按钮:", (await btn.textContent())?.trim());
+      await btn.click({ force: true });
+      await page.waitForTimeout(3000);
+      // 可能还有二次确认
+      const confirm = page
+        .locator("button:visible")
+        .filter({ hasText: /^(确定|确认|确认发布)$/ })
+        .last();
+      if (await confirm.isVisible({ timeout: 2500 }).catch(() => false)) {
+        await confirm.click({ force: true });
+      }
+    } else {
+      return { ok: false, detail: "页面上没找到『确认发布』按钮" };
+    }
+
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      await page.waitForTimeout(3000);
+      const stillDraft = await page
+        .evaluate(async (t) => {
+          try {
+            const res = await fetch(
+              "/mp/agw/creator_center/draft_list?type=0&count=50&app_id=1231",
+              { credentials: "include" },
+            );
+            const body = (await res.json()) as { code?: number };
+            if (body.code !== 0) return "unknown";
+            return JSON.stringify(body).includes(t.slice(0, 10)) ? "yes" : "no";
+          } catch {
+            return "unknown";
+          }
+        }, title)
+        .catch(() => "unknown");
+      if (stillDraft === "no") {
+        return { ok: true, detail: `已发表（草稿箱里已无此篇）https://mp.toutiao.com/profile_v4/manage/content/all` };
+      }
+    }
+    return { ok: false, detail: "点完发表后草稿仍在草稿箱，未确认发表" };
   }
 
   /**
