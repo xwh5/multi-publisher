@@ -8,6 +8,8 @@ import { createNodeRuntime } from "../runtime/node-runtime.js";
 import { initAdapterRegistry, getAdapter } from "../adapters/index.js";
 import { cleanupCoverFile } from "../tools/cover-fetcher.js";
 import type { PackageMeta } from "./xhs-package.js";
+import { acquireWriteLease, writeLeaseKey } from "../tools/write-lease.js";
+import { emitFailure, emitSuccess } from "./output.js";
 
 export async function runPublish(
   options: {
@@ -21,6 +23,7 @@ export async function runPublish(
     package?: string;
     viaScript?: string;
     publishNow?: boolean;
+    json?: boolean;
   },
   input?: string,
 ): Promise<void> {
@@ -118,6 +121,21 @@ export async function runPublish(
       coverImage = result.cover || result.autoCoverPath;
     }
 
+    // 写操作租约：同一平台的两个发布任务并发 ⇒ 第二个快速失败（防双发）
+    const lease = await acquireWriteLease(writeLeaseKey(platformId), `publish ${options.file ?? ""}`);
+    if (!lease.ok) {
+      emitFailure(
+        {
+          code: "SESSION_BUSY",
+          message: `${platformId} 正在被另一个发布任务占用`,
+          hint: lease.holder ?? "等前一个任务结束再发（双发在小红书不可撤销）",
+        },
+        { json: Boolean(options.json) },
+      );
+      process.exit(1);
+    }
+    process.once("exit", () => lease.releaseSync?.());
+
     const syncResult = await adapter.publish({
       title: result.title,
       markdown: content,
@@ -130,13 +148,26 @@ export async function runPublish(
       publishNow: options.publishNow,
     });
 
+    await lease.release?.();
+
     // 清理自动获取的临时封面图
     if (result.autoCoverPath) {
       await cleanupCoverFile(result.autoCoverPath).catch(() => {});
     }
 
     // 4. 输出结果
-    if (syncResult.success) {
+    if (syncResult.success && options.json) {
+      emitSuccess(
+        {
+          platform: platformId,
+          title: result.title,
+          postId: syncResult.postId,
+          postUrl: syncResult.postUrl,
+          draftOnly: syncResult.draftOnly,
+        },
+        { json: true },
+      );
+    } else if (syncResult.success) {
       console.log(`✅ 发布成功！`);
       if (syncResult.postUrl) {
         console.log(`📝 草稿链接: ${syncResult.postUrl}`);

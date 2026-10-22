@@ -19,6 +19,7 @@ import { runPublishDraft } from './publish-draft.js'
 import { runUpdateDraft, runPublishWeixinDraft } from './weixin-draft.js'
 import { runDeleteDraft } from './delete-draft.js'
 import { runXhs } from './xhs.js'
+import { runMetrics } from './metrics.js'
 
 export function createProgram() {
   const program = new Command()
@@ -44,6 +45,7 @@ export function createProgram() {
     .option('--package <dir>', '图文包目录（小红书等图文平台；配合 mpub xhs-package 产出）')
     .option('--via-script <path>', '外部投递脚本：把发布交给带闸门的脚本执行（如查重/检查/回查）')
     .option('--publish-now', '图文包路径：真发布（默认只存草稿；小红书发布不可撤销）')
+    .option('--json', '输出 JSON（{ok,data}）')
     .action(runPublish)
 
   // render 命令
@@ -166,6 +168,13 @@ export function createProgram() {
     .option('--yes', '写操作确认（发布/评论/点赞/收藏等不可撤销的写操作必须加）')
     .option('--json', '输出 JSON（{ok,data}）')
     .action((what: string, tool: string | undefined, opts) => runXhs(what, tool, opts))
+
+  // metrics 命令：一次拉齐三平台运营数字（只读）
+  program
+    .command('metrics')
+    .description('一次拉齐三平台运营数字（粉丝/草稿/笔记数，只读）')
+    .option('--json', '输出 JSON（{ok,data}）')
+    .action(runMetrics)
 
   // capture 命令
   const captureCmd = program.command('capture')

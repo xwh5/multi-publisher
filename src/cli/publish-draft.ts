@@ -8,6 +8,7 @@
 import { createNodeRuntime } from "../runtime/node-runtime.js";
 import { initAdapterRegistry, getAdapter } from "../adapters/index.js";
 import { emitSuccess, emitFailure } from "./output.js";
+import { acquireWriteLease, writeLeaseKey } from "../tools/write-lease.js";
 
 export async function runPublishDraft(options: {
   title?: string;
@@ -41,7 +42,17 @@ export async function runPublishDraft(options: {
     );
     return;
   }
+  const lease = await acquireWriteLease(writeLeaseKey(platformId), `publish-draft ${title}`);
+  if (!lease.ok) {
+    emitFailure(
+      { code: "SESSION_BUSY", message: `${platformId} 正在被另一个发布任务占用`, hint: lease.holder },
+      { json: options.json },
+    );
+    return;
+  }
+  process.once("exit", () => lease.releaseSync?.());
   const res = await adapter.publishDraftByTitle(title);
+  await lease.release?.();
   if (!res.success) {
     emitFailure(
       { code: "PUBLISH_DRAFT_FAILED", message: res.error ?? "未知错误" },

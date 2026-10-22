@@ -6,6 +6,7 @@
  */
 import { XhsMcpClient, unwrapToolResult, isWriteTool } from "../tools/xhs-mcp.js";
 import { emitSuccess, emitFailure, formatTable } from "./output.js";
+import { acquireWriteLease, writeLeaseKey } from "../tools/write-lease.js";
 
 export async function runXhs(
   what: string,
@@ -77,7 +78,17 @@ export async function runXhs(
         return;
       }
       const args = options.args ? JSON.parse(options.args) : {};
+      const lease = await acquireWriteLease(writeLeaseKey("xiaohongshu"), `xhs ${name}`);
+      if (!lease.ok) {
+        emitFailure(
+          { code: "SESSION_BUSY", message: "小红书正在被另一个写操作占用", hint: lease.holder },
+          { json },
+        );
+        return;
+      }
+      process.once("exit", () => lease.releaseSync?.());
       const res = await client.callTool(name, args);
+      await lease.release?.();
       const data = unwrapToolResult(res);
       if (res.isError) {
         emitFailure({ code: "XHS_TOOL_ERROR", message: JSON.stringify(data) }, { json });
