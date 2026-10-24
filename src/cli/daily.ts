@@ -182,10 +182,13 @@ export async function runDaily(options: {
           const d = new Date(`${new Date(now).getFullYear()}-${m[1]}-${m[2]}T${m[3]}:${m[4]}:00+08:00`);
           return (now - d.getTime()) / 3600000;
         };
-        const mature = works.filter((w) => ageHours(w.time) >= 24);
+        // 只统计「已发布」的正文：头条会自动派生"由文章生成"的微头条（阅读恒 0），
+        // 混进样本会让止损线永远误报（2026-10-24 回盘发现）
+        const published = works.filter((w) => String(w.status ?? "") === "已发布");
+        const mature = published.filter((w) => ageHours(w.time) >= 24);
         const recent = mature.slice(0, 5);
         const lowReads = recent.filter((w) => Number(w.reads) < 500).length;
-        const fresh = works.filter((w) => ageHours(w.time) < 24);
+        const fresh = published.filter((w) => ageHours(w.time) < 24);
         verdicts.push({
           rule: "头条连续 5 篇阅读 <500 ⇒ 换标题公式",
           hit: recent.length >= 5 && lowReads === recent.length,
