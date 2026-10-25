@@ -187,12 +187,15 @@ export async function runDaily(options: {
         const published = works.filter((w) => String(w.status ?? "") === "已发布");
         const mature = published.filter((w) => ageHours(w.time) >= 24);
         const recent = mature.slice(0, 5);
-        const lowReads = recent.filter((w) => Number(w.reads) < 500).length;
+        // 判据校准（2026-10-25）：原「阅读<500」在本号永远为真——
+        // 历史最好的一篇 3047 展现也只有 67 阅读（展现→阅读率约 2%）。
+        // 改用「展现<1000」，对齐历史中位 2298（87 篇复盘）。
+        const lowReads = recent.filter((w) => Number(w.impressions) < 1000).length;
         const fresh = published.filter((w) => ageHours(w.time) < 24);
         verdicts.push({
-          rule: "头条连续 5 篇阅读 <500 ⇒ 换标题公式",
+          rule: "头条连续 5 篇展现 <1000 ⇒ 换标题公式",
           hit: recent.length >= 5 && lowReads === recent.length,
-          evidence: `满 24h 的最近 ${recent.length} 篇阅读：${recent.map((w) => String(w.reads)).join("/")}（${lowReads} 篇 <500）；未满 24h 的 ${fresh.length} 篇展现：${fresh.map((w) => String(w.impressions)).join("/")}`,
+          evidence: `满 24h 的最近 ${recent.length} 篇展现：${recent.map((w) => String(w.impressions)).join("/")}（${lowReads} 篇 <1000）；未满 24h 的 ${fresh.length} 篇展现：${fresh.map((w) => String(w.impressions)).join("/")}`,
           action: "标题按历史高展现形态重写：数字 + 具体物 + 事件感 + 圈层黑话（见 references/信任指标.md）",
         });
       } catch (err) {
