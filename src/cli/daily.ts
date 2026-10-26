@@ -107,27 +107,35 @@ async function fetchXhs(): Promise<Record<string, unknown>> {
 
 
 /** 读 metrics.csv，算最近 N 天的私信线索总数（商业化/信任度的先行指标） */
-async function readDmLeads(file: string | undefined, days: number): Promise<{ total: number; rows: number }> {
-  if (!file) return { total: -1, rows: 0 };
+async function readDmLeads(
+  file: string | undefined,
+  days: number,
+): Promise<{ total: number; rows: number; reported: number }> {
+  if (!file) return { total: -1, rows: 0, reported: 0 };
   try {
     const raw = await fs.readFile(path.resolve(file), "utf-8");
     const lines = raw.split("\n").filter((l) => l.trim());
     const head = lines[0].split(",");
     const iDate = head.indexOf("date");
     const iDm = head.indexOf("dm_leads");
-    if (iDate < 0 || iDm < 0) return { total: -1, rows: 0 };
+    if (iDate < 0 || iDm < 0) return { total: -1, rows: 0, reported: 0 };
     const cutoff = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
     let total = 0;
-    let rows = 0;
+    let rowCount = 0;
+    let reported = 0;
     for (const line of lines.slice(1)) {
       const c = line.split(",");
       if (!c[iDate] || c[iDate] < cutoff) continue;
-      rows++;
-      total += Number(c[iDm] || 0) || 0;
+      rowCount++;
+      // dm_leads 只有人工填了才算数（空＝没记录，不等于 0 条私信）
+      if (c[iDm] !== undefined && c[iDm].trim() !== "") {
+        reported++;
+        total += Number(c[iDm]) || 0;
+      }
     }
-    return { total, rows };
+    return { total, rows: rowCount, reported };
   } catch {
-    return { total: -1, rows: 0 };
+    return { total: -1, rows: 0, reported: 0 };
   }
 }
 
@@ -207,11 +215,16 @@ export async function runDaily(options: {
         });
       }
       const dm = await readDmLeads(options.metrics, 14);
+      // 私信在 App 收件箱里，接口读不到 ⇒ 只有人工回填过才可能触发；
+      // 从没回填过＝没数据，不是 0 私信（2026-10-26 查明此线此前永远误报）
       verdicts.push({
         rule: "三平台 2 周 0 私信 ⇒ 加交付过程类内容",
-        hit: dm.total === 0,
-        evidence: dm.total < 0 ? "metrics.csv 未提供或无 dm_leads 列" : `近 14 天私信线索 ${dm.total} 条（回填 ${dm.rows} 行）`,
-        action: "加一节'我交付过什么'（可带走物从'判断'升级为'交付样例'）",
+        hit: dm.reported >= 7 && dm.total === 0,
+        evidence:
+          dm.reported === 0
+            ? `无人工私信记录（近 14 天 ${dm.rows} 行里 0 行填了 dm_leads）⇒ 私信数需人工报，此线不判定`
+            : `近 14 天人工记录 ${dm.reported} 次，私信线索 ${dm.total} 条`,
+        action: "先问用户「今天有私信/咨询吗？几条」并回填 dm_leads，攒够记录再判",
       });
     }
 
