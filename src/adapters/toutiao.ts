@@ -188,10 +188,11 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           /draft|save|publish|article/i.test(url)
         ) {
           saveResponses.push({ url, status: res.status(), body: "" });
+          // 同步抓住这条记录：.text() 是异步的，直接用 length-1 会在并发时记到错的记录上
+          const rec = saveResponses[saveResponses.length - 1];
           res
             .text()
             .then((t) => {
-              const rec = saveResponses[saveResponses.length - 1];
               if (rec) rec.body = t.slice(0, 300);
             })
             .catch(() => undefined);
@@ -502,7 +503,21 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         console.log("[toutiao] 首发声明:", state);
       }
 
-      // 点击「预览并发布」触发保存，随后关闭预览面板（面板内才会真正落库）
+      // 点击「预览并发布」触发保存。注意：不要关闭预览弹窗
+      // （2026-10-22 实测：点掉弹窗会触发一次异常重存，服务端返回 7050；
+      // 保持弹窗打开，等保存回执即可，弹窗关闭由浏览器生命周期处理）。
+      // 发表前自检（只读日志，不改变流程）：下次再遇到 7050，
+      // 直接看这行就知道是标题没进去还是正文没进去。
+      const preSaveState = await page
+        .evaluate(() => {
+          const ta = document.querySelector("textarea") as HTMLTextAreaElement | null;
+          const el = document.querySelector('[contenteditable="true"]') as HTMLElement | null;
+          const text = el?.innerText || "";
+          const wc = document.body.innerText.match(/共\s*(\d+)\s*字/);
+          return `标题="${(ta?.value || "").slice(0, 30)}" 字数=${wc?.[1] ?? "?"} 正文=${text.length}字 首段="${text.slice(0, 40)}" 残留标签=${/<(p|li|section|strong|em)\s|<br/i.test(text)}`;
+        })
+        .catch(() => "（状态读取失败）");
+      console.log("[toutiao] 发表前编辑器状态:", preSaveState);
       console.log("[toutiao] 查找发布按钮...");
       try {
         // 尝试多种发布按钮选择器
@@ -690,15 +705,10 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       await page.waitForTimeout(2000);
 
       // 草稿编辑器的按钮是「预览并发布」；真正的「确认发布」在预览面板里
-      const direct = page.locator("button:visible").filter({ hasText: /^(确认发布|立即发布)$/ }).last();
-      let publishClicked = false;
-      if (await direct.isVisible({ timeout: 4000 }).catch(() => false)) {
-        console.log("[toutiao] 点击:", (await direct.textContent())?.trim());
-        await direct.click({ force: true });
-        publishClicked = true;
-      } else {
-        const previewBtn = page.locator("button:visible").filter({ hasText: /^预览并发布$/ }).last();
-        if (!(await previewBtn.isVisible({ timeout: 6000 }).catch(() => false))) {
+      // （与 publish --publish-now 共用 clickPublishConfirm + pollDraftGone，不再各写一套）
+      const { clicked: publishClicked, stage } = await this.clickPublishConfirm(page);
+      if (!publishClicked) {
+        if (stage === "no-entry") {
           const buttons = await page
             .evaluate(() =>
               [...document.querySelectorAll("button")]
@@ -714,20 +724,6 @@ export class ToutiaoAdapter implements IPlatformAdapter {
             timestamp: Date.now() - start,
           };
         }
-        console.log("[toutiao] 点击: 预览并发布（打开预览面板）");
-        await previewBtn.click({ force: true });
-        await page.waitForTimeout(5000);
-        const confirmBtn = page
-          .locator("button:visible")
-          .filter({ hasText: /^(确认发布|立即发布|发布)$/ })
-          .last();
-        if (await confirmBtn.isVisible({ timeout: 10000 }).catch(() => false)) {
-          console.log("[toutiao] 点击:", (await confirmBtn.textContent())?.trim());
-          await confirmBtn.click({ force: true });
-          publishClicked = true;
-        }
-      }
-      if (!publishClicked) {
         return {
           platform: this.meta.id,
           success: false,
@@ -736,40 +732,18 @@ export class ToutiaoAdapter implements IPlatformAdapter {
         };
       }
       await page.waitForTimeout(4000);
-      const confirm = page.locator("button:visible").filter({ hasText: /^(确定|确认)$/ }).last();
-      if (await confirm.isVisible({ timeout: 2500 }).catch(() => false)) {
-        await confirm.click({ force: true });
-      }
+      await this.dismissSecondaryConfirm(page);
 
       // 回查：草稿箱里这篇应该消失了
-      const deadline = Date.now() + 60000;
-      while (Date.now() < deadline) {
-        await page.waitForTimeout(3000);
-        const state = await page
-          .evaluate(async (t) => {
-            try {
-              const res = await fetch(
-                "/mp/agw/creator_center/draft_list?type=0&count=50&app_id=1231",
-                { credentials: "include" },
-              );
-              const body = (await res.json()) as { code?: number };
-              if (body.code !== 0) return "unknown";
-              return JSON.stringify(body).includes(t.slice(0, 10)) ? "yes" : "no";
-            } catch {
-              return "unknown";
-            }
-          }, title)
-          .catch(() => "unknown");
-        if (state === "no") {
-          return {
-            platform: this.meta.id,
-            success: true,
-            postId: gid,
-            postUrl: `https://www.toutiao.com/item/${gid}/`,
-            draftOnly: false,
-            timestamp: Date.now() - start,
-          };
-        }
+      if (await this.pollDraftGone(page, title)) {
+        return {
+          platform: this.meta.id,
+          success: true,
+          postId: gid,
+          postUrl: `https://www.toutiao.com/item/${gid}/`,
+          draftOnly: false,
+          timestamp: Date.now() - start,
+        };
       }
       return {
         platform: this.meta.id,
@@ -948,40 +922,56 @@ export class ToutiaoAdapter implements IPlatformAdapter {
 
 
   /**
-   * 把已保存的草稿真发表（--publish-now）。
+   * 统一的发表确认（三处共用：publish --publish-now、publishDraftByTitle）。
    *
-   * 判定依据（不是"我点了按钮"）：发表后这篇会从草稿箱消失
-   * ⇒ 用草稿列表接口回查标题是否还在。
+   * 流程：直接找「确认发布/立即发布」→ 没有就点「预览并发布」→
+   * 在预览面板里找确认按钮。选择器以 publish-draft 链（多天稳定）为准。
    */
-  private async publishDraftNow(
+  private async clickPublishConfirm(
     page: Page,
-    title: string,
-    timeoutMs = 60000,
-  ): Promise<{ ok: boolean; detail: string }> {
-    const btn = page
-      .locator("button:visible")
-      .filter({ hasText: /^(确认发布|立即发布|发布|确定发布)$/ })
-      .last();
-    if (await btn.isVisible({ timeout: 8000 }).catch(() => false)) {
-      console.log("[toutiao] 点击发表按钮:", (await btn.textContent())?.trim());
-      await btn.click({ force: true });
-      await page.waitForTimeout(3000);
-      // 可能还有二次确认
-      const confirm = page
-        .locator("button:visible")
-        .filter({ hasText: /^(确定|确认|确认发布)$/ })
-        .last();
-      if (await confirm.isVisible({ timeout: 2500 }).catch(() => false)) {
-        await confirm.click({ force: true });
-      }
-    } else {
-      return { ok: false, detail: "页面上没找到『确认发布』按钮" };
+  ): Promise<{ clicked: boolean; stage: "direct" | "panel" | "no-entry" | "no-confirm" }> {
+    const direct = page.locator("button:visible").filter({ hasText: /^(确认发布|立即发布)$/ }).last();
+    if (await direct.isVisible({ timeout: 4000 }).catch(() => false)) {
+      console.log("[toutiao] 点击:", (await direct.textContent().catch(() => "") || "").trim());
+      await direct.click({ force: true });
+      return { clicked: true, stage: "direct" };
     }
+    const previewBtn = page.locator("button:visible").filter({ hasText: /^预览并发布$/ }).last();
+    if (!(await previewBtn.isVisible({ timeout: 6000 }).catch(() => false))) {
+      return { clicked: false, stage: "no-entry" };
+    }
+    console.log("[toutiao] 点击: 预览并发布（打开预览面板）");
+    await previewBtn.click({ force: true });
+    await page.waitForTimeout(5000);
+    const confirmBtn = page
+      .locator("button:visible")
+      .filter({ hasText: /^(确认发布|立即发布|发布)$/ })
+      .last();
+    if (await confirmBtn.isVisible({ timeout: 10000 }).catch(() => false)) {
+      console.log("[toutiao] 点击:", (await confirmBtn.textContent().catch(() => "") || "").trim());
+      await confirmBtn.click({ force: true });
+      return { clicked: true, stage: "panel" };
+    }
+    return { clicked: false, stage: "no-confirm" };
+  }
 
+  /** 点完发表后可能弹二次确认（确定/确认），有就点掉 */
+  private async dismissSecondaryConfirm(page: Page): Promise<void> {
+    const confirm = page.locator("button:visible").filter({ hasText: /^(确定|确认)$/ }).last();
+    if (await confirm.isVisible({ timeout: 2500 }).catch(() => false)) {
+      await confirm.click({ force: true });
+    }
+  }
+
+  /**
+   * 统一的发表回查：草稿发表后会从草稿箱消失，
+   * 用 draft_list 接口轮询标题是否还在。返回 true = 已消失（发表成功）。
+   */
+  private async pollDraftGone(page: Page, title: string, timeoutMs = 60000): Promise<boolean> {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       await page.waitForTimeout(3000);
-      const stillDraft = await page
+      const state = await page
         .evaluate(async (t) => {
           try {
             const res = await fetch(
@@ -996,9 +986,31 @@ export class ToutiaoAdapter implements IPlatformAdapter {
           }
         }, title)
         .catch(() => "unknown");
-      if (stillDraft === "no") {
-        return { ok: true, detail: `已发表（草稿箱里已无此篇）https://mp.toutiao.com/profile_v4/manage/content/all` };
-      }
+      if (state === "no") return true;
+    }
+    return false;
+  }
+
+  /**
+   * 把已保存的草稿真发表（--publish-now）。
+   *
+   * 判定依据（不是"我点了按钮"）：发表后这篇会从草稿箱消失
+   * ⇒ 用草稿列表接口回查标题是否还在。
+   */
+  private async publishDraftNow(
+    page: Page,
+    title: string,
+    timeoutMs = 60000,
+  ): Promise<{ ok: boolean; detail: string }> {
+    const { clicked } = await this.clickPublishConfirm(page);
+    if (!clicked) {
+      return { ok: false, detail: "页面上没找到『确认发布』按钮" };
+    }
+    await page.waitForTimeout(3000);
+    await this.dismissSecondaryConfirm(page);
+
+    if (await this.pollDraftGone(page, title, timeoutMs)) {
+      return { ok: true, detail: `已发表（草稿箱里已无此篇）https://mp.toutiao.com/profile_v4/manage/content/all` };
     }
     return { ok: false, detail: "点完发表后草稿仍在草稿箱，未确认发表" };
   }
