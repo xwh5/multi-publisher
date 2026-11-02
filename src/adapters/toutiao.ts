@@ -508,6 +508,9 @@ export class ToutiaoAdapter implements IPlatformAdapter {
       // 保持弹窗打开，等保存回执即可，弹窗关闭由浏览器生命周期处理）。
       // 发表前自检（只读日志，不改变流程）：下次再遇到 7050，
       // 直接看这行就知道是标题没进去还是正文没进去。
+      // 2026-11-02 夜事故：第 11 篇连续 4 次 7050，自检全绿（标题/正文/封面俱全），
+      // 删围栏表单块重发仍失败 ⇒ 非注入问题，疑内容审核或账号限流；此时应停手（勿连击加重），
+      // 次日改走已有草稿的 publish-draft 链路以定位范围。
       const preSaveState = await page
         .evaluate(() => {
           const ta = document.querySelector("textarea") as HTMLTextAreaElement | null;
