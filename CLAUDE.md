@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-一行命令，Markdown 发布到全网。支持微信公众号、知乎、掘金、CSDN 等 20+ 平台。
+一行命令，Markdown 发布到多个平台。当前注册 **9 个适配器**（微信/头条/知乎/掘金/CSDN/小红书/企鹅号/微博/B站），**仅微信与头条已实测跑通**；渲染主题 4 套。
 
 ## 技术栈
 
@@ -10,7 +10,7 @@
 - **CLI**: Commander.js
 - **渲染**: marked (Markdown) + juice (CSS 内联)
 - **AI 集成**: 多平台适配器架构，支持自动封面图生成
-- **发布**: 各平台官方 API
+- **发布**: API 与浏览器自动化混合，具体以 adapter 为准
 
 ## 开发流程
 
@@ -166,7 +166,7 @@ pnpm publish            # 发布到 npm（需打标签）
 
 # 本地测试
 node dist/cli/index.js publish -f article.md -p weixin --auto-cover
-node dist/cli/index.js render -f article.md -t cyberpunk
+node dist/cli/index.js render -f article.md -t minimal
 ```
 
 ---

@@ -15,7 +15,7 @@
 | **4 套精排主题** | default（通用）、wechat（公众号）、modern（技术/知乎）、minimal（轻阅读/头条），均按平台自动匹配 |
 | **自动封面图生成** | AI 根据标题生成封面图，自动上传到微信 CDN |
 | **Markdown 直发** | front-matter 元数据、代码高亮、LaTeX 公式 |
-| **CI/CD 友好** | 纯命令行无需浏览器，配置文件统一管理 |
+| **CI/CD 友好** | 纯命令行与 JSON 输出；浏览器类平台仍需 Playwright，失败返回非零退出码 |
 | **草稿箱发布** | 微信公众号 → 草稿箱，其他平台 → 各自草稿箱 |
 | **全流程运营命令** | `doctor` 体检三平台凭据（真实请求探测）、`list drafts/fans` 回读状态、`publish-draft` 发表已有草稿；成功判定一律靠可回查的证据 |
 | **诚实契约** | 命令输出 `{ok, data}` / `{ok, false, error{code,message,hint}}`，失败非零退出码 |
@@ -496,4 +496,4 @@ export { MyPlatformAdapter } from './my-platform.js'
 
 ## 许可证
 
-Apache-2.0 License
+MIT License
