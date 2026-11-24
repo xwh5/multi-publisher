@@ -104,9 +104,6 @@ multi-publisher/
 │       ├── cover-generator.ts # AI 封面图生成
 │       └── cover-fetcher.ts   # 封面图下载
 │
-├── skills/                  # 技能文档（供参考）
-│   └── blog-writer.md      # 博客写作技能
-│
 └── .github/workflows/      # CI/CD
     └── publish.yml          # npm 发布流程
 ```
