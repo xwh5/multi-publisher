@@ -56,9 +56,9 @@ git push origin v.x.x.x
 ```
 
 **标签会自动触发 CI：**
-1. `npm ci` - 安装依赖
-2. `npm run build` - 构建
-3. `npm run typecheck` - 类型检查
+1. `pnpm install --frozen-lockfile` - 安装依赖
+2. `pnpm run build` - 构建
+3. `pnpm run typecheck` - 类型检查
 4. `npm publish` - 发布到 npm
 5. `softprops/action-gh-release` - 创建 GitHub Release
 

@@ -157,11 +157,11 @@ tags: [技术, 前端]
 ## 本地开发测试
 
 ```bash
-cd ~/ai-workspace/projects/repos/multi-publisher
+cd ~/github/projects/repos/multi-publisher
 
-npm install      # 安装依赖
-npm run build    # 编译 TypeScript
-npm link         # 链接到全局
+pnpm install      # 安装依赖
+pnpm run build    # 编译 TypeScript
+pnpm link         # 链接到全局
 mpub platforms   # 测试
 ```
 

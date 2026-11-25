@@ -7,26 +7,26 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ```bash
 git clone <repo-url>
 cd multi-publisher
-npm install
-npm run build
-npm link
+pnpm install
+pnpm run build
+pnpm link
 ```
 
 ## Code Style
 
 - Use TypeScript for all new code
 - 2 spaces for indentation
-- Run `npm run build` before committing
+- Run `pnpm run build` and `pnpm run typecheck` before committing
 
 ## Testing
 
 ```bash
 # Build
-npm run build
+pnpm run build
 
 # Test specific command
-npx tsx src/index.ts platforms
-npx tsx src/index.ts render -f test.md
+pnpm exec tsx src/cli/index.ts platforms
+pnpm exec tsx src/cli/index.ts render -f test.md
 ```
 
 ## Pull Request Process

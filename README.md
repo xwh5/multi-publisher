@@ -439,22 +439,22 @@ interface IPlatformAdapter {
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
 # 开发模式
-npm run dev
+pnpm run dev
 
 # 构建
-npm run build
+pnpm run build
 
 # 类型检查
-npm run typecheck
+pnpm run typecheck
 ```
 
 ### 添加新平台
 
 1. 在 `src/adapters/` 创建 `<platform>.ts`，实现 `IPlatformAdapter` 接口
-2. 在 `src/adapters/index.ts` 注册
+2. 在 `src/adapters/registry.ts` 注册
 
 ```typescript
 // src/adapters/my-platform.ts
