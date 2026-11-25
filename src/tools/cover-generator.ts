@@ -17,6 +17,8 @@ const THEMES = [
   { name: '玫瑰粉紫', primary: '#ff6b6b', secondary: '#c471ed', bg: '#1a0a14' },
   { name: '薄荷绿', primary: '#00f5a0', secondary: '#00d9f5', bg: '#0a1a14' },
   { name: '落日橙', primary: '#ff7e5f', secondary: '#feb47b', bg: '#1a0f05' },
+  { name: '宣纸白', primary: '#b45309', secondary: '#92400e', bg: '#faf7f0', dark: false },
+  { name: '青花', primary: '#1d4ed8', secondary: '#0ea5e9', bg: '#f8fafc', dark: false },
 ]
 
 // 装饰风格
@@ -90,11 +92,12 @@ export async function generateCover(
     const decorStyle = pick(DECOR_STYLES, () => seededRandom(seed, 1))
 
     const { primary, secondary, bg } = theme
+    const dark = (theme as { dark?: boolean }).dark !== false
     const width = 900
     const height = 500
 
     // 生成 SVG
-    const svg = buildSvg({ title, subtitle, width, height, primary, secondary, bg, decorStyle })
+    const svg = buildSvg({ title, subtitle, width, height, primary, secondary, bg, decorStyle, dark })
 
     // 生成随机文件名
     const random = crypto.randomBytes(8).toString('hex')
@@ -120,6 +123,23 @@ export async function generateCover(
   }
 }
 
+function splitTitle(title: string): string[] {
+  const s = title.trim()
+  if ([...s].length <= 13) return [s]
+  const chars = [...s]
+  const mid = Math.floor(chars.length / 2)
+  let idx = -1
+  for (let d = 0; d < chars.length && idx < 0; d++) {
+    for (const o of [mid + d, mid - d]) {
+      if (o > 2 && o < chars.length - 2 && '，。、？！；：,;?!'.includes(chars[o])) { idx = o + 1; break }
+    }
+  }
+  if (idx < 0) idx = mid
+  let line2 = chars.slice(idx).join('')
+  if ([...line2].length > 16) line2 = [...line2].slice(0, 16).join('') + '…'
+  return [chars.slice(0, idx).join(''), line2]
+}
+
 interface BuildSvgParams {
   title: string
   subtitle: string
@@ -129,6 +149,7 @@ interface BuildSvgParams {
   secondary: string
   bg: string
   decorStyle: string
+  dark: boolean
 }
 
 function buildSvg(p: BuildSvgParams): string {
@@ -248,24 +269,24 @@ function buildSvg(p: BuildSvgParams): string {
   ${decorElements}
   <rect x="60" y="140" width="2" height="220" fill="url(#lineGrad)" opacity="0.5"/>
 
-  <text x="${width / 2}" y="${height / 2 - 30}" font-family="Arial, sans-serif" font-size="56" font-weight="bold"
-    fill="url(#titleGrad)" text-anchor="middle" filter="url(#textShadow)">
-    ${escapeXml(title)}
-  </text>
+  ${(() => {
+    const lines = splitTitle(p.title)
+    const size = lines.length > 1 ? 50 : 56
+    const fill = p.dark ? 'url(#titleGrad)' : '#1c1917'
+    const filter = p.dark ? ' filter="url(#textShadow)"' : ''
+    return lines.map((ln, i) =>
+      `<text x="${width / 2}" y="${height / 2 - 30 + (i - (lines.length - 1) / 2) * 62}" font-family="'WenQuanYi Zen Hei','Noto Sans CJK SC',Arial,sans-serif" font-size="${size}" font-weight="bold" fill="${fill}" text-anchor="middle"${filter}>${escapeXml(ln)}</text>`
+    ).join('\n')
+  })()}
 
   <rect x="${width / 2 - 150}" y="${height / 2 + 5}" width="300" height="2" rx="1" fill="url(#lineGrad)" opacity="0.7"/>
 
   ${subtitle ? `
-  <text x="${width / 2}" y="${height / 2 + 55}" font-family="Arial, sans-serif" font-size="28" fill="#ffffff" fill-opacity="0.8" text-anchor="middle" letter-spacing="3">
+  <text x="${width / 2}" y="${height / 2 + 55}" font-family="'WenQuanYi Zen Hei','Noto Sans CJK SC',Arial,sans-serif" font-size="28" fill="${p.dark ? '#ffffff' : '#44403c'}" fill-opacity="0.8" text-anchor="middle" letter-spacing="3">
     ${escapeXml(subtitle)}
   </text>
   ` : ''}
 
-  <rect x="${width / 2 - 140}" y="${height - 70}" width="280" height="36" rx="6"
-    fill="#ffffff" fill-opacity="0.06" stroke="${primary}" stroke-width="1" stroke-opacity="0.2"/>
-  <text x="${width / 2}" y="${height - 45}" font-family="Consolas, monospace" font-size="14" fill="${adjustColor(primary, 0.3)}" text-anchor="middle">
-    npm install -g multi-publisher
-  </text>
 
   <circle cx="${width / 2 - 80}" cy="${height - 18}" r="2" fill="${primary}" fill-opacity="0.4"/>
   <circle cx="${width / 2 - 60}" cy="${height - 18}" r="3" fill="${secondary}" fill-opacity="0.5"/>
